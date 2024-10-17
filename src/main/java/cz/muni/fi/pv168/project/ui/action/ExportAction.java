@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent;
 public class ExportAction extends AbstractAction {
     public ExportAction() {
         super("Export");
-        putValue(SHORT_DESCRIPTION, "Exports data from json");
+        putValue(SHORT_DESCRIPTION, "Exports data to json");
         putValue(MNEMONIC_KEY, KeyEvent.VK_E);
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl e"));
     }
