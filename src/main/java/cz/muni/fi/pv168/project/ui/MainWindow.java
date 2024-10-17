@@ -85,6 +85,10 @@ public class MainWindow {
         fileMenu.add(exportAction);
         menuBar.add(fileMenu);
 
+        var optionsMenu = new JMenu("Options");
+        optionsMenu.setMnemonic('o');
+        menuBar.add(optionsMenu);
+
         return menuBar;
     }
 
