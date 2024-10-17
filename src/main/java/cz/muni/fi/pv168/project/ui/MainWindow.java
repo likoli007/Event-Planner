@@ -89,6 +89,10 @@ public class MainWindow {
         optionsMenu.setMnemonic('o');
         menuBar.add(optionsMenu);
 
+        var helpMenu = new JMenu("Help");
+        helpMenu.setMnemonic('h');
+        menuBar.add(helpMenu);
+
         return menuBar;
     }
 
