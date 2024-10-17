@@ -2,10 +2,7 @@ package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.ui.action.AddAction;
-import cz.muni.fi.pv168.project.ui.action.DeleteAction;
-import cz.muni.fi.pv168.project.ui.action.EditAction;
-import cz.muni.fi.pv168.project.ui.action.QuitAction;
+import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 
 import javax.swing.Action;
@@ -32,6 +29,8 @@ public class MainWindow {
     private final Action addAction;
     private final Action deleteAction;
     private final Action editAction;
+    private final Action importAction;
+    private final Action exportAction;
 
     public MainWindow() {
         frame = createFrame();
@@ -39,6 +38,8 @@ public class MainWindow {
         addAction = new AddAction();
         deleteAction = new DeleteAction();
         editAction = new EditAction();
+        importAction = new ImportAction();
+        exportAction = new ExportAction();
 
         var testDataGenerator = new TestDataGenerator();
         var eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
@@ -77,14 +78,13 @@ public class MainWindow {
 
     private JMenuBar createMenuBar() {
         var menuBar = new JMenuBar();
-        var editMenu = new JMenu("Edit");
-        editMenu.setMnemonic('e');
-        editMenu.add(addAction);
-        editMenu.add(editAction);
-        editMenu.add(deleteAction);
-        editMenu.addSeparator();
-        editMenu.add(quitAction);
-        menuBar.add(editMenu);
+
+        var fileMenu = new JMenu("File");
+        fileMenu.setMnemonic('f');
+        fileMenu.add(importAction);
+        fileMenu.add(exportAction);
+        menuBar.add(fileMenu);
+
         return menuBar;
     }
 
