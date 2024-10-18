@@ -63,11 +63,16 @@ public class MainWindow {
 
         TimeUnitTableModel timeUnitTableModel = new TimeUnitTableModel(timeUnits);
         JTable timeUnitTable = createTable(timeUnitTableModel);
-
         // TODO:
         // timeUnitTable.setComponentPopupMenu( );
 
-        JPanel managerTab = new JPanel();
+        String[] managedEntities = {"Categories", "Templates", "Intervals"};
+        JComboBox managedEntityCombobox = new JComboBox(managedEntities);
+
+        JPanel managerTab = new JPanel(new BorderLayout());
+        JPanel managerTabToolPanel = new JPanel(new BorderLayout());
+        managerTabToolPanel.add(managedEntityCombobox, BorderLayout.EAST);
+        managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
         managerTab.add(new JScrollPane(timeUnitTable), BorderLayout.CENTER);
 
         return managerTab;
