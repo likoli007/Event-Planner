@@ -25,8 +25,8 @@ public class MainWindow {
         frame = createFrame();
 
         var tabPanel = new JTabbedPane();
-        JPanel eventsTab = new JPanel();
-        JPanel managerTab = new JPanel();
+        JPanel eventsTab = createEventsTab();
+        JPanel managerTab = createManagerTab();
         tabPanel.addTab("Events", eventsTab);
         tabPanel.addTab("Manager", managerTab);
 
@@ -36,9 +36,6 @@ public class MainWindow {
         deleteAction = new DeleteAction();
         editAction = new EditAction();
 
-        var testDataGenerator = new TestDataGenerator();
-        var eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
-        eventTable.setComponentPopupMenu(createEmployeeTablePopupMenu());
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
 
@@ -52,6 +49,32 @@ public class MainWindow {
         changeActionsState(0);
     }
 
+    public JPanel createEventsTab(){
+        var testDataGenerator = new TestDataGenerator();
+        var eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
+        eventTable.setComponentPopupMenu(createEmployeeTablePopupMenu());
+
+        JPanel eventsTab = new JPanel();
+        eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
+
+        return eventsTab;
+    }
+
+    public JPanel createManagerTab(){
+        var testDataGenerator = new TestDataGenerator();
+        List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
+
+        TimeUnitTableModel timeUnitTableModel = new TimeUnitTableModel(timeUnits);
+        JTable timeUnitTable = createTable(timeUnitTableModel);
+
+        // TODO:
+        // timeUnitTable.setComponentPopupMenu( );
+
+        JPanel managerTab = new JPanel();
+        managerTab.add(new JScrollPane(timeUnitTable), BorderLayout.CENTER);
+
+        return managerTab;
+    }
     public void show() {
         frame.setVisible(true);
     }
@@ -64,6 +87,11 @@ public class MainWindow {
 
     private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
         var model = new EventTableModel(todoEvents);
+        var table = new JTable(model);
+        table.setAutoCreateRowSorter(true);
+        return table;
+    }
+    private <T extends AbstractTableModel> JTable createTable(T model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         return table;
