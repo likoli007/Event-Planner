@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import cz.muni.fi.pv168.project.model.ManagedEntity;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.ui.action.AddAction;
@@ -66,8 +67,7 @@ public class MainWindow {
         // TODO:
         // timeUnitTable.setComponentPopupMenu( );
 
-        String[] managedEntities = {"Categories", "Templates", "Intervals"};
-        JComboBox managedEntityCombobox = new JComboBox(managedEntities);
+        JComboBox<ManagedEntity> managedEntityCombobox = new JComboBox<>(ManagedEntity.values());
 
         JPanel managerTab = new JPanel(new BorderLayout());
         JPanel managerTabToolPanel = new JPanel(new BorderLayout());
