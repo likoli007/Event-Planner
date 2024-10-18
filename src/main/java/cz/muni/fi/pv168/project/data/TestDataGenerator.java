@@ -6,6 +6,7 @@ import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,4 +22,12 @@ public final class TestDataGenerator {
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
+    public List<TimeUnit> createTimeUnits() {
+        List<TimeUnit> timeUnits = new ArrayList<>();
+        timeUnits.add(new TimeUnit("Teaching hour", "th", 45));
+        timeUnits.add(new TimeUnit("Ice Hockey period", "ihp", 20));
+        return timeUnits;
+    }
+
 }
