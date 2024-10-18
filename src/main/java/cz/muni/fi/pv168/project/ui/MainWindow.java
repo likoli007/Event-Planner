@@ -47,8 +47,9 @@ public class MainWindow {
 
     public JPanel createEventsTab(){
         var testDataGenerator = new TestDataGenerator();
-        var eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
-        eventTable.setComponentPopupMenu(createEmployeeTablePopupMenu());
+        List<TodoEvent> todoEvents = testDataGenerator.createTodoEvents(10);
+        EventTableModel eventTableModel = new EventTableModel(todoEvents);
+        JTable eventTable = createTable(eventTableModel);
 
         JPanel eventsTab = new JPanel();
         eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
@@ -81,12 +82,6 @@ public class MainWindow {
         return frame;
     }
 
-    private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
-        var model = new EventTableModel(todoEvents);
-        var table = new JTable(model);
-        table.setAutoCreateRowSorter(true);
-        return table;
-    }
     private <T extends AbstractTableModel> JTable createTable(T model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
