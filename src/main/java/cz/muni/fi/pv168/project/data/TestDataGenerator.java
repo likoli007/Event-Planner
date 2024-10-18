@@ -30,4 +30,11 @@ public final class TestDataGenerator {
         return timeUnits;
     }
 
+    public List<Category> createCategories() {
+        List<Category> categories = new ArrayList<>();
+        categories.add(new Category("Holiday", Color.BLUE));
+        categories.add(new Category("Work", Color.RED));
+        categories.add(new Category("Family", Color.GREEN));
+        return categories;
+    }
 }
