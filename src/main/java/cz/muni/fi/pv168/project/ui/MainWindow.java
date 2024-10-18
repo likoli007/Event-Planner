@@ -41,13 +41,6 @@ public class MainWindow {
 
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
-
-
-
-        eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
-
-        managerTab.add(new Label("Manager tab"));
-
         frame.pack();
         changeActionsState(0);
     }
