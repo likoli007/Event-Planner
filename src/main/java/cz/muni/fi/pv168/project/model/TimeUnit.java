@@ -16,4 +16,9 @@ public class TimeUnit {
     public static TimeUnit minute() {
         return MINUTE;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
