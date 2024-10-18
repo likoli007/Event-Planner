@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.ManagedEntity;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
@@ -8,13 +9,16 @@ import cz.muni.fi.pv168.project.ui.action.AddAction;
 import cz.muni.fi.pv168.project.ui.action.DeleteAction;
 import cz.muni.fi.pv168.project.ui.action.EditAction;
 import cz.muni.fi.pv168.project.ui.action.QuitAction;
+import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.List;
 
 public class MainWindow {
@@ -58,22 +62,61 @@ public class MainWindow {
         return eventsTab;
     }
 
+    // Function to update the table model when combo box selection changes
+    private static void updateTableModel(ActionEvent e, JTable table) {
+        JComboBox<ManagedEntity> comboBox = (JComboBox<ManagedEntity>) e.getSource();
+        ManagedEntity selectedEntity = (ManagedEntity)comboBox.getSelectedItem();
+
+        TestDataGenerator testDataGenerator = new TestDataGenerator();
+        TableModel newModel;
+
+        switch (selectedEntity) {
+            case CATEGORIES:
+                List<Category> categories = testDataGenerator.createCategories();
+                newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
+                break;
+            case TEMPLATES:
+                // TODO: implement templates to be displayed here, for now i will just re-use categories
+                //List<Template> templates = testDataGenerator.createTemplates();
+                //newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
+                List<Category> templates = testDataGenerator.createCategories();
+                newModel = new CategoryTableModel(templates); // Switch to CategoryTableModel
+                break;
+            case INTERVALS:
+                List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
+                newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
+                break;
+            default:
+                // default since otherwise the setModel function may have an unitialized newModel
+                // TODO: once normal app logic is being implemented an error/exception should be thrown here
+                List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
+                newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
+                break;
+        }
+
+        // Update the table with the new model
+        table.setModel(newModel);
+    }
+
     public JPanel createManagerTab(){
         var testDataGenerator = new TestDataGenerator();
-        List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
+        List<Category> categories = testDataGenerator.createCategories();
 
-        TimeUnitTableModel timeUnitTableModel = new TimeUnitTableModel(timeUnits);
-        JTable timeUnitTable = createTable(timeUnitTableModel);
+        CategoryTableModel CategoryTableModel = new CategoryTableModel(categories);
+        JTable managerTabTable = createTable(CategoryTableModel);
         // TODO:
         // timeUnitTable.setComponentPopupMenu( );
 
-        JComboBox<ManagedEntity> managedEntityCombobox = new JComboBox<>(ManagedEntity.values());
+        JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
 
         JPanel managerTab = new JPanel(new BorderLayout());
         JPanel managerTabToolPanel = new JPanel(new BorderLayout());
-        managerTabToolPanel.add(managedEntityCombobox, BorderLayout.EAST);
+        managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
         managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
-        managerTab.add(new JScrollPane(timeUnitTable), BorderLayout.CENTER);
+        managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
+
+        //
+        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable));
 
         return managerTab;
     }
