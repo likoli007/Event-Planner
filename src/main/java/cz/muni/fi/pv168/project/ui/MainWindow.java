@@ -64,38 +64,44 @@ public class MainWindow {
 
     // Function to update the table model when combo box selection changes
     private static void updateTableModel(ActionEvent e, JTable table) {
-        JComboBox<ManagedEntity> comboBox = (JComboBox<ManagedEntity>) e.getSource();
-        ManagedEntity selectedEntity = (ManagedEntity)comboBox.getSelectedItem();
+        Object source = e.getSource();
 
-        TestDataGenerator testDataGenerator = new TestDataGenerator();
-        TableModel newModel;
+        // Cast-checking needs to be done here
+        if (source instanceof JComboBox<?> comboBox) {
+            Object selectedItem = comboBox.getSelectedItem();
+            if (selectedItem instanceof ManagedEntity selectedEntity) {
 
-        switch (selectedEntity) {
-            case CATEGORIES:
-                List<Category> categories = testDataGenerator.createCategories();
-                newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
-                break;
-            case TEMPLATES:
-                // TODO: implement templates to be displayed here, for now i will just re-use categories
-                //List<Template> templates = testDataGenerator.createTemplates();
-                //newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
-                List<Category> templates = testDataGenerator.createCategories();
-                newModel = new CategoryTableModel(templates); // Switch to CategoryTableModel
-                break;
-            case INTERVALS:
-                List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
-                newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
-                break;
-            default:
-                // default since otherwise the setModel function may have an unitialized newModel
-                // TODO: once normal app logic is being implemented an error/exception should be thrown here
-                List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
-                newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
-                break;
+                TestDataGenerator testDataGenerator = new TestDataGenerator();
+                TableModel newModel;
+
+                switch (selectedEntity) {
+                    case CATEGORIES -> {
+                        List<Category> categories = testDataGenerator.createCategories();
+                        newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
+                    }
+                    case TEMPLATES -> {
+                        // TODO: implement templates to be displayed here, for now i will just re-use categories
+                        //List<Template> templates = testDataGenerator.createTemplates();
+                        //newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
+                        List<Category> templates = testDataGenerator.createCategories();
+                        newModel = new CategoryTableModel(templates); // Switch to CategoryTableModel
+                    }
+                    case INTERVALS -> {
+                        List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
+                        newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
+                    }
+                    default -> {
+                        // default since otherwise the setModel function may have an uninitialized newModel
+                        // TODO: once normal app logic is being implemented an error/exception should be thrown here
+                        List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
+                        newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
+                    }
+                }
+
+                // Update the table with the new model
+                table.setModel(newModel);
+            }
         }
-
-        // Update the table with the new model
-        table.setModel(newModel);
     }
 
     public JPanel createManagerTab(){
