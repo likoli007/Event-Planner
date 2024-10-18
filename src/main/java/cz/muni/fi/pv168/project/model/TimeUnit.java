@@ -40,4 +40,9 @@ public class TimeUnit {
     public void setMinutes(int minutes) {
         this.minutes = minutes;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
