@@ -8,21 +8,9 @@ import cz.muni.fi.pv168.project.ui.action.EditAction;
 import cz.muni.fi.pv168.project.ui.action.QuitAction;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 
-import javax.swing.Action;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JToolBar;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.util.List;
 
 public class MainWindow {
@@ -36,6 +24,14 @@ public class MainWindow {
     public MainWindow() {
         frame = createFrame();
 
+        var tabPanel = new JTabbedPane();
+        JPanel eventsTab = new JPanel();
+        JPanel managerTab = new JPanel();
+        tabPanel.addTab("Events", eventsTab);
+        tabPanel.addTab("Manager", managerTab);
+
+        frame.add(tabPanel, BorderLayout.CENTER);
+
         addAction = new AddAction();
         deleteAction = new DeleteAction();
         editAction = new EditAction();
@@ -43,9 +39,15 @@ public class MainWindow {
         var testDataGenerator = new TestDataGenerator();
         var eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
         eventTable.setComponentPopupMenu(createEmployeeTablePopupMenu());
-        frame.add(new JScrollPane(eventTable), BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
+
+
+
+        eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
+
+        managerTab.add(new Label("Manager tab"));
+
         frame.pack();
         changeActionsState(0);
     }
