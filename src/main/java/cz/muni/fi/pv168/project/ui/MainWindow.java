@@ -28,8 +28,9 @@ public class MainWindow {
     private final Action editAction;
     private final Action importAction;
     private final Action exportAction;
-
     private final Action aboutAction;
+    private final Action keybindsAction;
+    private final Action contactAction;
 
     public MainWindow() {
         frame = createFrame();
@@ -46,7 +47,8 @@ public class MainWindow {
         importAction = new ImportAction();
         exportAction = new ExportAction();
         aboutAction = new AboutAction();
-
+        keybindsAction = new KeybindsAction();
+        contactAction = new ContactAction();
 
         var tabPanel = new JTabbedPane();
         JPanel eventsTab = createEventsTab();
@@ -209,6 +211,8 @@ public class MainWindow {
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
         helpMenu.add(aboutAction);
+        helpMenu.add(keybindsAction);
+        helpMenu.add(contactAction);
         menuBar.add(helpMenu);
 
 
