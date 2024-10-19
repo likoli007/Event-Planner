@@ -1,10 +1,14 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.ui.dialog.ImportDialog;
+import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Optional;
 
 public class ImportAction extends AbstractAction {
     public ImportAction() {
@@ -16,6 +20,7 @@ public class ImportAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        // TODO
+        ImportDialog dialog = new ImportDialog();
+        //Optional<TodoEvent> result = dialog.show(eventTable, "Add New Event");
     }
 }
