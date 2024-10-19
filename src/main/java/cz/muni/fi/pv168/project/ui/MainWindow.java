@@ -14,8 +14,6 @@ import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,6 +21,9 @@ import java.util.List;
 
 public class MainWindow {
     private final JFrame frame;
+    private final JTable eventTable;
+    private final JTable managerTabTable;
+    private JTable currentTable;
 
     private final Action quitAction = new QuitAction();
     private final Action addAction;
@@ -32,18 +33,48 @@ public class MainWindow {
     public MainWindow() {
         frame = createFrame();
 
+        var testDataGenerator = new TestDataGenerator();
+        eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
+        managerTabTable = createCategoryTable(testDataGenerator.createCategories());
+
+        currentTable = eventTable;
+
+        addAction = new AddAction(currentTable);
+        deleteAction = new DeleteAction();
+        editAction = new EditAction(currentTable);
+
         var tabPanel = new JTabbedPane();
         JPanel eventsTab = createEventsTab();
         JPanel managerTab = createManagerTab();
         tabPanel.addTab("Events", eventsTab);
         tabPanel.addTab("Manager", managerTab);
 
+        tabPanel.addChangeListener(e -> {
+            int selectedIndex = tabPanel.getSelectedIndex();
+            if (selectedIndex == 0) {
+                currentTable = eventTable;
+            } else if (selectedIndex == 1) {
+                currentTable = managerTabTable;
+            }
+            int selectedRowsCount = currentTable.getSelectedRowCount();
+            changeActionsState(selectedRowsCount);
+        });
+
+        eventTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && currentTable == eventTable) {
+                int selectedRowsCount = eventTable.getSelectedRowCount();
+                changeActionsState(selectedRowsCount);
+            }
+        });
+
+        managerTabTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && currentTable == managerTabTable) {
+                int selectedRowsCount = managerTabTable.getSelectedRowCount();
+                changeActionsState(selectedRowsCount);
+            }
+        });
+
         frame.add(tabPanel, BorderLayout.CENTER);
-
-        addAction = new AddAction();
-        deleteAction = new DeleteAction();
-        editAction = new EditAction();
-
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
         frame.pack();
@@ -51,22 +82,35 @@ public class MainWindow {
     }
 
     public JPanel createEventsTab(){
-        var testDataGenerator = new TestDataGenerator();
-        List<TodoEvent> todoEvents = testDataGenerator.createTodoEvents(10);
-        EventTableModel eventTableModel = new EventTableModel(todoEvents);
-        JTable eventTable = createTable(eventTableModel);
-
-        JPanel eventsTab = new JPanel();
+        JPanel eventsTab = new JPanel(new BorderLayout());
         eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
-
+        eventTable.setComponentPopupMenu(createPopupMenu());
         return eventsTab;
     }
 
-    // Function to update the table model when combo box selection changes
+    public JPanel createManagerTab(){
+        var testDataGenerator = new TestDataGenerator();
+        List<Category> categories = testDataGenerator.createCategories();
+
+        CategoryTableModel categoryTableModel = new CategoryTableModel(categories);
+        managerTabTable.setModel(categoryTableModel);
+
+        JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
+
+        JPanel managerTab = new JPanel(new BorderLayout());
+        JPanel managerTabToolPanel = new JPanel(new BorderLayout());
+        managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
+        managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
+        managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
+
+        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable));
+
+        return managerTab;
+    }
+
     private static void updateTableModel(ActionEvent e, JTable table) {
         Object source = e.getSource();
 
-        // Cast-checking needs to be done here
         if (source instanceof JComboBox<?> comboBox) {
             Object selectedItem = comboBox.getSelectedItem();
             if (selectedItem instanceof ManagedEntity selectedEntity) {
@@ -98,55 +142,40 @@ public class MainWindow {
                     }
                 }
 
-                // Update the table with the new model
                 table.setModel(newModel);
             }
         }
     }
 
-    public JPanel createManagerTab(){
-        var testDataGenerator = new TestDataGenerator();
-        List<Category> categories = testDataGenerator.createCategories();
-
-        CategoryTableModel CategoryTableModel = new CategoryTableModel(categories);
-        JTable managerTabTable = createTable(CategoryTableModel);
-        // TODO:
-        // timeUnitTable.setComponentPopupMenu( );
-
-        JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
-
-        JPanel managerTab = new JPanel(new BorderLayout());
-        JPanel managerTabToolPanel = new JPanel(new BorderLayout());
-        managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
-        managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
-        managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
-
-        //
-        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable));
-
-        return managerTab;
-    }
     public void show() {
         frame.setVisible(true);
     }
 
     private JFrame createFrame() {
-        var frame = new JFrame("Employee records");
+        var frame = new JFrame("TODO Manager");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         return frame;
     }
 
-    private <T extends AbstractTableModel> JTable createTable(T model) {
+    private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
+        var model = new EventTableModel(todoEvents);
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         return table;
     }
 
-    private JPopupMenu createEmployeeTablePopupMenu() {
+    private JTable createCategoryTable(List<Category> categories) {
+        var model = new CategoryTableModel(categories);
+        var table = new JTable(model);
+        table.setAutoCreateRowSorter(true);
+        return table;
+    }
+
+    private JPopupMenu createPopupMenu() {
         var menu = new JPopupMenu();
-        menu.add(deleteAction);
-        menu.add(editAction);
         menu.add(addAction);
+        menu.add(editAction);
+        menu.add(deleteAction);
         return menu;
     }
 
