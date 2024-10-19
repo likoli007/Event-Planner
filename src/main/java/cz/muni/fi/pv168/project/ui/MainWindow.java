@@ -46,8 +46,8 @@ public class MainWindow {
         addAction = new AddAction(currentTable);
         deleteAction = new DeleteAction();
         editAction = new EditAction(currentTable);
-        importAction = new ImportAction();
-        exportAction = new ExportAction();
+        importAction = new ImportAction(frame);
+        exportAction = new ExportAction(frame);
 
         var tabPanel = new JTabbedPane();
         JPanel eventsTab = createEventsTab();

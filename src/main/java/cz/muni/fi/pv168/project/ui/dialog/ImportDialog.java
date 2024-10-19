@@ -23,12 +23,12 @@ public class ImportDialog{
     JTextArea fileInfoTextArea = new JTextArea();
     JButton importButton = new JButton("Import");
 
-    JDialog dialog = new JDialog((JFrame) null, "Import", true);
+    private JDialog dialog;
 
-    public ImportDialog() {
-
+    public ImportDialog(JFrame parentFrame) {
+        dialog = new JDialog(parentFrame, "Export", true);
         dialog.setSize(300, 150);
-        dialog.setLocationRelativeTo(null);
+        dialog.setLocationRelativeTo(parentFrame);
 
         textField.setEditable(false);
         fileInfoTextArea.setEditable(false);

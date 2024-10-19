@@ -26,11 +26,12 @@ public class ExportDialog{
     JCheckBox templatesCheckBox = new JCheckBox("Templates");
     JCheckBox intervalsCheckBox = new JCheckBox("Intervals");
 
-    JDialog dialog = new JDialog((JFrame) null, "Export", true);
+    private JDialog dialog;
 
-    public ExportDialog() {
+    public ExportDialog(JFrame parentFrame) {
+        dialog = new JDialog(parentFrame, "Export", true);
         dialog.setSize(300, 150);
-        dialog.setLocationRelativeTo(null);
+        dialog.setLocationRelativeTo(parentFrame);
 
         textField.setEditable(false);
         openButton.addActionListener(this::openButtonClicked);
