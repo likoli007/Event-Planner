@@ -91,7 +91,26 @@ public class MainWindow {
         JPanel eventsTab = new JPanel(new BorderLayout());
         eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
         eventTable.setComponentPopupMenu(createPopupMenu());
+        eventsTab.add(createStatisticsPanel(), BorderLayout.SOUTH);
+
+
         return eventsTab;
+    }
+
+    //TODO: actual computing of statistics
+    public JPanel createStatisticsPanel(){
+        JPanel statisticsPanel = new JPanel(new BorderLayout());
+
+        JTextArea statisticsArea = new JTextArea(
+                """
+                        Total No. of Done Events: 42
+                        Total No. of Planned Events: 13
+                        """
+                );
+        statisticsArea.setEditable(false);
+        statisticsArea.setBackground(null);
+        statisticsPanel.add(statisticsArea);
+        return statisticsPanel;
     }
 
     public JPanel createManagerTab(){
