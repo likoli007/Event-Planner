@@ -131,9 +131,9 @@ public class MainWindow {
         // Default text shown
         // TODO: in the future fetch these statistics
         statisticsArea.setText("""
-                                    Total No. of Tasks With Selected Category: 5
-                                    Percentage of Total Tasks With Selected Category: 14%
-                                """);
+            Total No. of Tasks With Selected Category: 5
+            Percentage of Total Tasks With Selected Category: 14%
+            """);
 
 
         JPanel managerTab = new JPanel(new BorderLayout());
@@ -166,9 +166,9 @@ public class MainWindow {
                         newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
 
                         statisticsArea.setText("""
-                                    Total No. of Tasks With Selected Category: 5
-                                    Percentage of Total Tasks With Selected Category: 14%
-                                """);
+                            Total No. of Tasks With Selected Category: 5
+                            Percentage of Total Tasks With Selected Category: 14%
+                            """);
                         //TODO: statistics like this should be in its own function where they will be calculated
                     }
                     case TEMPLATES -> {
