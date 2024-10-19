@@ -26,41 +26,16 @@ public class ExportDialog{
     JCheckBox templatesCheckBox = new JCheckBox("Templates");
     JCheckBox intervalsCheckBox = new JCheckBox("Intervals");
 
-    JDialog dialog = new JDialog((JFrame) null, "Import", true);
+    JDialog dialog = new JDialog((JFrame) null, "Export", true);
 
     public ExportDialog() {
-
-
         dialog.setSize(300, 150);
         dialog.setLocationRelativeTo(null);
 
         textField.setEditable(false);
+        openButton.addActionListener(this::openButtonClicked);
 
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fileChooser.setFileFilter(filter);
-                int result = fileChooser.showSaveDialog(dialog);
-                if(result == JFileChooser.APPROVE_OPTION){
-                    //TODO: actual import logic, exceptions checking
-                    // actual import logic should be done only after the user selects the 'import' button
-
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getAbsolutePath());
-
-                }else{
-                    textField.setText("");
-                }
-            }
-        });
-
-        exportButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //TODO: perform the export
-                dialog.dispose();
-            }
-        });
+        exportButton.addActionListener(this::exportButtonClicked);
 
         exportOptionsPanel.add(eventsCheckBox);
         exportOptionsPanel.add(categoriesCheckBox);
@@ -79,6 +54,23 @@ public class ExportDialog{
         dialog.setVisible(true);
     }
 
+    private void exportButtonClicked(ActionEvent e){
+        //TODO: actual export logic
+        dialog.dispose();
+    }
 
+    private void openButtonClicked(ActionEvent e){
+        fileChooser.setFileFilter(filter);
+        int result = fileChooser.showSaveDialog(dialog);
+        if(result == JFileChooser.APPROVE_OPTION){
+            //TODO: actual export logic, exceptions checking
+
+            File file = fileChooser.getSelectedFile();
+            textField.setText(file.getAbsolutePath());
+
+        }else{
+            textField.setText("");
+        }
+    }
 }
 

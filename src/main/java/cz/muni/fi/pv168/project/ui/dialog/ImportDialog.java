@@ -34,38 +34,9 @@ public class ImportDialog{
         fileInfoTextArea.setEditable(false);
         fileInfoTextArea.setBackground(null);
 
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fileChooser.setFileFilter(filter);
-                int result = fileChooser.showOpenDialog(dialogPanel);
-                if(result == JFileChooser.APPROVE_OPTION){
-                    //TODO: actual import logic, exceptions checking
-                    // actual import logic should be done only after the user selects the 'import' button
+        openButton.addActionListener(this::openButtonClicked);
 
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getAbsolutePath());
-
-                    fileInfoTextArea.setText("""
-                            Total No. of events: 10
-                            Total No. of categories: 9
-                            Total No. of templates: 8
-                            Total No. of intervals: 7
-                            """);
-
-                }else{
-                    textField.setText("");
-                }
-            }
-        });
-
-        importButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //TODO: perform the import
-                dialog.dispose();
-            }
-        });
+        importButton.addActionListener(this::importButtonClicked);
 
         importPanel.add(filePathLabel, BorderLayout.WEST);
         importPanel.add(textField, BorderLayout.CENTER);
@@ -79,5 +50,31 @@ public class ImportDialog{
         dialog.setVisible(true);
     }
 
+    private void importButtonClicked(ActionEvent e){
+        //TODO: actual import logic
+        dialog.dispose();
+    }
+
+    private void openButtonClicked(ActionEvent e){
+        fileChooser.setFileFilter(filter);
+        int result = fileChooser.showOpenDialog(dialogPanel);
+        if(result == JFileChooser.APPROVE_OPTION){
+            //TODO: actual import logic, exceptions checking
+            // actual import logic should be done only after the user selects the 'import' button
+
+            File file = fileChooser.getSelectedFile();
+            textField.setText(file.getAbsolutePath());
+
+            fileInfoTextArea.setText("""
+                            Total No. of events: 10
+                            Total No. of categories: 9
+                            Total No. of templates: 8
+                            Total No. of intervals: 7
+                            """);
+
+        }else{
+            textField.setText("");
+        }
+    }
 
 }
