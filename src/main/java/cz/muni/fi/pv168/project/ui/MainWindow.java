@@ -98,11 +98,14 @@ public class MainWindow {
     }
 
     //TODO: actual computing of statistics
+    // can use this to display statistics between the different tabs, left alone for now
+    //  i.e. use createStatisticsPanel to just create the panel, then make a 'changeDisplayedStatistics' function
+    //  which sets the currently relevant statistics
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
         JTextArea statisticsArea = new JTextArea(
-                """
+                        """
                         Total No. of Done Events: 42
                         Total No. of Planned Events: 13
                         """
@@ -122,18 +125,32 @@ public class MainWindow {
 
         JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
 
+        JTextArea statisticsArea = new JTextArea();
+        statisticsArea.setEditable(false);
+        statisticsArea.setBackground(null);
+        // Default text shown
+        // TODO: in the future fetch these statistics
+        statisticsArea.setText("""
+                                    Total No. of Tasks With Selected Category: 5
+                                    Percentage of Total Tasks With Selected Category: 14%
+                                """);
+
+
         JPanel managerTab = new JPanel(new BorderLayout());
         JPanel managerTabToolPanel = new JPanel(new BorderLayout());
         managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
         managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
-        managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
 
-        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable));
+
+        managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
+        managerTab.add(statisticsArea, BorderLayout.SOUTH);
+
+        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable, statisticsArea));
 
         return managerTab;
     }
 
-    private static void updateTableModel(ActionEvent e, JTable table) {
+    private static void updateTableModel(ActionEvent e, JTable table, JTextArea statisticsArea) {
         Object source = e.getSource();
 
         if (source instanceof JComboBox<?> comboBox) {
@@ -147,6 +164,12 @@ public class MainWindow {
                     case CATEGORIES -> {
                         List<Category> categories = testDataGenerator.createCategories();
                         newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
+
+                        statisticsArea.setText("""
+                                    Total No. of Tasks With Selected Category: 5
+                                    Percentage of Total Tasks With Selected Category: 14%
+                                """);
+                        //TODO: statistics like this should be in its own function where they will be calculated
                     }
                     case TEMPLATES -> {
                         // TODO: implement templates to be displayed here, for now i will just re-use categories
@@ -154,10 +177,16 @@ public class MainWindow {
                         //newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
                         List<Category> templates = testDataGenerator.createCategories();
                         newModel = new CategoryTableModel(templates); // Switch to CategoryTableModel
+
+                        //TODO: statistics for used templates? for now leaving blank
+                        statisticsArea.setText("");
                     }
                     case INTERVALS -> {
                         List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
                         newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
+
+                        //TODO: statistics for used intervals? for now leaving blank
+                        statisticsArea.setText("");
                     }
                     default -> {
                         // default since otherwise the setModel function may have an uninitialized newModel
