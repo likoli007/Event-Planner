@@ -17,11 +17,9 @@ public class ExportDialog{
     JPanel dialogPanel = new JPanel(new BorderLayout());
     JPanel exportPanel = new JPanel(new BorderLayout());
     JPanel exportOptionsPanel = new JPanel();
-
     JLabel filePathLabel = new JLabel("File Path:");
     JButton openButton = new JButton("Open");
     JTextField textField = new JTextField();
-    JTextArea fileInfoTextArea = new JTextArea();
     JButton exportButton = new JButton("Export");
     JCheckBox eventsCheckBox = new JCheckBox("Events");
     JCheckBox categoriesCheckBox = new JCheckBox("Categories");
