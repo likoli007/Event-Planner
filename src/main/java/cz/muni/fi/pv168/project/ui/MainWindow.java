@@ -1,28 +1,24 @@
 package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.ui.action.AddAction;
 import cz.muni.fi.pv168.project.ui.action.DeleteAction;
 import cz.muni.fi.pv168.project.ui.action.EditAction;
 import cz.muni.fi.pv168.project.ui.action.QuitAction;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
+import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 
-import javax.swing.Action;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JToolBar;
-import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 public class MainWindow {
     private final JFrame frame;
     private final JTable eventTable;
+    private final JTable timeUnitTable;
+    private JTable currentTable;
 
     private final Action quitAction = new QuitAction();
     private final Action addAction;
@@ -34,18 +30,46 @@ public class MainWindow {
 
         var testDataGenerator = new TestDataGenerator();
         eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
+        timeUnitTable = createTimeUnitTable(testDataGenerator.createTimeUnits());
 
-        editAction = new EditAction(eventTable);
+        currentTable = eventTable;
+
+        addAction = new AddAction(currentTable);
         deleteAction = new DeleteAction();
-        addAction = new AddAction(eventTable);
+        editAction = new EditAction(currentTable);
 
-        eventTable.setComponentPopupMenu(createEventTablePopupMenu());
-        eventTable.getSelectionModel().addListSelectionListener(e -> {
-            int selectedRowsCount = eventTable.getSelectedRowCount();
+        var tabPanel = new JTabbedPane();
+        JPanel eventsTab = createEventsTab();
+        JPanel managerTab = createManagerTab();
+        tabPanel.addTab("Events", eventsTab);
+        tabPanel.addTab("Manager", managerTab);
+
+        tabPanel.addChangeListener(e -> {
+            int selectedIndex = tabPanel.getSelectedIndex();
+            if (selectedIndex == 0) {
+                currentTable = eventTable;
+            } else if (selectedIndex == 1) {
+                currentTable = timeUnitTable;
+            }
+            int selectedRowsCount = currentTable.getSelectedRowCount();
             changeActionsState(selectedRowsCount);
         });
 
-        frame.add(new JScrollPane(eventTable), BorderLayout.CENTER);
+        eventTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && currentTable == eventTable) {
+                int selectedRowsCount = eventTable.getSelectedRowCount();
+                changeActionsState(selectedRowsCount);
+            }
+        });
+
+        timeUnitTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && currentTable == timeUnitTable) {
+                int selectedRowsCount = timeUnitTable.getSelectedRowCount();
+                changeActionsState(selectedRowsCount);
+            }
+        });
+
+        frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
         frame.pack();
@@ -62,6 +86,22 @@ public class MainWindow {
         return frame;
     }
 
+    private JPanel createEventsTab() {
+        JPanel eventsTab = new JPanel(new BorderLayout());
+        eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
+
+        eventTable.setComponentPopupMenu(createPopupMenu());
+        return eventsTab;
+    }
+
+    private JPanel createManagerTab() {
+        JPanel managerTab = new JPanel(new BorderLayout());
+        managerTab.add(new JScrollPane(timeUnitTable), BorderLayout.CENTER);
+
+        timeUnitTable.setComponentPopupMenu(createPopupMenu());
+        return managerTab;
+    }
+
     private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
         var model = new EventTableModel(todoEvents);
         var table = new JTable(model);
@@ -69,11 +109,18 @@ public class MainWindow {
         return table;
     }
 
-    private JPopupMenu createEventTablePopupMenu() {
+    private JTable createTimeUnitTable(List<TimeUnit> timeUnits) {
+        var model = new TimeUnitTableModel(timeUnits);
+        var table = new JTable(model);
+        table.setAutoCreateRowSorter(true);
+        return table;
+    }
+
+    private JPopupMenu createPopupMenu() {
         var menu = new JPopupMenu();
-        menu.add(deleteAction);
-        menu.add(editAction);
         menu.add(addAction);
+        menu.add(editAction);
+        menu.add(deleteAction);
         return menu;
     }
 
