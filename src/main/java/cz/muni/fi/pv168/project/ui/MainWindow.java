@@ -5,12 +5,7 @@ import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.ManagedEntity;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.ui.action.AddAction;
-import cz.muni.fi.pv168.project.ui.action.DeleteAction;
-import cz.muni.fi.pv168.project.ui.action.EditAction;
-import cz.muni.fi.pv168.project.ui.action.ExportAction;
-import cz.muni.fi.pv168.project.ui.action.ImportAction;
-import cz.muni.fi.pv168.project.ui.action.QuitAction;
+import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
@@ -33,6 +28,9 @@ public class MainWindow {
     private final Action editAction;
     private final Action importAction;
     private final Action exportAction;
+    private final Action aboutAction;
+    private final Action keybindsAction;
+    private final Action contactAction;
 
     public MainWindow() {
         frame = createFrame();
@@ -48,6 +46,9 @@ public class MainWindow {
         editAction = new EditAction(() -> currentTable);
         importAction = new ImportAction(frame);
         exportAction = new ExportAction(frame);
+        aboutAction = new AboutAction(frame);
+        keybindsAction = new KeybindsAction(frame);
+        contactAction = new ContactAction(frame);
 
         var tabPanel = new JTabbedPane();
         JPanel eventsTab = createEventsTab();
@@ -105,11 +106,11 @@ public class MainWindow {
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
         JTextArea statisticsArea = new JTextArea(
-                        """
-                        Total No. of Done Events: 42
-                        Total No. of Planned Events: 13
-                        """
-                );
+                """
+                Total No. of Done Events: 42
+                Total No. of Planned Events: 13
+                """
+        );
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
         statisticsPanel.add(statisticsArea);
@@ -257,6 +258,9 @@ public class MainWindow {
 
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
+        helpMenu.add(aboutAction);
+        helpMenu.add(keybindsAction);
+        helpMenu.add(contactAction);
         menuBar.add(helpMenu);
 
         return menuBar;
