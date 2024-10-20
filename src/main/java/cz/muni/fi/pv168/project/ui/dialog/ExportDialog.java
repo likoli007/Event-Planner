@@ -16,15 +16,17 @@ public class ExportDialog{
 
     JPanel dialogPanel = new JPanel(new BorderLayout());
     JPanel exportPanel = new JPanel(new BorderLayout());
-    JPanel exportOptionsPanel = new JPanel();
+    JPanel exportOptionsPanel = new JPanel(new BorderLayout());
     JLabel filePathLabel = new JLabel("File Path:");
     JButton openButton = new JButton("Open");
     JTextField textField = new JTextField();
     JButton exportButton = new JButton("Export");
-    JCheckBox eventsCheckBox = new JCheckBox("Events");
-    JCheckBox categoriesCheckBox = new JCheckBox("Categories");
-    JCheckBox templatesCheckBox = new JCheckBox("Templates");
-    JCheckBox intervalsCheckBox = new JCheckBox("Intervals");
+
+    JRadioButton filterRadioButton = new JRadioButton("Export filtered");
+    JRadioButton noFilterRadioButton = new JRadioButton("Export all");
+
+    ButtonGroup filterGroup = new ButtonGroup();
+    JLabel exportStatisticsLabel = new JLabel("Will export 78 out of 90 events.");
 
     private JDialog dialog;
 
@@ -38,10 +40,19 @@ public class ExportDialog{
 
         exportButton.addActionListener(this::exportButtonClicked);
 
-        exportOptionsPanel.add(eventsCheckBox);
-        exportOptionsPanel.add(categoriesCheckBox);
-        exportOptionsPanel.add(templatesCheckBox);
-        exportOptionsPanel.add(intervalsCheckBox);
+        filterGroup.add(filterRadioButton);
+        filterGroup.add(noFilterRadioButton);
+
+        JLabel filterLabel = new JLabel("Events export options:");
+
+        exportOptionsPanel.add(filterLabel, BorderLayout.NORTH);
+        exportOptionsPanel.add(filterRadioButton, BorderLayout.WEST);
+        exportOptionsPanel.add(noFilterRadioButton, BorderLayout.CENTER);
+        exportOptionsPanel.add(exportStatisticsLabel, BorderLayout.SOUTH);
+
+        exportStatisticsLabel.setVisible(false);
+        filterRadioButton.addActionListener(this::filterRadioButtonClicked);
+        noFilterRadioButton.addActionListener(this::noFilterRadioButtonClicked);
 
         exportPanel.add(filePathLabel, BorderLayout.WEST);
         exportPanel.add(textField, BorderLayout.CENTER);
@@ -54,6 +65,16 @@ public class ExportDialog{
         dialog.add(dialogPanel);
         dialog.setVisible(true);
     }
+
+    private void filterRadioButtonClicked(ActionEvent e) {
+       //TODO actual statistics logic
+        exportStatisticsLabel.setVisible(true);
+    }
+
+    private void noFilterRadioButtonClicked(ActionEvent e){
+        exportStatisticsLabel.setVisible(false);
+    }
+
 
     private void exportButtonClicked(ActionEvent e){
         //TODO: actual export logic
