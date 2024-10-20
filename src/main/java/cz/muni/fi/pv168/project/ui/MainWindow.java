@@ -46,9 +46,9 @@ public class MainWindow {
         editAction = new EditAction(currentTable);
         importAction = new ImportAction();
         exportAction = new ExportAction();
-        aboutAction = new AboutAction();
-        keybindsAction = new KeybindsAction();
-        contactAction = new ContactAction();
+        aboutAction = new AboutAction(frame);
+        keybindsAction = new KeybindsAction(frame);
+        contactAction = new ContactAction(frame);
 
         var tabPanel = new JTabbedPane();
         JPanel eventsTab = createEventsTab();
