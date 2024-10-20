@@ -26,7 +26,7 @@ public class ImportDialog{
     private JDialog dialog;
 
     public ImportDialog(JFrame parentFrame) {
-        dialog = new JDialog(parentFrame, "Export", true);
+        dialog = new JDialog(parentFrame, "Import", true);
         dialog.setSize(300, 150);
         dialog.setLocationRelativeTo(parentFrame);
 
