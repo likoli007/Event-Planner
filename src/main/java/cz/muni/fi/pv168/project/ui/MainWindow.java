@@ -43,9 +43,9 @@ public class MainWindow {
 
         currentTable = eventTable;
 
-        addAction = new AddAction(currentTable);
-        deleteAction = new DeleteAction();
-        editAction = new EditAction(currentTable);
+        addAction = new AddAction(() -> currentTable);
+        deleteAction = new DeleteAction(() -> currentTable);
+        editAction = new EditAction(() -> currentTable);
         importAction = new ImportAction(frame);
         exportAction = new ExportAction(frame);
 
