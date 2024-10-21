@@ -1,5 +1,7 @@
 package cz.muni.fi.pv168.project.model;
 
+import java.util.Objects;
+
 public class TimeUnit {
     private String name;
     private String shortcut;
@@ -44,5 +46,18 @@ public class TimeUnit {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TimeUnit timeUnit = (TimeUnit) o;
+        return minutes == timeUnit.minutes && Objects.equals(name, timeUnit.name) && Objects.equals(shortcut, timeUnit.shortcut);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, shortcut, minutes);
     }
 }
