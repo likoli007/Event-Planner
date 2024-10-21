@@ -84,4 +84,19 @@ public class TodoEvent {
     public void setDone(boolean done) {
         this.done = done;
     }
+
+    public String formatInterval() {
+        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
+
+        if (timeUnit != TimeUnit.minute()) {
+            sb
+                    .append(" (")
+                    .append(timeUnit.getMinutes() * timeUnitAmount)
+                    .append(" ")
+                    .append(TimeUnit.minute().getShortcut())
+                    .append(")");
+        }
+
+        return sb.toString();
+    }
 }
