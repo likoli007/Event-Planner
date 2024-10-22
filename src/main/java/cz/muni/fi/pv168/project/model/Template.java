@@ -90,4 +90,7 @@ public class Template {
 
         return sb.toString();
     }
+    public TodoEvent toTodoEvent(){
+            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, category );
+    }
 }

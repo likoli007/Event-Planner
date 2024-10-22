@@ -2,16 +2,17 @@ package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
-import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
@@ -23,7 +24,8 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private final JTextField intervalField = new JTextField(5);
     private final ComboBoxModel<TimeUnit> timeUnitModel;
     private final ComboBoxModel<Category> categoryModel;
-    private final TodoEvent todoEvent;
+    private final ComboBoxModel<Template> templateModel;
+    private TodoEvent todoEvent;
 
     public TodoEventDialog(TodoEvent todoEvent) {
         this.todoEvent = todoEvent;
@@ -38,6 +40,13 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
                 new TimeUnit("Hour", "hr", 60),
                 new TimeUnit("Class", "cl", 90)
         });
+
+        var testData = new TestDataGenerator();
+        List<Template> templates = new ArrayList<>();
+        templates.add(null);  // Add null as the first "no template" option
+        templates.addAll(testData.createTemplates());
+
+        this.templateModel = new DefaultComboBoxModel<>(templates.toArray(new Template[0]));
 
         setValues();
         addFields();
@@ -62,12 +71,24 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     }
 
     private void addFields() {
+        var templateComboBox = new JComboBox<>(this.templateModel);
+
+        templateComboBox.addActionListener(e -> {
+            Template selectedTemplate = (Template) templateComboBox.getSelectedItem();
+
+            if (selectedTemplate != null) {
+                todoEvent = selectedTemplate.toTodoEvent();  // Update your todoEvent
+                setValues();
+            }
+        });
+
         var categoryComboBox = new JComboBox<>(categoryModel);
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
         JPanel intervalField = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         intervalField.add(this.intervalField);
         intervalField.add(timeUnitComboBox);
 
+        add("Template", templateComboBox);
         add("Name:", nameField);
         add("Details:", detailsField);
         add("Date:", dateField);
