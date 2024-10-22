@@ -1,13 +1,11 @@
 package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
-import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.ManagedEntity;
-import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
+import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 
 import javax.swing.*;
@@ -174,10 +172,8 @@ public class MainWindow {
                     }
                     case TEMPLATES -> {
                         // TODO: implement templates to be displayed here, for now i will just re-use categories
-                        //List<Template> templates = testDataGenerator.createTemplates();
-                        //newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
-                        List<Category> templates = testDataGenerator.createCategories();
-                        newModel = new CategoryTableModel(templates); // Switch to CategoryTableModel
+                        List<Template> templates = testDataGenerator.createTemplates();
+                        newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
 
                         //TODO: statistics for used templates? for now leaving blank
                         statisticsArea.setText("");
