@@ -1,9 +1,6 @@
 package cz.muni.fi.pv168.project.data;
 
-import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.model.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +18,12 @@ public final class TestDataGenerator {
                 .generate(this::createTodoEvent)
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    public List<Template> createTemplates() {
+        List<Template> templates = new ArrayList<>();
+        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalDateTime.now(), 30, new Category("self care", Color.RED)));
+        return templates;
     }
 
     public List<TimeUnit> createTimeUnits() {
