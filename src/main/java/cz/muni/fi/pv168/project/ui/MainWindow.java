@@ -12,6 +12,8 @@ import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow {
@@ -88,6 +90,7 @@ public class MainWindow {
 
     public JPanel createEventsTab(){
         JPanel eventsTab = new JPanel(new BorderLayout());
+        eventsTab.add(createFilterPanel(), BorderLayout.NORTH);
         eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
         eventTable.setComponentPopupMenu(createPopupMenu());
         eventsTab.add(createStatisticsPanel(), BorderLayout.SOUTH);
@@ -274,5 +277,71 @@ public class MainWindow {
     private void changeActionsState(int selectedItemsCount) {
         editAction.setEnabled(selectedItemsCount == 1);
         deleteAction.setEnabled(selectedItemsCount >= 1);
+    }
+
+    private JPanel createFilterPanel() {
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JLabel fromLabel = new JLabel("From:");
+        JSpinner fromTime = new JSpinner(new SpinnerDateModel());
+        fromTime.setEditor(new JSpinner.DateEditor(fromTime, "yyyy-MM-dd HH:mm"));
+
+        JLabel toLabel = new JLabel("To:");
+        JSpinner toTime = new JSpinner(new SpinnerDateModel());
+        toTime.setEditor(new JSpinner.DateEditor(toTime, "yyyy-MM-dd HH:mm"));
+
+        JLabel unitLabel = new JLabel("Units:");
+        JComboBox<String> unitComboBox = createMultiSelectComboBox(new String[]{"Minutes", "Hours", "Class"});
+
+        JLabel categoryLabel = new JLabel("Category:");
+        JComboBox<String> categoryComboBox = createMultiSelectComboBox(new String[]{"Work", "Study", "Exercise"});
+
+        JLabel statusLabel = new JLabel("Status:");
+        JCheckBox doneCheckBox = new JCheckBox("Done");
+        JCheckBox plannedCheckBox = new JCheckBox("Planned");
+
+        JButton clearButton = new JButton("Clear");
+
+        filterPanel.add(fromLabel);
+        filterPanel.add(fromTime);
+        filterPanel.add(toLabel);
+        filterPanel.add(toTime);
+        filterPanel.add(unitLabel);
+        filterPanel.add(unitComboBox);
+        filterPanel.add(categoryLabel);
+        filterPanel.add(categoryComboBox);
+        filterPanel.add(statusLabel);
+        filterPanel.add(doneCheckBox);
+        filterPanel.add(plannedCheckBox);
+        filterPanel.add(clearButton);
+
+        return filterPanel;
+    }
+
+    private static JComboBox<String> createMultiSelectComboBox(String[] options) {
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Select"});
+        comboBox.setPrototypeDisplayValue("Select");
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        List<JCheckBox> checkBoxes = new ArrayList<>();
+
+        for (String option : options) {
+            JCheckBox checkBox = new JCheckBox(option);
+            checkBoxes.add(checkBox);
+            popupMenu.add(checkBox);
+        }
+
+        comboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (popupMenu.isShowing()) {
+                    popupMenu.setVisible(false);
+                } else {
+                    popupMenu.show(comboBox, 0, comboBox.getHeight());
+                }
+            }
+        });
+
+        return comboBox;
     }
 }
