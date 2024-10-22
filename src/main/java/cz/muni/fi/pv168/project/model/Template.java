@@ -75,4 +75,19 @@ public class Template {
     public void setCategory(Category category) {
         this.category = category;
     }
+
+    public String formatInterval() {
+        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
+
+        if (timeUnit != TimeUnit.minute()) {
+            sb
+                    .append(" (")
+                    .append(timeUnit.getMinutes() * timeUnitAmount)
+                    .append(" ")
+                    .append(TimeUnit.minute().getShortcut())
+                    .append(")");
+        }
+
+        return sb.toString();
+    }
 }
