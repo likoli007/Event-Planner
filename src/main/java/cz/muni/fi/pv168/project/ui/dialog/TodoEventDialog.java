@@ -66,7 +66,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         }
 
         intervalField.setText(String.valueOf(todoEvent.getTimeUnitAmount()));
-        categoryModel.setSelectedItem(todoEvent.getCategory());
+        categoryModel.setSelectedItem(todoEvent.getCategories());
         timeUnitModel.setSelectedItem(todoEvent.getTimeUnit());
     }
 
@@ -110,7 +110,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         todoEvent.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
         todoEvent.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        todoEvent.setCategory((Category) categoryModel.getSelectedItem());
+        todoEvent.setCategories((List<Category>) categoryModel.getSelectedItem());
 
         return todoEvent;
     }

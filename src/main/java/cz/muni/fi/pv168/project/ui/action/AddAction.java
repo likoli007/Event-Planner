@@ -16,6 +16,7 @@ import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -42,7 +43,7 @@ public final class AddAction extends AbstractAction {
                     "",
                     LocalDateTime.now(),
                     1,
-                    new Category("Work", Color.BLUE)
+                    List.of(new Category("Work", Color.BLUE))
             );
             TodoEventDialog dialog = new TodoEventDialog(newEvent);
             Optional<TodoEvent> result = dialog.show(currentTable, "Add New Event");
@@ -56,7 +57,7 @@ public final class AddAction extends AbstractAction {
                     "",
                     LocalDateTime.now(),
                     1,
-                    new Category("Work", Color.BLUE)
+                    List.of(new Category("Work", Color.BLUE))
             );
             TemplateDialog dialog = new TemplateDialog(newTemplate);
             Optional<Template> result = dialog.show(currentTable, "Add New Template");

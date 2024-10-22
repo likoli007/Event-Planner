@@ -7,6 +7,7 @@ import cz.muni.fi.pv168.project.model.Color;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -55,7 +56,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
         }
 
         intervalField.setText(String.valueOf(template.getTimeUnitAmount()));
-        categoryModel.setSelectedItem(template.getCategory());
+        categoryModel.setSelectedItem(template.getCategories());
         timeUnitModel.setSelectedItem(template.getTimeUnit());
     }
 
@@ -87,7 +88,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         template.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
         template.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        template.setCategory((Category) categoryModel.getSelectedItem());
+        template.setCategories((List<Category>) categoryModel.getSelectedItem());
 
         return template;
     }

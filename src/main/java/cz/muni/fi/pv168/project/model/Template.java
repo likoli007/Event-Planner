@@ -1,6 +1,8 @@
 package cz.muni.fi.pv168.project.model;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 public class Template {
     private String name;
@@ -8,24 +10,24 @@ public class Template {
     private LocalDateTime date;
     private TimeUnit timeUnit;
     private int timeUnitAmount;
-    private Category category;
+    private List<Category> categories;
 
-    public Template(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, Category category) {
+    public Template(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
         this.date = date;
         this.timeUnit = timeUnit;
         this.timeUnitAmount = timeUnitAmount;
-        this.category = category;
+        this.categories = categories;
     }
 
-    public Template(String name, String details, LocalDateTime date, int minutes, Category category) {
+    public Template(String name, String details, LocalDateTime date, int minutes, List<Category> categories) {
         this.name = name;
         this.details = details;
         this.date = date;
         this.timeUnit = TimeUnit.minute();
         this.timeUnitAmount = minutes;
-        this.category = category;
+        this.categories = categories;
     }
 
     public String getName() {
@@ -68,12 +70,12 @@ public class Template {
         this.timeUnitAmount = timeUnitAmount;
     }
 
-    public Category getCategory() {
-        return category;
+    public List<Category> getCategories() {
+        return Collections.unmodifiableList(categories);
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
     }
 
     public String formatInterval() {
@@ -91,6 +93,6 @@ public class Template {
         return sb.toString();
     }
     public TodoEvent toTodoEvent(){
-            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, category );
+            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, categories );
     }
 }
