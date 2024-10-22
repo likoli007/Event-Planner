@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui.action;
 
 import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
 import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
@@ -8,6 +9,7 @@ import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
+import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
@@ -58,12 +60,14 @@ public final class EditAction extends AbstractAction {
             Category category = categoryTableModel.getEntity(modelRow);
             CategoryDialog dialog = new CategoryDialog(category);
             dialog.show(currentTable, "Edit Category");
+        } else if (model instanceof TemplateTableModel templateTableModel) {
+            Template template = templateTableModel.getEntity(modelRow);
+            TemplateDialog dialog = new TemplateDialog(template);
+            dialog.show(currentTable, "Edit Template");
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit timeUnit = timeUnitTableModel.getEntity(modelRow);
             IntervalDialog dialog = new IntervalDialog(timeUnit);
             dialog.show(currentTable, "Edit Time Unit");
-        // } else if (model instanceof TemplateDialog templateModel) {
-            // TODO
         } else {
             JOptionPane.showMessageDialog(currentTable,
                     "Unsupported table model for editing.",
