@@ -1,7 +1,9 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
+import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
@@ -59,6 +61,10 @@ public final class DeleteAction extends AbstractAction {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
             }
         } else if (model instanceof CategoryTableModel categoryTableModel) {
+            for (int viewRow : selectedRows) {
+                int modelRow = currentTable.convertRowIndexToModel(viewRow);
+            }
+        } else if (model instanceof TemplateTableModel templateTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
             }

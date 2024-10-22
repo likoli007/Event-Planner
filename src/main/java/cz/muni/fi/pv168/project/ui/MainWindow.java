@@ -171,7 +171,6 @@ public class MainWindow {
                         //TODO: statistics like this should be in its own function where they will be calculated
                     }
                     case TEMPLATES -> {
-                        // TODO: implement templates to be displayed here, for now i will just re-use categories
                         List<Template> templates = testDataGenerator.createTemplates();
                         newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
 
