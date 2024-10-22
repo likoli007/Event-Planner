@@ -1,14 +1,13 @@
 package cz.muni.fi.pv168.project.ui.action;
 
-import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
 import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
+import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
+import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
@@ -51,6 +50,16 @@ public final class AddAction extends AbstractAction {
             Category newCategory = new Category("", Color.BLUE);
             CategoryDialog dialog = new CategoryDialog(newCategory);
             Optional<Category> result = dialog.show(currentTable, "Add New Category");
+        } else if (model instanceof TemplateTableModel) {
+            Template newTemplate = new Template(
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    1,
+                    new Category("Work", Color.BLUE)
+            );
+            TemplateDialog dialog = new TemplateDialog(newTemplate);
+            Optional<Template> result = dialog.show(currentTable, "Add New Template");
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit newTimeUnit = new TimeUnit("", "", 0);
             IntervalDialog dialog = new IntervalDialog(newTimeUnit);
