@@ -95,4 +95,9 @@ public class Template {
     public TodoEvent toTodoEvent(){
             return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, categories );
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
