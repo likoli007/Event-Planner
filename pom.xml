@@ -47,6 +47,11 @@
             <version>${version.mockito}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5.1</version>
+        </dependency>
     </dependencies>
 
     <build>
