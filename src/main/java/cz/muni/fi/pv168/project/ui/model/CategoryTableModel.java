@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.model.Color;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import javax.swing.table.AbstractTableModel;
@@ -12,7 +13,8 @@ public class CategoryTableModel extends AbstractTableModel {
     private final List<Category> categories;
 
     private final List<Column<Category, ?>> columns = List.of(
-            Column.editable("Name", String.class, Category::getName, Category::setName)
+            Column.editable("Name", String.class, Category::getName, Category::setName),
+            Column.editable("Color", Color.class, Category::getColor, Category::setColor)
     );
 
     public CategoryTableModel(List<Category> categories) {
