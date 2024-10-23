@@ -7,6 +7,7 @@ import cz.muni.fi.pv168.project.model.Color;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,16 +21,15 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
     private final JTextField intervalField = new JTextField(5);
     private final ComboBoxModel<TimeUnit> timeUnitModel;
-    private final ComboBoxModel<Category> categoryModel;
+    private final DefaultListModel<Category> categoryModel;
     private final Template template;
 
     public TemplateDialog(Template template) {
         this.template = template;
-        this.categoryModel = new DefaultComboBoxModel<>(new Category[]{
-                new Category("Work", Color.BLUE),
-                new Category("Personal", Color.GREEN),
-                new Category("Fitness", Color.RED)
-        });
+        this.categoryModel = new DefaultListModel<>();
+        this.categoryModel.addElement(new Category("Work", Color.BLUE));
+        this.categoryModel.addElement(new Category("Personal", Color.GREEN));
+        this.categoryModel.addElement(new Category("Fitness", Color.RED));
 
         this.timeUnitModel = new DefaultComboBoxModel<>(new TimeUnit[]{
                 new TimeUnit("Minute", "min", 1),
@@ -55,12 +55,12 @@ public final class TemplateDialog extends EntityDialog<Template> {
         }
 
         intervalField.setText(String.valueOf(template.getTimeUnitAmount()));
-        categoryModel.setSelectedItem(template.getCategory());
+        // categoryModel.setSelectedItem(template.getCategories()); TODO
         timeUnitModel.setSelectedItem(template.getTimeUnit());
     }
 
     private void addFields() {
-        var categoryComboBox = new JComboBox<>(categoryModel);
+        var categoryComboBox = new JList<>(categoryModel);
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
         JPanel intervalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         intervalPanel.add(intervalField);
@@ -71,7 +71,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
         add("Date:", dateField);
         add("Time:", timeField);
         add("Length:", intervalPanel);
-        add("Category:", categoryComboBox);
+        add("Categories:", categoryComboBox);
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         template.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
         template.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        template.setCategory((Category) categoryModel.getSelectedItem());
+        // template.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
 
         return template;
     }

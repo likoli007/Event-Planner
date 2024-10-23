@@ -16,7 +16,7 @@ public class TemplateTableModel extends AbstractTableModel {
             Column.readonly("Details", String.class, Template::getDetails),
             Column.readonly("Date", LocalDateTime.class, Template::getDate),
             Column.readonly("Interval", String.class, Template::formatInterval),
-            Column.readonly("Category", Category.class, Template::getCategory)
+            Column.readonly("Categories", List.class, Template::getCategories)
     );
 
     public TemplateTableModel(List<Template> templates) {

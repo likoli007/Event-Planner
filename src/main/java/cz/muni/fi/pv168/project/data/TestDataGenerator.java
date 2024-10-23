@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 
 public final class TestDataGenerator {
     public TodoEvent createTodoEvent() {
-        return new TodoEvent("a", "b", LocalDateTime.now(), 6, new Category("a", Color.BLUE));
+        return new TodoEvent("a", "b", LocalDateTime.now(), 6,
+                List.of(new Category("a", Color.BLUE)));
     }
 
     public List<TodoEvent> createTodoEvents(int count) {
@@ -22,7 +23,8 @@ public final class TestDataGenerator {
 
     public List<Template> createTemplates() {
         List<Template> templates = new ArrayList<>();
-        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalDateTime.now(), 30, new Category("self care", Color.RED)));
+        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalDateTime.now(), 30,
+                List.of(new Category("self care", Color.RED), new Category("fitness", Color.GREEN))));
         return templates;
     }
 

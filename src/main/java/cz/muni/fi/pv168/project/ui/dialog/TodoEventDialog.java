@@ -23,17 +23,16 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
     private final JTextField intervalField = new JTextField(5);
     private final ComboBoxModel<TimeUnit> timeUnitModel;
-    private final ComboBoxModel<Category> categoryModel;
+    private final DefaultListModel<Category> categoryModel;
     private final ComboBoxModel<Template> templateModel;
     private TodoEvent todoEvent;
 
     public TodoEventDialog(TodoEvent todoEvent) {
         this.todoEvent = todoEvent;
-        this.categoryModel = new DefaultComboBoxModel<>(new Category[]{
-                new Category("Work", Color.BLUE),
-                new Category("Personal", Color.GREEN),
-                new Category("Fitness", Color.RED)
-        });
+        this.categoryModel = new DefaultListModel<>();
+        this.categoryModel.addElement(new Category("Work", Color.BLUE));
+        this.categoryModel.addElement(new Category("Personal", Color.GREEN));
+        this.categoryModel.addElement(new Category("Fitness", Color.RED));;
 
         this.timeUnitModel = new DefaultComboBoxModel<>(new TimeUnit[]{
                 new TimeUnit("Minute", "min", 1),
@@ -66,7 +65,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         }
 
         intervalField.setText(String.valueOf(todoEvent.getTimeUnitAmount()));
-        categoryModel.setSelectedItem(todoEvent.getCategory());
+        // categoryModel.setSelectedItem(todoEvent.getCategories()); TODO set selected items
         timeUnitModel.setSelectedItem(todoEvent.getTimeUnit());
     }
 
@@ -82,7 +81,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             }
         });
 
-        var categoryComboBox = new JComboBox<>(categoryModel);
+        var categoryList = new JList<>(categoryModel);
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
         JPanel intervalField = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         intervalField.add(this.intervalField);
@@ -94,7 +93,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         add("Date:", dateField);
         add("Time:", timeField);
         add("Length:", intervalField);
-        add("Category:", categoryComboBox);
+        add("Categories:", categoryList);
     }
 
     @Override
@@ -110,7 +109,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         todoEvent.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
         todoEvent.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        todoEvent.setCategory((Category) categoryModel.getSelectedItem());
+        // todoEvent.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
 
         return todoEvent;
     }

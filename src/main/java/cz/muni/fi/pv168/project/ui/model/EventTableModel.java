@@ -18,7 +18,7 @@ public class EventTableModel extends AbstractTableModel {
             Column.readonly("Details", String.class, TodoEvent::getDetails),
             Column.readonly("Date", LocalDateTime.class, TodoEvent::getDate),
             Column.readonly("Interval", String.class, TodoEvent::formatInterval),
-            Column.readonly("Category", Category.class, TodoEvent::getCategory),
+            Column.readonly("Categories", List.class, TodoEvent::getCategories),
             Column.editable("Done", Boolean.class, TodoEvent::isDone, TodoEvent::setDone)
     );
 
