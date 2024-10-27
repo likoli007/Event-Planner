@@ -16,6 +16,7 @@ import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -55,7 +56,7 @@ public final class AddAction extends AbstractAction {
             Template newTemplate = new Template(
                     "",
                     "",
-                    LocalDateTime.now(),
+                    LocalTime.now(),
                     1,
                     List.of(new Category("Work", Color.BLUE))
             );
