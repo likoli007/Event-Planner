@@ -7,23 +7,23 @@ import java.util.List;
 public class TodoEvent {
     private String name;
     private String details;
-    private LocalDateTime date;
+    private LocalDateTime start;
     private Interval interval;
     private List<Category> categories;
     private boolean done = false;
 
-    public TodoEvent(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
+    public TodoEvent(String name, String details, LocalDateTime start, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
+        this.start = start;
         this.interval = new Interval(timeUnit, timeUnitAmount);
         this.categories = categories;
     }
 
-    public TodoEvent(String name, String details, LocalDateTime date, int minutes, List<Category> categories) {
+    public TodoEvent(String name, String details, LocalDateTime start, int minutes, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
+        this.start = start;
         this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
     }
@@ -44,12 +44,12 @@ public class TodoEvent {
         this.details = details;
     }
 
-    public LocalDateTime getDate() {
-        return date;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
     public Interval getInterval() {
