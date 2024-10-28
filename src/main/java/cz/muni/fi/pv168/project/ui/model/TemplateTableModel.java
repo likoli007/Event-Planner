@@ -57,4 +57,10 @@ public class TemplateTableModel extends AbstractTableModel {
     public Template getEntity(int rowIndex) {
         return templates.get(rowIndex);
     }
+
+    public void addTemplate(Template template) {
+        templates.add(template);
+        int rowIndex = templates.size() - 1;
+        fireTableRowsInserted(rowIndex, rowIndex);
+    }
 }
