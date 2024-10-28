@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.ui;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.action.*;
+import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
@@ -22,8 +23,13 @@ public class MainWindow {
     private final JTable managerTabTable;
     private JTable currentTable;
 
+    private final EventTableModel eventTableModel;
+    private final CategoryTableModel categoryTableModel;
+    private final TemplateTableModel templateTableModel;
+    private final TimeUnitTableModel timeUnitTableModel;
+
     private final Action quitAction = new QuitAction();
-    private final Action addAction;
+    private final Action addActionContextual;
     private final Action deleteAction;
     private final Action editAction;
     private final Action importAction;
@@ -36,12 +42,17 @@ public class MainWindow {
         frame = createFrame();
 
         var testDataGenerator = new TestDataGenerator();
-        eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
-        managerTabTable = createCategoryTable(testDataGenerator.createCategories());
 
+        eventTableModel = new EventTableModel(testDataGenerator.createTodoEvents(10));
+        categoryTableModel = new CategoryTableModel(testDataGenerator.createCategories());
+        templateTableModel = new TemplateTableModel(testDataGenerator.createTemplates());
+        timeUnitTableModel = new TimeUnitTableModel(testDataGenerator.createTimeUnits());
+
+        eventTable = createTodoEventTable(eventTableModel);
+        managerTabTable = createCategoryTable(categoryTableModel);
         currentTable = eventTable;
 
-        addAction = new AddAction(() -> currentTable);
+        addActionContextual = new AddContextual(() -> currentTable);
         deleteAction = new DeleteAction(() -> currentTable);
         editAction = new EditAction(() -> currentTable);
         importAction = new ImportAction(frame);
@@ -119,10 +130,6 @@ public class MainWindow {
     }
 
     public JPanel createManagerTab(){
-        var testDataGenerator = new TestDataGenerator();
-        List<Category> categories = testDataGenerator.createCategories();
-
-        CategoryTableModel categoryTableModel = new CategoryTableModel(categories);
         managerTabTable.setModel(categoryTableModel);
 
         JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
@@ -152,20 +159,18 @@ public class MainWindow {
         return managerTab;
     }
 
-    private static void updateTableModel(ActionEvent e, JTable table, JTextArea statisticsArea) {
+    private void updateTableModel(ActionEvent e, JTable table, JTextArea statisticsArea) {
         Object source = e.getSource();
 
         if (source instanceof JComboBox<?> comboBox) {
             Object selectedItem = comboBox.getSelectedItem();
             if (selectedItem instanceof ManagedEntity selectedEntity) {
 
-                TestDataGenerator testDataGenerator = new TestDataGenerator();
                 TableModel newModel;
 
                 switch (selectedEntity) {
                     case CATEGORIES -> {
-                        List<Category> categories = testDataGenerator.createCategories();
-                        newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
+                        newModel = categoryTableModel;
 
                         statisticsArea.setText("""
                             Total No. of Tasks With Selected Category: 5
@@ -174,15 +179,13 @@ public class MainWindow {
                         //TODO: statistics like this should be in its own function where they will be calculated
                     }
                     case TEMPLATES -> {
-                        List<Template> templates = testDataGenerator.createTemplates();
-                        newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
+                        newModel = templateTableModel;
 
                         //TODO: statistics for used templates? for now leaving blank
                         statisticsArea.setText("");
                     }
                     case INTERVALS -> {
-                        List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
-                        newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
+                        newModel = timeUnitTableModel;
 
                         //TODO: statistics for used intervals? for now leaving blank
                         statisticsArea.setText("");
@@ -190,8 +193,7 @@ public class MainWindow {
                     default -> {
                         // default since otherwise the setModel function may have an uninitialized newModel
                         // TODO: once normal app logic is being implemented an error/exception should be thrown here
-                        List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
-                        newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
+                        newModel = timeUnitTableModel;
                     }
                 }
 
@@ -210,15 +212,13 @@ public class MainWindow {
         return frame;
     }
 
-    private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
-        var model = new EventTableModel(todoEvents);
+    private JTable createTodoEventTable(EventTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         return table;
     }
 
-    private JTable createCategoryTable(List<Category> categories) {
-        var model = new CategoryTableModel(categories);
+    private JTable createCategoryTable(CategoryTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         return table;
@@ -226,7 +226,7 @@ public class MainWindow {
 
     private JPopupMenu createPopupMenu() {
         var menu = new JPopupMenu();
-        menu.add(addAction);
+        menu.add(addActionContextual);
         menu.add(editAction);
         menu.add(deleteAction);
         return menu;
@@ -245,9 +245,10 @@ public class MainWindow {
 
         var editMenu = new JMenu("Edit");
         editMenu.setMnemonic('e');
-        editMenu.add(addAction);
-        editMenu.add(editAction);
-        editMenu.add(deleteAction);
+        editMenu.add(new AddEvent(() -> currentTable, eventTableModel));
+        editMenu.add(new AddCategory(() -> currentTable, categoryTableModel));
+        editMenu.add(new AddTemplate(() -> currentTable, templateTableModel));
+        editMenu.add(new AddTimeUnit(() -> currentTable, timeUnitTableModel));
         menuBar.add(editMenu);
 
         var optionsMenu = new JMenu("Options");
@@ -268,7 +269,7 @@ public class MainWindow {
         var toolbar = new JToolBar();
         toolbar.add(quitAction);
         toolbar.addSeparator();
-        toolbar.add(addAction);
+        toolbar.add(addActionContextual);
         toolbar.add(editAction);
         toolbar.add(deleteAction);
         return toolbar;

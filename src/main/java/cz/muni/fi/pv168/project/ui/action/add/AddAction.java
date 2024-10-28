@@ -1,4 +1,4 @@
-package cz.muni.fi.pv168.project.ui.action;
+package cz.muni.fi.pv168.project.ui.action.add;
 
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
@@ -21,22 +21,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class AddAction extends AbstractAction {
+public abstract class AddAction extends AbstractAction {
+    protected final Supplier<JTable> tableSupplier;
 
-    private final Supplier<JTable> tableSupplier;
-
-    public AddAction(Supplier<JTable> tableSupplier) {
-        super("Add", Icons.ADD_ICON);
+    public AddAction(String name, Supplier<JTable> tableSupplier) {
+        super(name, Icons.ADD_ICON);
         this.tableSupplier = tableSupplier;
-        putValue(SHORT_DESCRIPTION, "Adds new item");
-        putValue(MNEMONIC_KEY, KeyEvent.VK_A);
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl N"));
     }
+
+    protected abstract TableModel getTableModel();
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JTable currentTable = tableSupplier.get();
-        TableModel model = currentTable.getModel();
+        TableModel model = getTableModel();
 
         if (model instanceof EventTableModel eventTableModel) {
             TodoEvent newEvent = new TodoEvent(
