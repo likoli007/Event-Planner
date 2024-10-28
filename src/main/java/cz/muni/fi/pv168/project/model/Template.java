@@ -8,16 +8,14 @@ public class Template {
     private String name;
     private String details;
     private LocalDateTime date;
-    private TimeUnit timeUnit;
-    private int timeUnitAmount;
+    private Interval interval;
     private List<Category> categories;
 
     public Template(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
         this.date = date;
-        this.timeUnit = timeUnit;
-        this.timeUnitAmount = timeUnitAmount;
+        this.interval = new Interval(timeUnit, timeUnitAmount);
         this.categories = categories;
     }
 
@@ -25,8 +23,7 @@ public class Template {
         this.name = name;
         this.details = details;
         this.date = date;
-        this.timeUnit = TimeUnit.minute();
-        this.timeUnitAmount = minutes;
+        this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
     }
 
@@ -54,20 +51,12 @@ public class Template {
         this.date = date;
     }
 
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    public Interval getInterval() {
+        return interval;
     }
 
-    public void setTimeUnit(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public int getTimeUnitAmount() {
-        return timeUnitAmount;
-    }
-
-    public void setTimeUnitAmount(int timeUnitAmount) {
-        this.timeUnitAmount = timeUnitAmount;
+    public void setInterval(Interval interval) {
+        this.interval = interval;
     }
 
     public List<Category> getCategories() {
@@ -79,21 +68,12 @@ public class Template {
     }
 
     public String formatInterval() {
-        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
-
-        if (timeUnit != TimeUnit.minute()) {
-            sb
-                    .append(" (")
-                    .append(timeUnit.getMinutes() * timeUnitAmount)
-                    .append(" ")
-                    .append(TimeUnit.minute().getShortcut())
-                    .append(")");
-        }
-
-        return sb.toString();
+        return interval.format();
     }
+
     public TodoEvent toTodoEvent(){
-            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, categories );
+            return new TodoEvent(name,details, date, getInterval().getTimeUnit(),
+                    getInterval().getAmount(), categories);
     }
 
     @Override

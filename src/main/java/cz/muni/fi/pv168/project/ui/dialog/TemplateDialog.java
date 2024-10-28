@@ -54,9 +54,9 @@ public final class TemplateDialog extends EntityDialog<Template> {
             timeField.setTime(LocalTime.now());
         }
 
-        intervalField.setText(String.valueOf(template.getTimeUnitAmount()));
+        intervalField.setText(String.valueOf(template.getInterval().getAmount()));
         // categoryModel.setSelectedItem(template.getCategories()); TODO
-        timeUnitModel.setSelectedItem(template.getTimeUnit());
+        timeUnitModel.setSelectedItem(template.getInterval().getTimeUnit());
     }
 
     private void addFields() {
@@ -85,8 +85,8 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setDate(LocalDateTime.of(date, time));
         }
 
-        template.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
-        template.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
+        template.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
         // template.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
 
         return template;
