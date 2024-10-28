@@ -1,10 +1,9 @@
 package cz.muni.fi.pv168.project.ui.model;
 
-import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 
 import javax.swing.table.AbstractTableModel;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class TemplateTableModel extends AbstractTableModel {
     private final List<Column<Template, ?>> columns = List.of(
             Column.readonly("Name", String.class, Template::getName),
             Column.readonly("Details", String.class, Template::getDetails),
-            Column.readonly("Date", LocalDateTime.class, Template::getDate),
+            Column.readonly("Start time", LocalTime.class, Template::getStartTime),
             Column.readonly("Interval", String.class, Template::formatInterval),
             Column.readonly("Categories", List.class, Template::getCategories)
     );
