@@ -8,12 +8,14 @@ import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -215,6 +217,7 @@ public class MainWindow {
     private JTable createTodoEventTable(EventTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
+        table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeRenderer());
         return table;
     }
 
