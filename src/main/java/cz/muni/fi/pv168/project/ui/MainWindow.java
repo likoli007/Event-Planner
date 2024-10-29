@@ -134,7 +134,9 @@ public class MainWindow {
     public JPanel createManagerTab(){
         managerTabTable.setModel(categoryTableModel);
 
-        JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
+        JButton templateButton = new JButton("Templates");
+        JButton categoryButton = new JButton("Categories");
+        JButton intervalButton = new JButton("Intervals");
 
         JTextArea statisticsArea = new JTextArea();
         statisticsArea.setEditable(false);
@@ -142,66 +144,67 @@ public class MainWindow {
         // Default text shown
         // TODO: in the future fetch these statistics
         statisticsArea.setText("""
-            Total No. of Tasks With Selected Category: 5
-            Percentage of Total Tasks With Selected Category: 14%
-            """);
+        Total No. of Tasks With Selected Category: 5
+        Percentage of Total Tasks With Selected Category: 14%
+        """);
 
 
         JPanel managerTab = new JPanel(new BorderLayout());
-        JPanel managerTabToolPanel = new JPanel(new BorderLayout());
-        managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
+        JPanel managerTabToolPanel = new JPanel();
+        managerTabToolPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+        managerTabToolPanel.add(categoryButton);
+        managerTabToolPanel.add(templateButton);
+        managerTabToolPanel.add(intervalButton);
         managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
 
 
         managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
         managerTab.add(statisticsArea, BorderLayout.SOUTH);
 
-        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable, statisticsArea));
+        categoryButton.addActionListener(e -> updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, statisticsArea));
+        templateButton.addActionListener(e -> updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, statisticsArea));
+        intervalButton.addActionListener(e -> updateTableModel(ManagedEntity.INTERVALS, managerTabTable, statisticsArea));
 
         return managerTab;
     }
 
-    private void updateTableModel(ActionEvent e, JTable table, JTextArea statisticsArea) {
-        Object source = e.getSource();
+    private static void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea statisticsArea) {
+        TestDataGenerator testDataGenerator = new TestDataGenerator();
+        TableModel newModel;
 
-        if (source instanceof JComboBox<?> comboBox) {
-            Object selectedItem = comboBox.getSelectedItem();
-            if (selectedItem instanceof ManagedEntity selectedEntity) {
+        switch (selectedEntity) {
+            case CATEGORIES -> {
+                List<Category> categories = testDataGenerator.createCategories();
+                newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
 
-                TableModel newModel;
+                statisticsArea.setText("""
+                    Total No. of Tasks With Selected Category: 5
+                    Percentage of Total Tasks With Selected Category: 14%
+                """);
+                //TODO: statistics like this should be in its own function where they will be calculated
+            }
+            case TEMPLATES -> {
+                List<Template> templates = testDataGenerator.createTemplates();
+                newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
 
-                switch (selectedEntity) {
-                    case CATEGORIES -> {
-                        newModel = categoryTableModel;
+                //TODO: statistics for used templates? for now leaving blank
+                statisticsArea.setText("");
+            }
+            case INTERVALS -> {
+                List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
+                newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
 
-                        statisticsArea.setText("""
-                            Total No. of Tasks With Selected Category: 5
-                            Percentage of Total Tasks With Selected Category: 14%
-                            """);
-                        //TODO: statistics like this should be in its own function where they will be calculated
-                    }
-                    case TEMPLATES -> {
-                        newModel = templateTableModel;
-
-                        //TODO: statistics for used templates? for now leaving blank
-                        statisticsArea.setText("");
-                    }
-                    case INTERVALS -> {
-                        newModel = timeUnitTableModel;
-
-                        //TODO: statistics for used intervals? for now leaving blank
-                        statisticsArea.setText("");
-                    }
-                    default -> {
-                        // default since otherwise the setModel function may have an uninitialized newModel
-                        // TODO: once normal app logic is being implemented an error/exception should be thrown here
-                        newModel = timeUnitTableModel;
-                    }
-                }
-
-                table.setModel(newModel);
+                //TODO: statistics for used intervals? for now leaving blank
+                statisticsArea.setText("");
+            }
+            default -> {
+                List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
+                newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
             }
         }
+
+        table.setModel(newModel);
     }
 
     public void show() {
