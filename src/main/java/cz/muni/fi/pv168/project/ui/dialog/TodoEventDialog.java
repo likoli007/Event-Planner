@@ -55,18 +55,18 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         nameField.setText(todoEvent.getName());
         detailsField.setText(todoEvent.getDetails());
 
-        LocalDateTime dateTime = todoEvent.getDate();
-        if (dateTime != null) {
-            dateField.setDate(dateTime.toLocalDate());
-            timeField.setTime(dateTime.toLocalTime());
+        LocalDateTime start = todoEvent.getStart();
+        if (start != null) {
+            dateField.setDate(start.toLocalDate());
+            timeField.setTime(start.toLocalTime());
         } else {
             dateField.setDate(LocalDate.now());
             timeField.setTime(LocalTime.now());
         }
 
-        intervalField.setText(String.valueOf(todoEvent.getTimeUnitAmount()));
+        intervalField.setText(String.valueOf(todoEvent.getInterval().getAmount()));
         // categoryModel.setSelectedItem(todoEvent.getCategories()); TODO set selected items
-        timeUnitModel.setSelectedItem(todoEvent.getTimeUnit());
+        timeUnitModel.setSelectedItem(todoEvent.getInterval().getTimeUnit());
     }
 
     private void addFields() {
@@ -104,11 +104,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         LocalDate date = dateField.getDate();
         LocalTime time = timeField.getTime();
         if (date != null && time != null) {
-            todoEvent.setDate(LocalDateTime.of(date, time));
+            todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.setTimeUnitAmount(Integer.parseInt(intervalField.getText()));
-        todoEvent.setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
+        todoEvent.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
         // todoEvent.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
 
         return todoEvent;

@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.data;
 import cz.muni.fi.pv168.project.model.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public final class TestDataGenerator {
 
     public List<Template> createTemplates() {
         List<Template> templates = new ArrayList<>();
-        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalDateTime.now(), 30,
+        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30,
                 List.of(new Category("self care", Color.RED), new Category("fitness", Color.GREEN))));
         return templates;
     }

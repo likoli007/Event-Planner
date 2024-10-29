@@ -16,7 +16,7 @@ public class EventTableModel extends AbstractTableModel {
     private final List<Column<TodoEvent, ?>> columns = List.of(
             Column.readonly("Name", String.class, TodoEvent::getName),
             Column.readonly("Details", String.class, TodoEvent::getDetails),
-            Column.readonly("Date", LocalDateTime.class, TodoEvent::getDate),
+            Column.readonly("Start", LocalDateTime.class, TodoEvent::getStart),
             Column.readonly("Interval", String.class, TodoEvent::formatInterval),
             Column.readonly("Categories", List.class, TodoEvent::getCategories),
             Column.editable("Done", Boolean.class, TodoEvent::isDone, TodoEvent::setDone)

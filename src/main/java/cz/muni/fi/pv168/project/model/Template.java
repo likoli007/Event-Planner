@@ -1,32 +1,31 @@
 package cz.muni.fi.pv168.project.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
 public class Template {
     private String name;
     private String details;
-    private LocalDateTime date;
-    private TimeUnit timeUnit;
-    private int timeUnitAmount;
+    private LocalTime startTime;
+    private Interval interval;
     private List<Category> categories;
 
-    public Template(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
+    public Template(String name, String details, LocalTime startTime, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = timeUnit;
-        this.timeUnitAmount = timeUnitAmount;
+        this.startTime = startTime;
+        this.interval = new Interval(timeUnit, timeUnitAmount);
         this.categories = categories;
     }
 
-    public Template(String name, String details, LocalDateTime date, int minutes, List<Category> categories) {
+    public Template(String name, String details, LocalTime startTime, int minutes, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = TimeUnit.minute();
-        this.timeUnitAmount = minutes;
+        this.startTime = startTime;
+        this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
     }
 
@@ -46,28 +45,20 @@ public class Template {
         this.details = details;
     }
 
-    public LocalDateTime getDate() {
-        return date;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    public Interval getInterval() {
+        return interval;
     }
 
-    public void setTimeUnit(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public int getTimeUnitAmount() {
-        return timeUnitAmount;
-    }
-
-    public void setTimeUnitAmount(int timeUnitAmount) {
-        this.timeUnitAmount = timeUnitAmount;
+    public void setInterval(Interval interval) {
+        this.interval = interval;
     }
 
     public List<Category> getCategories() {
@@ -79,21 +70,11 @@ public class Template {
     }
 
     public String formatInterval() {
-        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
-
-        if (timeUnit != TimeUnit.minute()) {
-            sb
-                    .append(" (")
-                    .append(timeUnit.getMinutes() * timeUnitAmount)
-                    .append(" ")
-                    .append(TimeUnit.minute().getShortcut())
-                    .append(")");
-        }
-
-        return sb.toString();
+        return interval.format();
     }
+
     public TodoEvent toTodoEvent(){
-            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, categories );
+            return new TodoEvent(name,details, startTime.atDate(LocalDate.now()), getInterval().getTimeUnit(), getInterval().getAmount(), categories );
     }
 
     @Override
