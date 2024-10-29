@@ -11,7 +11,7 @@ public class LocalDateTimeRenderer extends AbstractRenderer<LocalDateTime> {
 
     @Override
     protected void updateLabel(JLabel label, LocalDateTime value) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm EEE dd.MM.yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy EEE");
         String formattedDateTime = value.format(formatter);
         label.setText(formattedDateTime);
     }
