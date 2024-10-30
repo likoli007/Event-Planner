@@ -108,7 +108,6 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private void onCreateTemplate() {
         String name = nameField.getText();
         String details = detailsField.getText();
-        LocalDate date = dateField.getDate();
         LocalTime time = timeField.getTime();
         int intervalAmount = Integer.parseInt(intervalField.getText());
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
@@ -117,7 +116,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         Template newTemplate = new Template(
                 name,
                 details,
-                LocalDateTime.of(date, time),
+                time,
                 selectedTimeUnit,
                 intervalAmount,
                 selectedCategories
