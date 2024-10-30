@@ -11,6 +11,7 @@ import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -125,9 +126,20 @@ public class MainWindow {
                 Total No. of Planned Events: 13
                 """
         );
+
+        JTextArea statisticsLengthArea = new JTextArea(
+                """
+                Total length of done events: 189 minutes
+                Total number of events: 55 events
+                """
+        );
+
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
-        statisticsPanel.add(statisticsArea);
+        statisticsPanel.add(statisticsArea, BorderLayout.WEST);
+        statisticsLengthArea.setEditable(false);
+        statisticsLengthArea.setBackground(null);
+        statisticsPanel.add(statisticsLengthArea, BorderLayout.EAST);
         return statisticsPanel;
     }
 
