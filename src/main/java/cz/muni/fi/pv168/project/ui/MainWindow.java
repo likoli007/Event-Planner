@@ -2,6 +2,11 @@ package cz.muni.fi.pv168.project.ui;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
+import cz.muni.fi.pv168.project.service.crud.CategoryCrudService;
+import cz.muni.fi.pv168.project.service.crud.TemplateCrudService;
+import cz.muni.fi.pv168.project.service.crud.TimeUnitCrudService;
+import cz.muni.fi.pv168.project.service.crud.TodoEventCrudService;
+import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
@@ -45,10 +50,20 @@ public class MainWindow {
 
         var testDataGenerator = new TestDataGenerator();
 
-        eventTableModel = new EventTableModel(testDataGenerator.createTodoEvents());
-        categoryTableModel = new CategoryTableModel(testDataGenerator.createCategories());
-        templateTableModel = new TemplateTableModel(testDataGenerator.createTemplates());
-        timeUnitTableModel = new TimeUnitTableModel(testDataGenerator.createTimeUnits());
+        var categoryRepository = new InMemoryRepository<>(testDataGenerator.createCategories());
+        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
+        var timeUnitRepository = new InMemoryRepository<>(testDataGenerator.createTimeUnits());
+        var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
+
+        var categoryCrudService = new CategoryCrudService(categoryRepository);
+        var templateCrudService = new TemplateCrudService(templateRepository);
+        var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
+        var eventCrudService = new TodoEventCrudService(eventRepository);
+
+        categoryTableModel = new CategoryTableModel(categoryCrudService);
+        templateTableModel = new TemplateTableModel(templateCrudService);
+        timeUnitTableModel = new TimeUnitTableModel(timeUnitCrudService);
+        eventTableModel = new EventTableModel(eventCrudService);
 
         eventTable = createTodoEventTable(eventTableModel);
         managerTabTable = createCategoryTable(categoryTableModel);
@@ -169,14 +184,13 @@ public class MainWindow {
         return managerTab;
     }
 
-    private static void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea statisticsArea) {
+    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea statisticsArea) {
         TestDataGenerator testDataGenerator = new TestDataGenerator();
         TableModel newModel;
 
         switch (selectedEntity) {
             case CATEGORIES -> {
-                List<Category> categories = testDataGenerator.createCategories();
-                newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
+                newModel = categoryTableModel;
 
                 statisticsArea.setText("""
                     Total No. of Tasks With Selected Category: 5
@@ -185,22 +199,19 @@ public class MainWindow {
                 //TODO: statistics like this should be in its own function where they will be calculated
             }
             case TEMPLATES -> {
-                List<Template> templates = testDataGenerator.createTemplates();
-                newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
+                newModel = templateTableModel;
 
                 //TODO: statistics for used templates? for now leaving blank
                 statisticsArea.setText("");
             }
             case INTERVALS -> {
-                List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
-                newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
+                newModel = timeUnitTableModel;
 
                 //TODO: statistics for used intervals? for now leaving blank
                 statisticsArea.setText("");
             }
             default -> {
-                List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
-                newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
+                newModel = timeUnitTableModel;
             }
         }
 

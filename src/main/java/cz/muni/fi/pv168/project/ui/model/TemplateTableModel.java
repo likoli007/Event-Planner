@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Template;
+import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalTime;
@@ -8,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TemplateTableModel extends AbstractTableModel {
-    private final List<Template> templates;
+    private final CrudService<Template> templateCrudService;
+    private List<Template> templates;
 
     private final List<Column<Template, ?>> columns = List.of(
             Column.readonly("Name", String.class, Template::getName),
@@ -18,8 +20,9 @@ public class TemplateTableModel extends AbstractTableModel {
             Column.readonly("Categories", List.class, Template::getCategories)
     );
 
-    public TemplateTableModel(List<Template> templates) {
-        this.templates = new ArrayList<>(templates);
+    public TemplateTableModel(CrudService<Template> templateCrudService) {
+        this.templateCrudService = templateCrudService;
+        this.templates = new ArrayList<>(templateCrudService.findAll());
     }
 
     @Override
