@@ -16,7 +16,7 @@ public final class TestDataGenerator {
     private final Category healthCategory = new Category("Health", Color.ORANGE);
     private final Category recreationCategory = new Category("Recreation", Color.GREEN);
     private final Category hobbyCategory = new Category("Hobby", Color.YELLOW);
-    public List<TodoEvent> createTodoEvents(int count) {
+    public List<TodoEvent> createTodoEvents() {
         List<TodoEvent> sampleTodoEvents = List.of(
                 new TodoEvent("Team Meeting", "Discuss project roadmap", LocalDateTime.of(2024, 11, 3, 10, 0), 24, List.of(workCategory)),
                 new TodoEvent("Doctor Appointment", "Annual check-up", LocalDateTime.of(2024, 11, 4, 15, 30), 31, List.of(personalCategory)),

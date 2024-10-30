@@ -45,7 +45,7 @@ public class MainWindow {
 
         var testDataGenerator = new TestDataGenerator();
 
-        eventTableModel = new EventTableModel(testDataGenerator.createTodoEvents(10));
+        eventTableModel = new EventTableModel(testDataGenerator.createTodoEvents());
         categoryTableModel = new CategoryTableModel(testDataGenerator.createCategories());
         templateTableModel = new TemplateTableModel(testDataGenerator.createTemplates());
         timeUnitTableModel = new TimeUnitTableModel(testDataGenerator.createTimeUnits());
