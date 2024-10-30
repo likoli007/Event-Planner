@@ -1,13 +1,15 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimeUnitTableModel extends AbstractTableModel {
-    private final List<TimeUnit> timeUnits;
+    private final CrudService<TimeUnit> timeUnitCrudService;
+    private List<TimeUnit> timeUnits;
 
     private final List<Column<TimeUnit, ?>> columns = List.of(
             Column.editable("Name", String.class, TimeUnit::getName, TimeUnit::setName),
@@ -15,8 +17,9 @@ public class TimeUnitTableModel extends AbstractTableModel {
             Column.editable("Minutes", Integer.class, TimeUnit::getMinutes, TimeUnit::setMinutes)
     );
 
-    public TimeUnitTableModel(List<TimeUnit> timeUnits) {
-        this.timeUnits = new ArrayList<>(timeUnits);
+    public TimeUnitTableModel(CrudService<TimeUnit> timeUnitCrudService) {
+        this.timeUnitCrudService = timeUnitCrudService;
+        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
     }
 
     @Override

@@ -2,7 +2,7 @@ package cz.muni.fi.pv168.project.model;
 
 import java.util.Objects;
 
-public class TimeUnit {
+public class TimeUnit extends Entity {
     private String name;
     private String shortcut;
     private int minutes;

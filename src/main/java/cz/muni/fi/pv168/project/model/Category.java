@@ -1,6 +1,6 @@
 package cz.muni.fi.pv168.project.model;
 
-public class Category {
+public class Category extends Entity {
     private String name;
 
     private Color color;

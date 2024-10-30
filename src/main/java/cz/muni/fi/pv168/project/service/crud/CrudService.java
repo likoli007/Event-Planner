@@ -1,0 +1,39 @@
+package cz.muni.fi.pv168.project.service.crud;
+
+import cz.muni.fi.pv168.project.model.Entity;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Service for creation, read, update, and delete operations.
+ *
+ * @param <T> entity type.
+ */
+public interface CrudService<T extends Entity> {
+
+    /**
+     * Find all entities.
+     */
+    List<T> findAll();
+
+    /**
+     * Validate and store the given {@code newEntity}.
+     */
+    void create(T newEntity);
+
+    /**
+     * Updates the given {@code entity}.
+     */
+    void update(T entity);
+
+    /**
+     * Delete entity with given {@code id}.
+     */
+    void deleteById(UUID id);
+
+    /**
+     * Delete all entities.
+     */
+    void deleteAll();
+}

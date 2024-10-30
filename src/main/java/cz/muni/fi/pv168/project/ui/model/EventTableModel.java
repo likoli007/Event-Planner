@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDate;
@@ -11,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
-    private final List<TodoEvent> todoEvents;
+    private final CrudService<TodoEvent> todoEventCrudService;
+    private List<TodoEvent> todoEvents;
 
     private final List<Column<TodoEvent, ?>> columns = List.of(
             Column.readonly("Name", String.class, TodoEvent::getName),
@@ -22,8 +24,9 @@ public class EventTableModel extends AbstractTableModel {
             Column.editable("Done", Boolean.class, TodoEvent::isDone, TodoEvent::setDone)
     );
 
-    public EventTableModel(List<TodoEvent> todoEvents) {
-        this.todoEvents = new ArrayList<>(todoEvents);
+    public EventTableModel(CrudService<TodoEvent> todoEventCrudService) {
+        this.todoEventCrudService = todoEventCrudService;
+        this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
     }
 
     @Override
