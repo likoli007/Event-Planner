@@ -5,6 +5,7 @@ import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.model.Color;
+import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private final TimePicker timeField = new TimePicker();
 
     private final JTextField intervalField = new JTextField(5);
+    private final JList<Category> categoryList;
     private final ComboBoxModel<TimeUnit> timeUnitModel;
     private final DefaultListModel<Category> categoryModel;
     private final ComboBoxModel<Template> templateModel;
@@ -33,6 +35,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         this.categoryModel.addElement(new Category("Work", Color.BLUE));
         this.categoryModel.addElement(new Category("Personal", Color.GREEN));
         this.categoryModel.addElement(new Category("Fitness", Color.RED));;
+        this.categoryList = new JList<>(categoryModel);
 
         this.timeUnitModel = new DefaultComboBoxModel<>(new TimeUnit[]{
                 new TimeUnit("Minute", "min", 1),
@@ -72,9 +75,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private void addFields() {
         var templateComboBox = new JComboBox<>(this.templateModel);
 
+        JButton createTemplateButton = new JButton("Create Template");
+        createTemplateButton.addActionListener(e -> onCreateTemplate());
+
         templateComboBox.addActionListener(e -> {
             Template selectedTemplate = (Template) templateComboBox.getSelectedItem();
-
             if (selectedTemplate != null) {
                 todoEvent = selectedTemplate.toTodoEvent();  // Update your todoEvent
                 setValues();
@@ -87,13 +92,43 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         intervalField.add(this.intervalField);
         intervalField.add(timeUnitComboBox);
 
-        add("Template", templateComboBox);
+        JPanel templatePanel = new JPanel(new BorderLayout());
+        templatePanel.add(templateComboBox, BorderLayout.CENTER);
+        templatePanel.add(createTemplateButton, BorderLayout.EAST);
+
+        add("Template", templatePanel);
         add("Name:", nameField);
         add("Details:", detailsField);
         add("Date:", dateField);
         add("Time:", timeField);
         add("Length:", intervalField);
         add("Categories:", categoryList);
+    }
+
+    private void onCreateTemplate() {
+        String name = nameField.getText();
+        String details = detailsField.getText();
+        LocalDate date = dateField.getDate();
+        LocalTime time = timeField.getTime();
+        int intervalAmount = Integer.parseInt(intervalField.getText());
+        TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
+        List<Category> selectedCategories = categoryList.getSelectedValuesList();
+
+        Template newTemplate = new Template(
+                name,
+                details,
+                LocalDateTime.of(date, time),
+                selectedTimeUnit,
+                intervalAmount,
+                selectedCategories
+        );
+
+//        templateTableModel.addTemplate(newTemplate);
+
+        JOptionPane.showMessageDialog(null,
+                "Template created successfully!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
