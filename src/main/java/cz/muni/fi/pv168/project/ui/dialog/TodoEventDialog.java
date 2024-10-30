@@ -117,7 +117,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         Template newTemplate = new Template(
                 name,
                 details,
-                LocalDateTime.of(date, time),
+                time,
                 selectedTimeUnit,
                 intervalAmount,
                 selectedCategories
