@@ -1,6 +1,6 @@
 package cz.muni.fi.pv168.project.model;
 
-public class Interval {
+public class Interval extends Entity {
     private TimeUnit timeUnit;
     private int amount;
 

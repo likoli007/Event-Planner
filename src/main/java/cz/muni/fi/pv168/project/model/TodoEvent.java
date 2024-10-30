@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-public class TodoEvent {
+public class TodoEvent extends Entity {
     private String name;
     private String details;
     private LocalDateTime start;

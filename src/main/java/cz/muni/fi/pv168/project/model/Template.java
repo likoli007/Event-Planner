@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
-public class Template {
+public class Template extends Entity {
     private String name;
     private String details;
     private LocalTime startTime;
