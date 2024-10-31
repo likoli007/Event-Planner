@@ -58,4 +58,25 @@ public class CategoryTableModel extends AbstractTableModel {
     public Category getEntity(int rowIndex) {
         return categories.get(rowIndex);
     }
+
+    public void addRow(Category category) {
+        categoryCrudService.create(category);
+        int newRowIndex = categories.size();
+        categories.add(category);
+        fireTableRowsInserted(newRowIndex, newRowIndex);
+
+    }
+
+    public void updateRow(Category category) {
+        categoryCrudService.update(category);
+        int rowIndex = categories.indexOf(category);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int rowIndex) {
+        Category category = categories.get(rowIndex);
+        categoryCrudService.deleteById(category.getId());
+        categories.remove(rowIndex);
+        fireTableRowsDeleted(rowIndex, rowIndex);
+    }
 }

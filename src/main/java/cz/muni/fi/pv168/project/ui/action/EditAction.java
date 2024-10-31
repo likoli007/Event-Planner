@@ -59,7 +59,7 @@ public final class EditAction extends AbstractAction {
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category category = categoryTableModel.getEntity(modelRow);
             CategoryDialog dialog = new CategoryDialog(category);
-            dialog.show(currentTable, "Edit Category");
+            dialog.show(currentTable, "Edit Category").ifPresent(categoryTableModel::updateRow);
         } else if (model instanceof TemplateTableModel templateTableModel) {
             Template template = templateTableModel.getEntity(modelRow);
             TemplateDialog dialog = new TemplateDialog(template);
