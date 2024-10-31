@@ -67,7 +67,7 @@ public final class EditAction extends AbstractAction {
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit timeUnit = timeUnitTableModel.getEntity(modelRow);
             IntervalDialog dialog = new IntervalDialog(timeUnit);
-            dialog.show(currentTable, "Edit Time Unit");
+            dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnitTableModel::updateRow);
         } else {
             JOptionPane.showMessageDialog(currentTable,
                     "Unsupported table model for editing.",
