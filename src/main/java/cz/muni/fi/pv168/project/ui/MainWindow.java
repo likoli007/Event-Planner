@@ -1,5 +1,7 @@
 package cz.muni.fi.pv168.project.ui;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.service.crud.CategoryCrudService;
@@ -20,7 +22,11 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -300,13 +306,41 @@ public class MainWindow {
     private JPanel createFilterPanel() {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        JLabel fromLabel = new JLabel("From:");
-        JSpinner fromTime = new JSpinner(new SpinnerDateModel());
-        fromTime.setEditor(new JSpinner.DateEditor(fromTime, "yyyy-MM-dd HH:mm"));
+        JLabel fromLabel = new JLabel("From Date:");
+        DatePicker fromDatePicker = new DatePicker();
+        fromDatePicker.setDateToToday();
 
-        JLabel toLabel = new JLabel("To:");
-        JSpinner toTime = new JSpinner(new SpinnerDateModel());
-        toTime.setEditor(new JSpinner.DateEditor(toTime, "yyyy-MM-dd HH:mm"));
+        JLabel fromTimeLabel = new JLabel("Time:");
+        TimePicker fromTimePicker = new TimePicker();
+        fromTimePicker.setTimeToNow();
+
+        JLabel toLabel = new JLabel("To Date:");
+        DatePicker toDatePicker = new DatePicker();
+        toDatePicker.setDateToToday();
+
+        JLabel toTimeLabel = new JLabel("Time:");
+        TimePicker toTimePicker = new TimePicker();
+        toTimePicker.setTimeToNow();
+
+        JButton todayButton = new JButton("Today");
+        todayButton.addActionListener(e -> {
+            fromDatePicker.setDateToToday();
+            toDatePicker.setDateToToday();
+            fromTimePicker.setTimeToNow();
+            toTimePicker.setTimeToNow();
+        });
+
+        JButton thisWeekButton = new JButton("This Week");
+        thisWeekButton.addActionListener(e -> {
+            LocalDate today = LocalDate.now();
+            LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            LocalDate endOfWeek = today.with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
+
+            fromDatePicker.setDate(startOfWeek);
+            toDatePicker.setDate(endOfWeek);
+            fromTimePicker.setTime(LocalTime.MIN);
+            toTimePicker.setTime(LocalTime.MAX);
+        });
 
         JLabel unitLabel = new JLabel("Units:");
         JComboBox<String> unitComboBox = createMultiSelectComboBox(new String[]{"Minutes", "Hours", "Class"});
@@ -320,10 +354,28 @@ public class MainWindow {
 
         JButton clearButton = new JButton("Clear");
 
+        clearButton.addActionListener(e -> {
+            fromDatePicker.clear();
+            fromTimePicker.clear();
+            toDatePicker.clear();
+            toTimePicker.clear();
+            doneCheckBox.setSelected(false);
+            plannedCheckBox.setSelected(false);
+        });
+
         filterPanel.add(fromLabel);
-        filterPanel.add(fromTime);
+        filterPanel.add(fromDatePicker);
+        filterPanel.add(fromTimeLabel);
+        filterPanel.add(fromTimePicker);
+
         filterPanel.add(toLabel);
-        filterPanel.add(toTime);
+        filterPanel.add(toDatePicker);
+        filterPanel.add(toTimeLabel);
+        filterPanel.add(toTimePicker);
+
+        filterPanel.add(todayButton);
+        filterPanel.add(thisWeekButton);
+
         filterPanel.add(unitLabel);
         filterPanel.add(unitComboBox);
         filterPanel.add(categoryLabel);
