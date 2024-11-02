@@ -46,6 +46,15 @@ public class EventTableModel extends AbstractTableModel {
     }
 
     @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        var event = getEntity(rowIndex);
+        if (columns.get(columnIndex).getName().equals("Done")) {
+            event.setDone((Boolean) aValue);
+            fireTableCellUpdated(rowIndex, columnIndex);
+        }
+    }
+
+    @Override
     public String getColumnName(int columnIndex) {
         return columns.get(columnIndex).getName();
     }
@@ -62,5 +71,14 @@ public class EventTableModel extends AbstractTableModel {
 
     public TodoEvent getEntity(int rowIndex) {
         return todoEvents.get(rowIndex);
+    }
+
+    public int getColumnIndexByName(String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).getName().equals(columnName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

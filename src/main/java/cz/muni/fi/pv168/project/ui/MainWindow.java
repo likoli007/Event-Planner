@@ -13,6 +13,7 @@ import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
 import cz.muni.fi.pv168.project.ui.model.EventTableModel;
 import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
 
 import javax.swing.*;
@@ -232,6 +233,17 @@ public class MainWindow {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeRenderer());
+
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(new EventTableCellRenderer());
+        }
+
+        int doneColumnIndex = model.getColumnIndexByName("Done");
+        if (doneColumnIndex != -1) {
+            table.getColumnModel().getColumn(doneColumnIndex).setCellRenderer(table.getDefaultRenderer(Boolean.class));
+            table.getColumnModel().getColumn(doneColumnIndex).setCellEditor(table.getDefaultEditor(Boolean.class));
+        }
+
         return table;
     }
 
