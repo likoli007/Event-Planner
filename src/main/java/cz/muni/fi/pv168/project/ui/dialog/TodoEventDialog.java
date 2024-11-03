@@ -4,8 +4,6 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,14 +1,16 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
 
 import javax.swing.*;
+import java.awt.*;
 
 public final class CategoryDialog extends EntityDialog<Category> {
 
     private final JTextField nameField = new JTextField();
-    private final JComboBox<Color> colorComboBox = new JComboBox<>(Color.values());
+    //private final JComboBox<Color> colorComboBox = new JComboBox<>(Color.values());
+
+    private final JColorChooser colorChooser = new JColorChooser();
 
     private final Category category;
     private Color selectedColor;
@@ -22,18 +24,18 @@ public final class CategoryDialog extends EntityDialog<Category> {
     private void setValues() {
         nameField.setText(category.getName());
         selectedColor = category.getColor();
-        colorComboBox.setSelectedItem(selectedColor);
+
     }
 
     private void addFields() {
         add("Name:", nameField);
-        add("Color:", colorComboBox);
+        add("Color:", colorChooser);
     }
 
     @Override
     Category getEntity() {
         category.setName(nameField.getText());
-        selectedColor = (Color) colorComboBox.getSelectedItem();
+        selectedColor = (Color) colorChooser.getColor();
         category.setColor(selectedColor);
         return category;
     }

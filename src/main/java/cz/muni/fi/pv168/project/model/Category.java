@@ -1,5 +1,7 @@
 package cz.muni.fi.pv168.project.model;
 
+import java.awt.Color;
+
 public class Category extends Entity {
     private String name;
 

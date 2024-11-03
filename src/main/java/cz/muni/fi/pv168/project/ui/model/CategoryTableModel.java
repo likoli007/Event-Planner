@@ -1,12 +1,10 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
-import java.time.LocalDateTime;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
