@@ -13,8 +13,8 @@ import cz.muni.fi.pv168.project.model.Category;
 public class CategoryListRenderer extends JPanel implements TableCellRenderer {
 
     public CategoryListRenderer(){
-        setOpaque(false); // Make the panel background transparent
-        setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Adjust layout as needed
+        setOpaque(false);
+        setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
     }
 
@@ -30,7 +30,7 @@ public class CategoryListRenderer extends JPanel implements TableCellRenderer {
                     Category category = (Category) obj;
 
                     //just cyan for now
-                    RoundedLabel roundedLabel = new RoundedLabel(category.getName(), Color.CYAN);
+                    RoundedLabel roundedLabel = new RoundedLabel(category.getName(), category.getColor());
                     roundedLabel.setForeground(Color.BLACK);
                     add(roundedLabel);
                 }
