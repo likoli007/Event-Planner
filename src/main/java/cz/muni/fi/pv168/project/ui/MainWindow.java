@@ -78,6 +78,9 @@ public class MainWindow {
         managerTabTable = createCategoryTable(categoryTableModel);
         currentTable = eventTable;
 
+        //should this be done here?
+        managerTabTable.setDefaultRenderer(List.class, new CategoryListRenderer());
+
         addActionContextual = new AddContextual(() -> currentTable);
         deleteAction = new DeleteAction(() -> currentTable);
         editAction = new EditAction(() -> currentTable);
