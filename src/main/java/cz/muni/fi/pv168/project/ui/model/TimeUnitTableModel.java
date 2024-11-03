@@ -56,4 +56,23 @@ public class TimeUnitTableModel extends AbstractTableModel {
     public TimeUnit getEntity(int rowIndex) {
         return timeUnits.get(rowIndex);
     }
+
+    public void addRow(TimeUnit timeUnit) {
+        timeUnitCrudService.create(timeUnit);
+        timeUnits.add(timeUnit);
+        fireTableRowsInserted(timeUnits.size() - 1, timeUnits.size() - 1);
+    }
+
+    public void updateRow(TimeUnit timeUnit) {
+        timeUnitCrudService.update(timeUnit);
+        int rowIndex = timeUnits.indexOf(timeUnit);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int modelRow) {
+        var timeUnit = getEntity(modelRow);
+        timeUnitCrudService.deleteById(timeUnit.getId());
+        timeUnits.remove(modelRow);
+        fireTableRowsDeleted(modelRow, modelRow);
+    }
 }

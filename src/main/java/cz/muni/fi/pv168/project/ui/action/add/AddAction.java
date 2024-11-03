@@ -64,7 +64,7 @@ public abstract class AddAction extends AbstractAction {
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit newTimeUnit = new TimeUnit("", "", 0);
             IntervalDialog dialog = new IntervalDialog(newTimeUnit);
-            Optional<TimeUnit> result = dialog.show(currentTable, "Add New Time Unit");
+            dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnitTableModel::addRow);
         } else {
             JOptionPane.showMessageDialog(currentTable,
                     "Unsupported table model for adding.",

@@ -72,6 +72,7 @@ public final class DeleteAction extends AbstractAction {
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                timeUnitTableModel.deleteRow(modelRow);
             }
         } else {
             JOptionPane.showMessageDialog(currentTable,
