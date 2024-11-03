@@ -28,6 +28,10 @@ public class Category extends Entity {
         this.color = color;
     }
 
+    public Category getCategory(){
+        return this;
+    }
+
     @Override
     public String toString() {
         return name;

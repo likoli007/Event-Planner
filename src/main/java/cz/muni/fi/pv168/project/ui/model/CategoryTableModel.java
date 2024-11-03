@@ -13,8 +13,7 @@ public class CategoryTableModel extends AbstractTableModel {
     private List<Category> categories;
 
     private final List<Column<Category, ?>> columns = List.of(
-            Column.editable("Name", String.class, Category::getName, Category::setName),
-            Column.editable("Color", Color.class, Category::getColor, Category::setColor)
+            Column.readonly("Categories", Category.class, Category::getCategory)
     );
 
     public CategoryTableModel(CrudService<Category> categoryCrudService) {
