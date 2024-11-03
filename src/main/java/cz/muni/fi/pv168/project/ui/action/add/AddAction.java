@@ -49,7 +49,8 @@ public abstract class AddAction extends AbstractAction {
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category newCategory = new Category("", Color.BLUE);
             CategoryDialog dialog = new CategoryDialog(newCategory);
-            Optional<Category> result = dialog.show(currentTable, "Add New Category");
+            dialog.show(currentTable, "Add New Category").ifPresent(categoryTableModel::addRow);
+
         } else if (model instanceof TemplateTableModel) {
             Template newTemplate = new Template(
                     "",
