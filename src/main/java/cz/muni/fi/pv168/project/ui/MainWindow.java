@@ -17,6 +17,7 @@ import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
+import cz.muni.fi.pv168.project.ui.renderer.LocalTimeRenderer;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -256,6 +257,8 @@ public class MainWindow {
     private JTable createCategoryTable(CategoryTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
+        table.setDefaultRenderer(LocalTime.class, new LocalTimeRenderer());
+
         return table;
     }
 
