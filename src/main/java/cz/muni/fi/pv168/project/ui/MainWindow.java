@@ -244,6 +244,11 @@ public class MainWindow {
             table.getColumnModel().getColumn(i).setCellRenderer(new EventTableCellRenderer());
         }
 
+        int startColumnIndex = model.getColumnIndexByName("Start");
+        if (startColumnIndex != -1) {
+            table.getColumnModel().getColumn(startColumnIndex).setCellRenderer(new LocalDateTimeRenderer());
+        }
+
         int doneColumnIndex = model.getColumnIndexByName("Done");
         if (doneColumnIndex != -1) {
             table.getColumnModel().getColumn(doneColumnIndex).setCellRenderer(table.getDefaultRenderer(Boolean.class));
