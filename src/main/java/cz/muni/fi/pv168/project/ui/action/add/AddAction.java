@@ -51,7 +51,7 @@ public abstract class AddAction extends AbstractAction {
             CategoryDialog dialog = new CategoryDialog(newCategory);
             dialog.show(currentTable, "Add New Category").ifPresent(categoryTableModel::addRow);
 
-        } else if (model instanceof TemplateTableModel) {
+        } else if (model instanceof TemplateTableModel templateTableModel) {
             Template newTemplate = new Template(
                     "",
                     "",
@@ -60,7 +60,7 @@ public abstract class AddAction extends AbstractAction {
                     List.of(new Category("Work", Color.BLUE))
             );
             TemplateDialog dialog = new TemplateDialog(newTemplate);
-            Optional<Template> result = dialog.show(currentTable, "Add New Template");
+            dialog.show(currentTable, "Add New Template").ifPresent(templateTableModel::addRow);
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit newTimeUnit = new TimeUnit("", "", 0);
             IntervalDialog dialog = new IntervalDialog(newTimeUnit);

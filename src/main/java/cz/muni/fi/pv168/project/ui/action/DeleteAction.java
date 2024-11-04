@@ -68,6 +68,7 @@ public final class DeleteAction extends AbstractAction {
         } else if (model instanceof TemplateTableModel templateTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                templateTableModel.deleteRow(modelRow);
             }
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             for (int viewRow : selectedRows) {
