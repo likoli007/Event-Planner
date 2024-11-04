@@ -58,7 +58,7 @@ public abstract class AddAction extends AbstractAction {
                     1,
                     List.of(new Category("Work", Color.BLUE))
             );
-            TemplateDialog dialog = new TemplateDialog(newTemplate);
+            TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
             dialog.show(currentTable, "Add New Template").ifPresent(templateTableModel::addRow);
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit newTimeUnit = new TimeUnit("", "", 0);

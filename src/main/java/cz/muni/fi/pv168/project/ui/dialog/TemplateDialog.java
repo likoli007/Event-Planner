@@ -4,6 +4,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.model.Color;
+import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,22 +18,20 @@ public final class TemplateDialog extends EntityDialog<Template> {
     private final TimePicker timeField = new TimePicker();
 
     private final JTextField intervalField = new JTextField(5);
+    private final JList<Category> categoryList;
     private final ComboBoxModel<TimeUnit> timeUnitModel;
     private final DefaultListModel<Category> categoryModel;
     private final Template template;
 
-    public TemplateDialog(Template template) {
+    public TemplateDialog(Template template, AllTableModels allTableModels) {
         this.template = template;
         this.categoryModel = new DefaultListModel<>();
-        this.categoryModel.addElement(new Category("Work", Color.BLUE));
-        this.categoryModel.addElement(new Category("Personal", Color.GREEN));
-        this.categoryModel.addElement(new Category("Fitness", Color.RED));
+        for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
+            this.categoryModel.addElement(category);
+        }
+        this.categoryList = new JList<>(categoryModel);
 
-        this.timeUnitModel = new DefaultComboBoxModel<>(new TimeUnit[]{
-                new TimeUnit("Minute", "min", 1),
-                new TimeUnit("Hour", "hr", 60),
-                new TimeUnit("Class", "cl", 90)
-        });
+        this.timeUnitModel = new DefaultComboBoxModel<>(allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findAll().toArray(new TimeUnit[0]));
 
         setValues();
         addFields();
