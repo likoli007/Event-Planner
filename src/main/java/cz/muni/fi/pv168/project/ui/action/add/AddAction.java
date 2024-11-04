@@ -41,7 +41,7 @@ public abstract class AddAction extends AbstractAction {
                     "",
                     LocalDateTime.now(),
                     1,
-                    List.of(new Category("Work", Color.BLUE))
+                    List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
             );
             TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
             dialog.show(currentTable, "Add New Event").ifPresent(eventTableModel::addRow);
@@ -56,7 +56,7 @@ public abstract class AddAction extends AbstractAction {
                     "",
                     LocalTime.now(),
                     1,
-                    List.of(new Category("Work", Color.BLUE))
+                    List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
             );
             TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
             dialog.show(currentTable, "Add New Template").ifPresent(templateTableModel::addRow);
