@@ -45,7 +45,7 @@ public abstract class AddAction extends AbstractAction {
                     List.of(new Category("Work", Color.BLUE))
             );
             TodoEventDialog dialog = new TodoEventDialog(newEvent);
-            Optional<TodoEvent> result = dialog.show(currentTable, "Add New Event");
+            dialog.show(currentTable, "Add New Event").ifPresent(eventTableModel::addRow);
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category newCategory = new Category("", Color.BLUE);
             CategoryDialog dialog = new CategoryDialog(newCategory);

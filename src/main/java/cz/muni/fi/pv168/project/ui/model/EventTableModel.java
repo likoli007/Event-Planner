@@ -81,4 +81,24 @@ public class EventTableModel extends AbstractTableModel {
         }
         return -1;
     }
+
+    public void addRow(TodoEvent todoEvent) {
+        todoEventCrudService.create(todoEvent);
+        todoEvents.add(todoEvent);
+        int rowIndex = todoEvents.size() - 1;
+        fireTableRowsInserted(rowIndex, rowIndex);
+    }
+
+    public void updateRow(TodoEvent todoEvent) {
+        todoEventCrudService.update(todoEvent);
+        int rowIndex = todoEvents.indexOf(todoEvent);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int modelRow) {
+        var template = getEntity(modelRow);
+        todoEventCrudService.deleteById(template.getId());
+        todoEvents.remove(template);
+        fireTableRowsDeleted(modelRow, modelRow);
+    }
 }

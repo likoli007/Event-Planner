@@ -55,10 +55,10 @@ public final class DeleteAction extends AbstractAction {
                 .sorted(Comparator.reverseOrder())
                 .mapToInt(Integer::intValue)
                 .toArray();
-
         if (model instanceof EventTableModel eventTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                eventTableModel.deleteRow(modelRow);
             }
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             for (int viewRow : selectedRows) {
