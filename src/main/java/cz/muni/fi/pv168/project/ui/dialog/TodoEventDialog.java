@@ -66,7 +66,9 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         }
 
         intervalField.setText(String.valueOf(todoEvent.getInterval().getAmount()));
-        // categoryModel.setSelectedItem(todoEvent.getCategories()); TODO set selected items
+        for (Category category : todoEvent.getCategories()) {
+            categoryList.setSelectedValue(category, true);
+        }
         timeUnitModel.setSelectedItem(todoEvent.getInterval().getTimeUnit());
     }
 
@@ -84,7 +86,6 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             }
         });
 
-        var categoryList = new JList<>(categoryModel);
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
         JPanel intervalField = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         intervalField.add(this.intervalField);
@@ -141,7 +142,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         todoEvent.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        // todoEvent.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
+        todoEvent.setCategories(categoryList.getSelectedValuesList());
 
         return todoEvent;
     }

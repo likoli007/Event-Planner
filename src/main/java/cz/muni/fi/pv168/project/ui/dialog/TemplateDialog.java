@@ -45,12 +45,13 @@ public final class TemplateDialog extends EntityDialog<Template> {
         timeField.setTime(Objects.requireNonNullElseGet(startTime, LocalTime::now));
 
         intervalField.setText(String.valueOf(template.getInterval().getAmount()));
-        // categoryModel.setSelectedItem(template.getCategories()); TODO
+        for (Category category : template.getCategories()) {
+            categoryList.setSelectedValue(category, true);
+        }
         timeUnitModel.setSelectedItem(template.getInterval().getTimeUnit());
     }
 
     private void addFields() {
-        var categoryComboBox = new JList<>(categoryModel);
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
         JPanel intervalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         intervalPanel.add(intervalField);
@@ -60,7 +61,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
         add("Details:", detailsField);
         add("Time:", timeField);
         add("Length:", intervalPanel);
-        add("Categories:", categoryComboBox);
+        add("Categories:", categoryList);
     }
 
     @Override
@@ -75,7 +76,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         template.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        // template.setCategories((List<Category>) categoryModel.getSelectedItem()); TODO
+        template.setCategories(categoryList.getSelectedValuesList());
 
         return template;
     }
