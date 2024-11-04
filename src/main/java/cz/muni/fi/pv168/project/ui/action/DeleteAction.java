@@ -1,10 +1,7 @@
 package cz.muni.fi.pv168.project.ui.action;
 
 import cz.muni.fi.pv168.project.model.Template;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
 import javax.swing.*;
@@ -18,10 +15,12 @@ import java.util.function.Supplier;
 public final class DeleteAction extends AbstractAction {
 
     private final Supplier<JTable> tableSupplier;
+    private final AllTableModels allTableModels;
 
-    public DeleteAction(Supplier<JTable> tableSupplier) {
+    public DeleteAction(Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
         super("Delete", Icons.DELETE_ICON);
         this.tableSupplier = tableSupplier;
+        this.allTableModels = allTableModels;
         putValue(SHORT_DESCRIPTION, "Deletes selected item(s)");
         putValue(MNEMONIC_KEY, KeyEvent.VK_D);
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl D"));
@@ -55,10 +54,10 @@ public final class DeleteAction extends AbstractAction {
                 .sorted(Comparator.reverseOrder())
                 .mapToInt(Integer::intValue)
                 .toArray();
-
         if (model instanceof EventTableModel eventTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                eventTableModel.deleteRow(modelRow);
             }
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             for (int viewRow : selectedRows) {
@@ -68,6 +67,7 @@ public final class DeleteAction extends AbstractAction {
         } else if (model instanceof TemplateTableModel templateTableModel) {
             for (int viewRow : selectedRows) {
                 int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                templateTableModel.deleteRow(modelRow);
             }
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             for (int viewRow : selectedRows) {

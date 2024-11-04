@@ -7,10 +7,7 @@ import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
 import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 
@@ -23,10 +20,12 @@ import java.util.function.Supplier;
 public final class EditAction extends AbstractAction {
 
     private final Supplier<JTable> tableSupplier;
+    private final AllTableModels allTableModels;
 
-    public EditAction(Supplier<JTable> tableSupplier) {
+    public EditAction(Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
         super("Edit", Icons.EDIT_ICON);
         this.tableSupplier = tableSupplier;
+        this.allTableModels = allTableModels;
         putValue(SHORT_DESCRIPTION, "Edits selected item");
         putValue(MNEMONIC_KEY, KeyEvent.VK_E);
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl E"));
@@ -54,16 +53,16 @@ public final class EditAction extends AbstractAction {
 
         if (model instanceof EventTableModel eventTableModel) {
             TodoEvent todoEvent = eventTableModel.getEntity(modelRow);
-            TodoEventDialog dialog = new TodoEventDialog(todoEvent);
-            dialog.show(currentTable, "Edit Todo Event");
+            TodoEventDialog dialog = new TodoEventDialog(todoEvent, allTableModels);
+            dialog.show(currentTable, "Edit Todo Event").ifPresent(eventTableModel::updateRow);
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category category = categoryTableModel.getEntity(modelRow);
             CategoryDialog dialog = new CategoryDialog(category);
             dialog.show(currentTable, "Edit Category").ifPresent(categoryTableModel::updateRow);
         } else if (model instanceof TemplateTableModel templateTableModel) {
             Template template = templateTableModel.getEntity(modelRow);
-            TemplateDialog dialog = new TemplateDialog(template);
-            dialog.show(currentTable, "Edit Template");
+            TemplateDialog dialog = new TemplateDialog(template, allTableModels);
+            dialog.show(currentTable, "Edit Template").ifPresent(templateTableModel::updateRow);
         } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
             TimeUnit timeUnit = timeUnitTableModel.getEntity(modelRow);
             IntervalDialog dialog = new IntervalDialog(timeUnit);
