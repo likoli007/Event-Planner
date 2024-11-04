@@ -79,4 +79,8 @@ public class CategoryTableModel extends AbstractTableModel {
         categories.remove(rowIndex);
         fireTableRowsDeleted(rowIndex, rowIndex);
     }
+
+    public CrudService<Category> getCategoryCrudService() {
+        return categoryCrudService;
+    }
 }

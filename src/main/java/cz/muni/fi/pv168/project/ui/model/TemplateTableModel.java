@@ -79,4 +79,8 @@ public class TemplateTableModel extends AbstractTableModel {
         templates.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
     }
+
+    public CrudService<Template> getTemplateCrudService() {
+        return templateCrudService;
+    }
 }
