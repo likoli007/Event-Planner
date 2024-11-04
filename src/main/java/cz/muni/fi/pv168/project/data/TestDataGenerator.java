@@ -16,6 +16,10 @@ public final class TestDataGenerator {
     private final Category healthCategory = new Category("Health", Color.ORANGE);
     private final Category recreationCategory = new Category("Recreation", Color.GREEN);
     private final Category hobbyCategory = new Category("Hobby", Color.YELLOW);
+
+    private final TimeUnit teachingHour = new TimeUnit("Teaching hour", "th", 45);
+    private final TimeUnit iceHockeyPeriod = new TimeUnit("Ice Hockey period", "ihp", 20);
+
     public List<TodoEvent> createTodoEvents() {
         List<TodoEvent> sampleTodoEvents = List.of(
                 new TodoEvent("Team Meeting", "Discuss project roadmap", LocalDateTime.of(2024, 11, 3, 10, 0), 24, List.of(workCategory)),
@@ -32,30 +36,22 @@ public final class TestDataGenerator {
                 new TodoEvent("Workshop", "Leadership Skills", LocalDateTime.of(2024, 11, 14, 9, 0), 60, List.of(workCategory, hobbyCategory, recreationCategory)),
                 new TodoEvent("Hiking Trip", "Mountain trail with friends", LocalDateTime.of(2024, 11, 15, 8, 0), 5, List.of(recreationCategory)),
                 new TodoEvent("Cooking Class", "Learn to make sushi", LocalDateTime.of(2024, 11, 16, 17, 0), 2, List.of(hobbyCategory)),
-                new TodoEvent("Gym Session", "Strength training", LocalDateTime.of(2024, 11, 17, 7, 0), 1, List.of(hobbyCategory, healthCategory))
+                new TodoEvent("Gym Session", "Strength training", LocalDateTime.of(2024, 11, 17, 7, 0), 1, List.of(hobbyCategory, healthCategory)),
+                new TodoEvent("Java Programming Lecture", "Databases", LocalDateTime.of(2024, 11, 14, 16, 0), teachingHour, 2, List.of(hobbyCategory)),
+                new TodoEvent("Ice Hockey Match", "Kometa vs Plzeň", LocalDateTime.of(2024, 11, 15, 18, 0), iceHockeyPeriod, 3, List.of(hobbyCategory, healthCategory))
         );
         return new ArrayList<>(sampleTodoEvents);
     }
 
     public List<Template> createTemplates() {
-        List<Template> templates = new ArrayList<>();
-        templates.add(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30,
-                List.of(new Category("self care", Color.RED), new Category("fitness", Color.GREEN))));
-        return templates;
+        return List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30, List.of(healthCategory, hobbyCategory)));
     }
 
     public List<TimeUnit> createTimeUnits() {
-        List<TimeUnit> timeUnits = new ArrayList<>();
-        timeUnits.add(new TimeUnit("Teaching hour", "th", 45));
-        timeUnits.add(new TimeUnit("Ice Hockey period", "ihp", 20));
-        return timeUnits;
+        return List.of(teachingHour, iceHockeyPeriod);
     }
 
     public List<Category> createCategories() {
-        List<Category> categories = new ArrayList<>();
-        categories.add(new Category("Holiday", Color.BLUE));
-        categories.add(new Category("Work", Color.RED));
-        categories.add(new Category("Family", Color.GREEN));
-        return categories;
+        return List.of(workCategory, personalCategory, healthCategory, recreationCategory, hobbyCategory);
     }
 }
