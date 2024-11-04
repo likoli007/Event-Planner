@@ -5,10 +5,7 @@ import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
 import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
 import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
 import javax.swing.*;
@@ -23,10 +20,12 @@ import java.util.function.Supplier;
 
 public abstract class AddAction extends AbstractAction {
     protected final Supplier<JTable> tableSupplier;
+    protected final AllTableModels allTableModels;
 
-    public AddAction(String name, Supplier<JTable> tableSupplier) {
+    public AddAction(String name, Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
         super(name, Icons.ADD_ICON);
         this.tableSupplier = tableSupplier;
+        this.allTableModels = allTableModels;
     }
 
     protected abstract TableModel getTableModel();

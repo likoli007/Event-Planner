@@ -11,10 +11,7 @@ import cz.muni.fi.pv168.project.service.crud.TodoEventCrudService;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalTimeRenderer;
@@ -42,6 +39,7 @@ public class MainWindow {
     private final CategoryTableModel categoryTableModel;
     private final TemplateTableModel templateTableModel;
     private final TimeUnitTableModel timeUnitTableModel;
+    private final AllTableModels allTableModels;
 
     private final Action quitAction = new QuitAction();
     private final Action addActionContextual;
@@ -68,18 +66,19 @@ public class MainWindow {
         var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
         var eventCrudService = new TodoEventCrudService(eventRepository);
 
+        eventTableModel = new EventTableModel(eventCrudService);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
         templateTableModel = new TemplateTableModel(templateCrudService);
         timeUnitTableModel = new TimeUnitTableModel(timeUnitCrudService);
-        eventTableModel = new EventTableModel(eventCrudService);
+        allTableModels = new AllTableModels(eventTableModel, categoryTableModel, templateTableModel, timeUnitTableModel);
 
         eventTable = createTodoEventTable(eventTableModel);
         managerTabTable = createCategoryTable(categoryTableModel);
         currentTable = eventTable;
 
-        addActionContextual = new AddContextual(() -> currentTable);
-        deleteAction = new DeleteAction(() -> currentTable);
-        editAction = new EditAction(() -> currentTable);
+        addActionContextual = new AddContextual(() -> currentTable, allTableModels);
+        deleteAction = new DeleteAction(() -> currentTable, allTableModels);
+        editAction = new EditAction(() -> currentTable, allTableModels);
         importAction = new ImportAction(frame);
         exportAction = new ExportAction(frame);
         aboutAction = new AboutAction(frame);
@@ -283,10 +282,10 @@ public class MainWindow {
 
         var editMenu = new JMenu("Edit");
         editMenu.setMnemonic('e');
-        editMenu.add(new AddEvent(() -> currentTable, eventTableModel));
-        editMenu.add(new AddCategory(() -> currentTable, categoryTableModel));
-        editMenu.add(new AddTemplate(() -> currentTable, templateTableModel));
-        editMenu.add(new AddTimeUnit(() -> currentTable, timeUnitTableModel));
+        editMenu.add(new AddEvent(() -> currentTable, allTableModels));
+        editMenu.add(new AddCategory(() -> currentTable, allTableModels));
+        editMenu.add(new AddTemplate(() -> currentTable, allTableModels));
+        editMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
         menuBar.add(editMenu);
 
         var optionsMenu = new JMenu("Options");
