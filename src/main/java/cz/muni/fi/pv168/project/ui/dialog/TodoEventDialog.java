@@ -29,9 +29,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private final DefaultListModel<Category> categoryModel;
     private final ComboBoxModel<Template> templateModel;
     private TodoEvent todoEvent;
+    private AllTableModels allTableModels;
 
     public TodoEventDialog(TodoEvent todoEvent, AllTableModels allTableModels) {
         this.todoEvent = todoEvent;
+        this.allTableModels = allTableModels;
         this.categoryModel = new DefaultListModel<>();
         for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
             this.categoryModel.addElement(category);
@@ -118,7 +120,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
                 selectedCategories
         );
 
-//        templateTableModel.addTemplate(newTemplate);
+        allTableModels.getTemplateTableModel().addRow(newTemplate);
 
         JOptionPane.showMessageDialog(null,
                 "Template created successfully!",
