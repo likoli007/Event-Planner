@@ -53,7 +53,7 @@ public final class EditAction extends AbstractAction {
 
         if (model instanceof EventTableModel eventTableModel) {
             TodoEvent todoEvent = eventTableModel.getEntity(modelRow);
-            TodoEventDialog dialog = new TodoEventDialog(todoEvent);
+            TodoEventDialog dialog = new TodoEventDialog(todoEvent, allTableModels);
             dialog.show(currentTable, "Edit Todo Event").ifPresent(eventTableModel::updateRow);
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category category = categoryTableModel.getEntity(modelRow);

@@ -5,6 +5,7 @@ import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.model.Color;
+import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 
 import javax.swing.*;
@@ -29,24 +30,19 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private final ComboBoxModel<Template> templateModel;
     private TodoEvent todoEvent;
 
-    public TodoEventDialog(TodoEvent todoEvent) {
+    public TodoEventDialog(TodoEvent todoEvent, AllTableModels allTableModels) {
         this.todoEvent = todoEvent;
         this.categoryModel = new DefaultListModel<>();
-        this.categoryModel.addElement(new Category("Work", Color.BLUE));
-        this.categoryModel.addElement(new Category("Personal", Color.GREEN));
-        this.categoryModel.addElement(new Category("Fitness", Color.RED));;
+        for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
+            this.categoryModel.addElement(category);
+        }
         this.categoryList = new JList<>(categoryModel);
 
-        this.timeUnitModel = new DefaultComboBoxModel<>(new TimeUnit[]{
-                new TimeUnit("Minute", "min", 1),
-                new TimeUnit("Hour", "hr", 60),
-                new TimeUnit("Class", "cl", 90)
-        });
+        this.timeUnitModel = new DefaultComboBoxModel<>(allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findAll().toArray(new TimeUnit[0]));
 
-        var testData = new TestDataGenerator();
         List<Template> templates = new ArrayList<>();
         templates.add(null);  // Add null as the first "no template" option
-        templates.addAll(testData.createTemplates());
+        templates.addAll(allTableModels.getTemplateTableModel().getTemplateCrudService().findAll());
 
         this.templateModel = new DefaultComboBoxModel<>(templates.toArray(new Template[0]));
 
