@@ -17,10 +17,12 @@ import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
 import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
 import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
+import cz.muni.fi.pv168.project.ui.window.ToastWindowContainer;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.DayOfWeek;
@@ -51,6 +53,8 @@ public class MainWindow {
     private final Action aboutAction;
     private final Action keybindsAction;
     private final Action contactAction;
+
+    ToastWindowContainer higherPanel;
 
     public MainWindow() {
         frame = createFrame();
@@ -100,6 +104,7 @@ public class MainWindow {
             }
             int selectedRowsCount = currentTable.getSelectedRowCount();
             changeActionsState(selectedRowsCount);
+            higherPanel.addToast("SELECTED: " + (selectedIndex == 0 ? "EVENTS" : "MANAGER"));
         });
 
         eventTable.getSelectionModel().addListSelectionListener(e -> {
@@ -116,11 +121,36 @@ public class MainWindow {
             }
         });
 
-        frame.add(tabPanel, BorderLayout.CENTER);
+
+        System.out.println(tabPanel.getPreferredSize());
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(tabPanel.getPreferredSize());
+        tabPanel.setBounds(0,0, tabPanel.getPreferredSize().width, tabPanel.getPreferredSize().height);
+        layeredPane.add(tabPanel, JLayeredPane.DEFAULT_LAYER);
+        tabPanel.setOpaque(true);
+
+        higherPanel = new ToastWindowContainer();
+        higherPanel.setOpaque(false);
+        higherPanel.setBounds(0, 0, tabPanel.getPreferredSize().width, tabPanel.getPreferredSize().height);
+
+        layeredPane.add(higherPanel, JLayeredPane.POPUP_LAYER);
+
+
+
+        frame.add(layeredPane, BorderLayout.CENTER);
+
+        //frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
         frame.pack();
         changeActionsState(0);
+        // Example toasts for testing
+        higherPanel.addToast("HELLO");
+        higherPanel.addToast("WORLD");
+        higherPanel.addToast("I");
+        higherPanel.addToast("AM");
+        higherPanel.addToast("TESTING");
+        higherPanel.addToast("TOASTS!");
     }
 
     public JPanel createEventsTab(){
@@ -129,7 +159,6 @@ public class MainWindow {
         eventsTab.add(new JScrollPane(eventTable), BorderLayout.CENTER);
         eventTable.setComponentPopupMenu(createPopupMenu());
         eventsTab.add(createStatisticsPanel(), BorderLayout.SOUTH);
-
 
         return eventsTab;
     }
