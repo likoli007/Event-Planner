@@ -26,7 +26,7 @@ class ToastPanel extends JPanel implements Runnable {
         int x = (getWidth() - rectWidth) / 2;
         int y = (getHeight() - rectHeight) / 2;
 
-        g.setColor(new Color(0, 0, 0, opacity));
+        g.setColor(new Color(32, 32, 32, opacity));
         g.fillRoundRect(x, y, rectWidth, rectHeight, 20, 20);
 
         g.setColor(new Color(255, 255, 255, opacity));
@@ -41,8 +41,8 @@ class ToastPanel extends JPanel implements Runnable {
     public void run() {
         try {
             System.out.println("PAINTING " + message);
-            Thread.sleep(2000);
-            for (int i = 255; i > 20; i -= 10){
+            Thread.sleep(800);
+            for (int i = 255; i > 20; i -= 30){
                 opacity = i;
                 repaint();
                 Thread.sleep(100);
