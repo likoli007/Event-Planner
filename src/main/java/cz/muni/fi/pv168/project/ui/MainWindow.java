@@ -121,24 +121,14 @@ public class MainWindow {
             }
         });
 
-
-        System.out.println(tabPanel.getPreferredSize());
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(tabPanel.getPreferredSize());
-        tabPanel.setBounds(0,0, tabPanel.getPreferredSize().width, tabPanel.getPreferredSize().height);
+        layeredPane.setLayout(new OverlayLayout(layeredPane));
         layeredPane.add(tabPanel, JLayeredPane.DEFAULT_LAYER);
-        tabPanel.setOpaque(true);
-
         higherPanel = new ToastWindowContainer();
         higherPanel.setOpaque(false);
-        higherPanel.setBounds(0, 0, tabPanel.getPreferredSize().width, tabPanel.getPreferredSize().height);
-
         layeredPane.add(higherPanel, JLayeredPane.POPUP_LAYER);
 
-
-
         frame.add(layeredPane, BorderLayout.CENTER);
-
         //frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
