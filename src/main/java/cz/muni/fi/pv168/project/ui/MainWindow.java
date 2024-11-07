@@ -15,6 +15,8 @@ import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.LocalTimeRenderer;
+import cz.muni.fi.pv168.project.ui.renderer.CategoryListRenderer;
+import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -76,6 +78,8 @@ public class MainWindow {
         eventTable = createTodoEventTable(eventTableModel);
         managerTabTable = createCategoryTable(categoryTableModel);
         currentTable = eventTable;
+
+        managerTabTable.setDefaultRenderer(List.class, new CategoryListRenderer());
 
         addActionContextual = new AddContextual(() -> currentTable, allTableModels);
         deleteAction = new DeleteAction(() -> currentTable, allTableModels);
@@ -266,6 +270,11 @@ public class MainWindow {
             table.getColumnModel().getColumn(doneColumnIndex).setCellRenderer(table.getDefaultRenderer(Boolean.class));
             table.getColumnModel().getColumn(doneColumnIndex).setCellEditor(table.getDefaultEditor(Boolean.class));
         }
+        int categoryColumnIndex = model.getColumnIndexByName("Categories");
+        if (categoryColumnIndex != -1) {
+            table.getColumnModel().getColumn(categoryColumnIndex).setCellRenderer(new CategoryListRenderer());
+        }
+
 
         return table;
     }
@@ -274,6 +283,7 @@ public class MainWindow {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         table.setDefaultRenderer(LocalTime.class, new LocalTimeRenderer());
+        table.setDefaultRenderer(Category.class, new CategoryRenderer());
 
         return table;
     }

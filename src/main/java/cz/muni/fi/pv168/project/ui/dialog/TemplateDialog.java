@@ -1,9 +1,7 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
-import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.model.Color;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 
 import javax.swing.*;
