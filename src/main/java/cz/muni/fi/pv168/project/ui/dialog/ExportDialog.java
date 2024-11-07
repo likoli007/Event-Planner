@@ -26,7 +26,8 @@ public class ExportDialog{
     JRadioButton noFilterRadioButton = new JRadioButton("Export all");
 
     ButtonGroup filterGroup = new ButtonGroup();
-    JLabel exportStatisticsLabel = new JLabel("Will export 78 out of 90 events.");
+    JLabel exportStatisticsLabel = new JLabel();
+
 
     private JDialog dialog;
 
@@ -68,11 +69,13 @@ public class ExportDialog{
 
     private void filterRadioButtonClicked(ActionEvent e) {
        //TODO actual statistics logic
+        exportStatisticsLabel.setText("Will export 78 out of 90 events.");
         exportStatisticsLabel.setVisible(true);
     }
 
     private void noFilterRadioButtonClicked(ActionEvent e){
-        exportStatisticsLabel.setVisible(false);
+        exportStatisticsLabel.setText("Will export 90 events.");
+        exportStatisticsLabel.setVisible(true);
     }
 
 

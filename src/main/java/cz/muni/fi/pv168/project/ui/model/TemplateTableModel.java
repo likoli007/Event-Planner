@@ -60,9 +60,27 @@ public class TemplateTableModel extends AbstractTableModel {
         return templates.get(rowIndex);
     }
 
-    public void addTemplate(Template template) {
+    public void addRow(Template template) {
+        templateCrudService.create(template);
         templates.add(template);
         int rowIndex = templates.size() - 1;
         fireTableRowsInserted(rowIndex, rowIndex);
+    }
+
+    public void updateRow(Template template) {
+        templateCrudService.update(template);
+        int rowIndex = templates.indexOf(template);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int modelRow) {
+        var template = getEntity(modelRow);
+        templateCrudService.deleteById(template.getId());
+        templates.remove(template);
+        fireTableRowsDeleted(modelRow, modelRow);
+    }
+
+    public CrudService<Template> getTemplateCrudService() {
+        return templateCrudService;
     }
 }
