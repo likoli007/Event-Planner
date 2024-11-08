@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.model;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class TodoEvent extends Entity {
     private String name;
@@ -74,6 +75,19 @@ public class TodoEvent extends Entity {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TodoEvent todoEvent = (TodoEvent) o;
+        return Objects.equals(name, todoEvent.name) && Objects.equals(start, todoEvent.start);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, start);
     }
 
     public String formatInterval() {
