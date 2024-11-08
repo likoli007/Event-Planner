@@ -25,6 +25,8 @@ public class ImportDialog{
 
     private JDialog dialog;
 
+    private String resultFilePath;
+
     public ImportDialog(JFrame parentFrame) {
         dialog = new JDialog(parentFrame, "Import", true);
         dialog.setSize(300, 150);
@@ -51,17 +53,18 @@ public class ImportDialog{
     }
 
     private void importButtonClicked(ActionEvent e){
-        //TODO: actual import logic
+        resultFilePath = textField.getText();
         dialog.dispose();
+    }
+
+    public String getResultFilePath(){
+        return resultFilePath;
     }
 
     private void openButtonClicked(ActionEvent e){
         fileChooser.setFileFilter(filter);
         int result = fileChooser.showOpenDialog(dialogPanel);
         if(result == JFileChooser.APPROVE_OPTION){
-            //TODO: actual import logic, exceptions checking
-            // actual import logic should be done only after the user selects the 'import' button
-
             File file = fileChooser.getSelectedFile();
             textField.setText(file.getAbsolutePath());
 

@@ -9,7 +9,9 @@ import cz.muni.fi.pv168.project.service.crud.TemplateCrudService;
 import cz.muni.fi.pv168.project.service.crud.TimeUnitCrudService;
 import cz.muni.fi.pv168.project.service.crud.TodoEventCrudService;
 import cz.muni.fi.pv168.project.service.export.GenericExportService;
+import cz.muni.fi.pv168.project.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.service.export.JSONFileExporter;
+import cz.muni.fi.pv168.project.service.export.JSONFileImporter;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
@@ -74,6 +76,9 @@ public class MainWindow {
         var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
                 templateCrudService, eventCrudService, List.of(new JSONFileExporter()));
 
+        var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
+                templateCrudService, eventCrudService, List.of(new JSONFileImporter()));
+
         eventTableModel = new EventTableModel(eventCrudService);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
         templateTableModel = new TemplateTableModel(templateCrudService);
@@ -89,7 +94,7 @@ public class MainWindow {
         addActionContextual = new AddContextual(() -> currentTable, allTableModels);
         deleteAction = new DeleteAction(() -> currentTable, allTableModels);
         editAction = new EditAction(() -> currentTable, allTableModels);
-        importAction = new ImportAction(frame);
+        importAction = new ImportAction(frame, importService);
         exportAction = new ExportAction(frame, exportService);
         aboutAction = new AboutAction(frame);
         keybindsAction = new KeybindsAction(frame);
