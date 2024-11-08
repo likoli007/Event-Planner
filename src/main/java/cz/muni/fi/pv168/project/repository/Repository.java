@@ -19,7 +19,7 @@ public interface Repository<T extends Entity> {
     List<T> findAll();
 
     /**
-     * Find entity with given {@code id} entities.
+     * Find entity with given {@code id}.
      */
     Optional<T> findById(UUID id);
 
@@ -31,7 +31,7 @@ public interface Repository<T extends Entity> {
     /**
      * Persist given {@code newEntity}.
      *
-     * @return the persisted entity with generated id.
+     * @return the persisted entity.
      */
     T create(T newEntity);
 

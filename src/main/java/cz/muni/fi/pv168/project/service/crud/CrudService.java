@@ -19,7 +19,7 @@ public interface CrudService<T extends Entity> {
     List<T> findAll();
 
     /**
-     * Find entity with given {@code id} entities.
+     * Find entity with given {@code id}.
      */
     Optional<T> findById(UUID id);
 
@@ -29,7 +29,7 @@ public interface CrudService<T extends Entity> {
     Optional<T> findDuplicate(T entity);
 
     /**
-     * Validate and store the given {@code newEntity}.
+     * Store the given {@code newEntity}.
      */
     void create(T newEntity);
 
