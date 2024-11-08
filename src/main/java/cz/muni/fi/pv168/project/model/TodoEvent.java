@@ -30,6 +30,7 @@ public class TodoEvent extends Entity {
     }
 
     public TodoEvent(TodoEvent todoEvent) {
+        this.id = todoEvent.id;
         this.name = todoEvent.name;
         this.details = todoEvent.details;
         this.start = todoEvent.start;

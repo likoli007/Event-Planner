@@ -33,12 +33,11 @@ public final class EditAction extends AbstractAction {
 
     private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
         TodoEvent eventToEdit = eventTableModel.getEntity(modelRow);
-        TodoEvent originalEvent = new TodoEvent(eventToEdit);
         TodoEventDialog dialog = new TodoEventDialog(eventToEdit, allTableModels);
         dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
             var possibleDuplicate = allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent);
             // Name, date or time changed - the result would be a duplicate
-            if (possibleDuplicate.isPresent() && !possibleDuplicate.get().equals(originalEvent)) {
+            if (possibleDuplicate.isPresent() && !possibleDuplicate.get().equals(eventToEdit)) {
                 JOptionPane.showMessageDialog(null,
                         "Event with given name for given date and time is already present.",
                         "Error",

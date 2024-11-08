@@ -31,7 +31,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private AllTableModels allTableModels;
 
     public TodoEventDialog(TodoEvent todoEvent, AllTableModels allTableModels) {
-        this.todoEvent = todoEvent;
+        this.todoEvent = new TodoEvent(todoEvent);
         this.allTableModels = allTableModels;
         this.categoryModel = new DefaultListModel<>();
         for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
