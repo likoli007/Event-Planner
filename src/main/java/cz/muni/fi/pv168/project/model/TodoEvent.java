@@ -29,6 +29,15 @@ public class TodoEvent extends Entity {
         this.categories = categories;
     }
 
+    public TodoEvent(TodoEvent todoEvent) {
+        this.name = todoEvent.name;
+        this.details = todoEvent.details;
+        this.start = todoEvent.start;
+        this.interval = todoEvent.interval;
+        this.categories = todoEvent.categories;
+        this.done = todoEvent.done;
+    }
+
     public String getName() {
         return name;
     }

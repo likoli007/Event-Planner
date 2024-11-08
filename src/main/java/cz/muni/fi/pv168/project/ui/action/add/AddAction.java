@@ -31,21 +31,40 @@ public abstract class AddAction extends AbstractAction {
 
     protected abstract TableModel getTableModel();
 
+    private void tryAddEvent(JTable currentTable, EventTableModel eventTableModel) {
+        TodoEvent newEvent = new TodoEvent(
+                "",
+                "",
+                LocalDateTime.now(),
+                1,
+                List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
+        );
+
+        TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
+        dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
+            if (allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent).isPresent()) {
+                JOptionPane.showMessageDialog(null,
+                        "Event with given name for given date and time is already present.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            JOptionPane.showMessageDialog(null,
+                    "Event created successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            eventTableModel.addRow(todoEvent);
+        });
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         JTable currentTable = tableSupplier.get();
         TableModel model = getTableModel();
 
         if (model instanceof EventTableModel eventTableModel) {
-            TodoEvent newEvent = new TodoEvent(
-                    "",
-                    "",
-                    LocalDateTime.now(),
-                    1,
-                    List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
-            );
-            TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
-            dialog.show(currentTable, "Add New Event").ifPresent(eventTableModel::addRow);
+            tryAddEvent(currentTable, eventTableModel);
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category newCategory = new Category("", Color.BLUE);
             CategoryDialog dialog = new CategoryDialog(newCategory);

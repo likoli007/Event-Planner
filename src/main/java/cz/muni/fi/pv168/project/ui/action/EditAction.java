@@ -31,6 +31,29 @@ public final class EditAction extends AbstractAction {
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl E"));
     }
 
+    private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
+        TodoEvent eventToEdit = eventTableModel.getEntity(modelRow);
+        TodoEvent originalEvent = new TodoEvent(eventToEdit);
+        TodoEventDialog dialog = new TodoEventDialog(eventToEdit, allTableModels);
+        dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
+            var possibleDuplicate = allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent);
+            // Name, date or time changed - the result would be a duplicate
+            if (possibleDuplicate.isPresent() && !possibleDuplicate.get().equals(originalEvent)) {
+                JOptionPane.showMessageDialog(null,
+                        "Event with given name for given date and time is already present.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            JOptionPane.showMessageDialog(null,
+                    "Event edited successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            eventTableModel.updateRow(todoEvent);
+        });
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         JTable currentTable = tableSupplier.get();
@@ -52,9 +75,7 @@ public final class EditAction extends AbstractAction {
         int modelRow = currentTable.convertRowIndexToModel(selectedRows[0]);
 
         if (model instanceof EventTableModel eventTableModel) {
-            TodoEvent todoEvent = eventTableModel.getEntity(modelRow);
-            TodoEventDialog dialog = new TodoEventDialog(todoEvent, allTableModels);
-            dialog.show(currentTable, "Edit Todo Event").ifPresent(eventTableModel::updateRow);
+            tryEditEvent(currentTable, eventTableModel, modelRow);
         } else if (model instanceof CategoryTableModel categoryTableModel) {
             Category category = categoryTableModel.getEntity(modelRow);
             CategoryDialog dialog = new CategoryDialog(category);
