@@ -28,6 +28,8 @@ public class ExportDialog{
     ButtonGroup filterGroup = new ButtonGroup();
     JLabel exportStatisticsLabel = new JLabel();
 
+    private String resultFilePath;
+    private boolean exportFiltered;
 
     private JDialog dialog;
 
@@ -81,21 +83,33 @@ public class ExportDialog{
 
     private void exportButtonClicked(ActionEvent e){
         //TODO: actual export logic
+        resultFilePath = textField.getText();
+        exportFiltered = filterRadioButton.isSelected();
         dialog.dispose();
+
     }
 
     private void openButtonClicked(ActionEvent e){
         fileChooser.setFileFilter(filter);
         int result = fileChooser.showSaveDialog(dialog);
         if(result == JFileChooser.APPROVE_OPTION){
-            //TODO: actual export logic, exceptions checking
-
-            File file = fileChooser.getSelectedFile();
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".json")) {
+                filePath += ".json";
+            }
+            File file = new File(filePath);
             textField.setText(file.getAbsolutePath());
 
         }else{
             textField.setText("");
         }
+    }
+
+    public String getResultFilePath(){
+        return resultFilePath;
+    }
+    public boolean getExportFiltered(){
+        return exportFiltered;
     }
 }
 
