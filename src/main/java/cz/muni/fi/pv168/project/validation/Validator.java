@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.validation;
 
-import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.model.*;
+import cz.muni.fi.pv168.project.service.crud.CrudService;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public class Validator {
         }
     }
 
-    public static void validateAddEvent(AllTableModels allTableModels, TodoEvent todoEvent) {
-        if (allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent).isPresent()) {
+    public static void validateAddEvent(AllTableModels allTableModels, TodoEvent newTodoEvent) {
+        if (allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(newTodoEvent).isPresent()) {
             throw new ValidationException("Event with given name for given date and time is already present.");
         }
     }
@@ -30,8 +30,47 @@ public class Validator {
     public static void validateEditEvent(AllTableModels allTableModels, TodoEvent originalEvent, TodoEvent editedEvent) {
         var possibleDuplicate = allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(editedEvent);
         // Name, date or time changed - the result would be a duplicate
-        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().equals(originalEvent)) {
+        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalEvent)) {
             throw new ValidationException("Event with given name for given date and time is already present.");
+        }
+    }
+
+    public static void validateAddTemplate(AllTableModels allTableModels, Template newTemplate) {
+        if (allTableModels.getTemplateTableModel().getTemplateCrudService().findDuplicate(newTemplate).isPresent()) {
+            throw new ValidationException("Template with given name is already present.");
+        }
+    }
+
+    public static void validateEditTemplate(AllTableModels allTableModels, Template originalTemplate, Template editedTemplate) {
+        var possibleDuplicate = allTableModels.getTemplateTableModel().getTemplateCrudService().findDuplicate(editedTemplate);
+        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalTemplate)) {
+            throw new ValidationException("Template with given name is already present.");
+        }
+    }
+
+    public static void validateAddCategory(AllTableModels allTableModels, Category newCategory) {
+        if (allTableModels.getCategoryTableModel().getCategoryCrudService().findDuplicate(newCategory).isPresent()) {
+            throw new ValidationException("Category with given name is already present.");
+        }
+    }
+
+    public static void validateEditCategory(AllTableModels allTableModels, Category originalCategory, Category editedCategory) {
+        var possibleDuplicate = allTableModels.getCategoryTableModel().getCategoryCrudService().findDuplicate(editedCategory);
+        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalCategory)) {
+            throw new ValidationException("Category with given name is already present.");
+        }
+    }
+
+    public static void validateAddTimeUnit(AllTableModels allTableModels, TimeUnit newTimeUnit) {
+        if (allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findDuplicate(newTimeUnit).isPresent()) {
+            throw new ValidationException("Time unit with given name or shortcut is already present.");
+        }
+    }
+
+    public static void validateEditTimeUnit(AllTableModels allTableModels, TimeUnit originalTimeUnit, TimeUnit editedTimeUnit) {
+        var possibleDuplicate = allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findDuplicate(editedTimeUnit);
+        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalTimeUnit)) {
+            throw new ValidationException("Time unit with given name or shortcut is already present.");
         }
     }
 }
