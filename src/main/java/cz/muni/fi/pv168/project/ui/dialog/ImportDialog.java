@@ -1,12 +1,11 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.filechooser.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 public class ImportDialog{
@@ -14,8 +13,9 @@ public class ImportDialog{
     private JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
     private FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "json");
 
-    JPanel dialogPanel = new JPanel(new BorderLayout());
-    JPanel importPanel = new JPanel(new BorderLayout());
+    JPanel mainPanel = new JPanel();
+
+    JPanel importPanel = new JPanel();
 
     JLabel filePathLabel = new JLabel("File Path:");
     JButton openButton = new JButton("Open");
@@ -23,16 +23,24 @@ public class ImportDialog{
     JTextArea fileInfoTextArea = new JTextArea();
     JButton importButton = new JButton("Import");
 
+    JPanel buttonPanel = new JPanel();
+
     private JDialog dialog;
 
     private String resultFilePath;
 
     public ImportDialog(JFrame parentFrame) {
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        importPanel.setLayout(new FlowLayout());
+
         dialog = new JDialog(parentFrame, "Import", true);
         dialog.setSize(300, 150);
         dialog.setLocationRelativeTo(parentFrame);
+        dialog.setResizable(false);
 
-        textField.setEditable(false);
+        textField.setEditable(true);
+        textField.setSize(200, 20);
+        textField.setPreferredSize(new Dimension(200, 20));
         fileInfoTextArea.setEditable(false);
         fileInfoTextArea.setBackground(null);
 
@@ -44,11 +52,18 @@ public class ImportDialog{
         importPanel.add(textField, BorderLayout.CENTER);
         importPanel.add(openButton, BorderLayout.EAST);
 
-        dialogPanel.add(fileInfoTextArea, BorderLayout.CENTER);
-        dialogPanel.add(importPanel, BorderLayout.NORTH);
-        dialogPanel.add(importButton, BorderLayout.SOUTH);
+        mainPanel.add(importPanel);
+        mainPanel.add(fileInfoTextArea);
 
-        dialog.add(dialogPanel);
+        //mainPanel.add(importButton);
+
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.add(importButton);
+        mainPanel.add(buttonPanel);
+
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        dialog.add(mainPanel);
+        dialog.pack();
         dialog.setVisible(true);
     }
 
@@ -63,7 +78,7 @@ public class ImportDialog{
 
     private void openButtonClicked(ActionEvent e){
         fileChooser.setFileFilter(filter);
-        int result = fileChooser.showOpenDialog(dialogPanel);
+        int result = fileChooser.showOpenDialog(mainPanel);
         if(result == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             textField.setText(file.getAbsolutePath());
@@ -78,6 +93,7 @@ public class ImportDialog{
         }else{
             textField.setText("");
         }
+        dialog.pack();
     }
 
 }
