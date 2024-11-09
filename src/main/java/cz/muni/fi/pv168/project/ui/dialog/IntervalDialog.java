@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 
@@ -34,7 +35,7 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
     TimeUnit getEntity() {
         timeUnit.setName(nameField.getText());
         timeUnit.setShortcut(shortcutField.getText());
-        timeUnit.setMinutes(Integer.parseInt(minutesField.getText()));
+        timeUnit.setMinutes(Validator.parseInt("Time unit length", minutesField.getText()));
         return timeUnit;
     }
 }
