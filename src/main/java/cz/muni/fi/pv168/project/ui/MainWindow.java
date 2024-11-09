@@ -4,10 +4,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.service.crud.CategoryCrudService;
-import cz.muni.fi.pv168.project.service.crud.TemplateCrudService;
-import cz.muni.fi.pv168.project.service.crud.TimeUnitCrudService;
-import cz.muni.fi.pv168.project.service.crud.TodoEventCrudService;
+import cz.muni.fi.pv168.project.service.crud.*;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
@@ -38,6 +35,12 @@ public class MainWindow {
     private final JTable managerTabTable;
     private JTable currentTable;
 
+    private final CrudService<TodoEvent> eventCrudService;
+    private final CrudService<Category> categoryCrudService;
+    private final CrudService<Template> templateCrudService;
+    private final CrudService<TimeUnit> timeUnitCrudService;
+
+
     private final EventTableModel eventTableModel;
     private final CategoryTableModel categoryTableModel;
     private final TemplateTableModel templateTableModel;
@@ -54,6 +57,8 @@ public class MainWindow {
     private final Action keybindsAction;
     private final Action contactAction;
 
+    private final TodoEventFilter filter = new TodoEventFilter();
+
     public MainWindow() {
         frame = createFrame();
 
@@ -64,10 +69,10 @@ public class MainWindow {
         var timeUnitRepository = new InMemoryRepository<>(testDataGenerator.createTimeUnits());
         var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
 
-        var categoryCrudService = new CategoryCrudService(categoryRepository);
-        var templateCrudService = new TemplateCrudService(templateRepository);
-        var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
-        var eventCrudService = new TodoEventCrudService(eventRepository);
+        categoryCrudService = new CategoryCrudService(categoryRepository);
+        templateCrudService = new TemplateCrudService(templateRepository);
+        timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
+        eventCrudService = new TodoEventCrudService(eventRepository);
 
         eventTableModel = new EventTableModel(eventCrudService);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
@@ -367,8 +372,8 @@ public class MainWindow {
         todayButton.addActionListener(e -> {
             fromDatePicker.setDateToToday();
             toDatePicker.setDateToToday();
-            fromTimePicker.setTimeToNow();
-            toTimePicker.setTimeToNow();
+            fromTimePicker.setTime(LocalTime.MIN);
+            toTimePicker.setTime(LocalTime.MAX);
         });
 
         JButton thisWeekButton = new JButton("This Week");
@@ -384,10 +389,16 @@ public class MainWindow {
         });
 
         JLabel unitLabel = new JLabel("Units:");
-        JComboBox<String> unitComboBox = createMultiSelectComboBox(new String[]{"Minutes", "Hours", "Class"});
+        var intervals = timeUnitCrudService.findAll();
+        var intervalStr = intervals.stream().map(TimeUnit::getName).toArray(String[]::new);
+        JComboBox<String> unitComboBox = createMultiSelectComboBox(intervalStr);
+
+//        var intervalsComboBox = new JComboBox<>(intervals.toArray(new TimeUnit[0]));
+
 
         JLabel categoryLabel = new JLabel("Category:");
-        JComboBox<String> categoryComboBox = createMultiSelectComboBox(new String[]{"Work", "Study", "Exercise"});
+        var categories = categoryCrudService.findAll().stream().map(Category::getName).toArray(String[]::new);
+        JComboBox<String> categoryComboBox = createMultiSelectComboBox(categories);
 
         JLabel statusLabel = new JLabel("Status:");
         JCheckBox doneCheckBox = new JCheckBox("Done");
@@ -404,27 +415,74 @@ public class MainWindow {
             plannedCheckBox.setSelected(false);
         });
 
-        filterPanel.add(fromLabel);
-        filterPanel.add(fromDatePicker);
-        filterPanel.add(fromTimeLabel);
-        filterPanel.add(fromTimePicker);
+        // Add listener to update 'from' DateTime filter
+        fromDatePicker.addDateChangeListener(event -> {
+            filter.setFromDate(fromDatePicker.getDate());
+            eventTableModel.refetch(filter);
+        });
 
-        filterPanel.add(toLabel);
-        filterPanel.add(toDatePicker);
-        filterPanel.add(toTimeLabel);
-        filterPanel.add(toTimePicker);
+        fromTimePicker.addTimeChangeListener(event -> {
+           filter.setFromTime(fromTimePicker.getTime());
+           eventTableModel.refetch(filter);
+        });
 
-        filterPanel.add(todayButton);
-        filterPanel.add(thisWeekButton);
+        toDatePicker.addDateChangeListener(event -> {
+            filter.setToDate(toDatePicker.getDate());
+            eventTableModel.refetch(filter);
+        });
 
-        filterPanel.add(unitLabel);
-        filterPanel.add(unitComboBox);
-        filterPanel.add(categoryLabel);
-        filterPanel.add(categoryComboBox);
-        filterPanel.add(statusLabel);
-        filterPanel.add(doneCheckBox);
-        filterPanel.add(plannedCheckBox);
-        filterPanel.add(clearButton);
+        toTimePicker.addTimeChangeListener(event -> {
+            filter.setToTime(toTimePicker.getTime());
+            eventTableModel.refetch(filter);
+        });
+
+
+        doneCheckBox.addActionListener(e -> {
+            boolean done = doneCheckBox.isSelected();
+            var isDone = done ? Boolean.TRUE : null;
+            filter.setDone(isDone);
+            plannedCheckBox.setSelected(false);
+            eventTableModel.refetch(filter);
+        });
+
+        plannedCheckBox.addActionListener(e -> {
+            boolean planned = plannedCheckBox.isSelected();
+            var isPlanned = planned ? Boolean.FALSE : null;
+            filter.setDone(isPlanned);
+            doneCheckBox.setSelected(false);
+            eventTableModel.refetch(filter);
+        });
+//
+//        plannedCheckBox.addActionListener(e -> {
+//            updateDoneStatus();
+//            tableModel.refetch(filter);
+//        });
+//
+//        categoryComboBox.addItemListener(e -> {
+//            filter.setSelectedCategories(getSelectedItemsFromComboBox(categoryComboBox));
+//            tableModel.refetch(filter);
+//        });
+//
+//        // Add clear button listener to reset the filter
+//        clearButton.addActionListener(e -> {
+//            clearFilter(); // Reset all filter fields
+//            tableModel.refetch(filter);
+//        });
+
+
+       List<Component> components = List.of(
+            fromLabel, fromDatePicker, fromTimeLabel, fromTimePicker,
+            toLabel, toDatePicker, toTimeLabel, toTimePicker,
+            todayButton, thisWeekButton,
+//            unitLabel, unitComboBox,intervalsComboBox,
+               categoryLabel, categoryComboBox,
+            statusLabel, doneCheckBox, plannedCheckBox, clearButton
+        );
+
+       for (Component component : components) {
+            filterPanel.add(component);
+
+       }
 
         return filterPanel;
     }

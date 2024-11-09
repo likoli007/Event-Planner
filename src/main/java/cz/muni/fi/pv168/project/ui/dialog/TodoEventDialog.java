@@ -119,7 +119,6 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
                 intervalAmount,
                 selectedCategories
         );
-
         allTableModels.getTemplateTableModel().addRow(newTemplate);
 
         JOptionPane.showMessageDialog(null,

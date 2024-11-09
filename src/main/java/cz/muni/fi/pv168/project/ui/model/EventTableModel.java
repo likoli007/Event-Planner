@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.model.TodoEventFilter;
 import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
@@ -27,6 +28,20 @@ public class EventTableModel extends AbstractTableModel {
     public EventTableModel(CrudService<TodoEvent> todoEventCrudService) {
         this.todoEventCrudService = todoEventCrudService;
         this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
+    }
+
+    public void refetch(TodoEventFilter filter) {
+        // this logic will be moved
+        todoEvents = todoEventCrudService.findAll().stream().filter(
+
+                        event -> filter.getDone() == null || event.isDone() == filter.getDone()
+                ).filter(
+                        event-> filter.getFromDate() == null ||  event.getStart().toLocalDate().isBefore(filter.getFromDate())
+                ).filter(
+                        event-> filter.getToDate() == null ||  event.getStart().toLocalDate().isAfter(filter.getToDate())
+                )
+                .toList();
+        fireTableDataChanged();
     }
 
     @Override
@@ -101,6 +116,8 @@ public class EventTableModel extends AbstractTableModel {
         todoEvents.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
     }
+
+
 
     public CrudService<TodoEvent> getTodoEventCrudService() {
         return todoEventCrudService;
