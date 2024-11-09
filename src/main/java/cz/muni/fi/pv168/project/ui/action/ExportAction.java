@@ -29,7 +29,10 @@ public class ExportAction extends AbstractAction {
         ExportDialog dialog = new ExportDialog(parentFrame);
 
         try {
-            exportService.exportData(dialog.getResultFilePath());
+            String filePath = dialog.getResultFilePath();
+            if (filePath != null) {
+                exportService.exportData(dialog.getResultFilePath());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
