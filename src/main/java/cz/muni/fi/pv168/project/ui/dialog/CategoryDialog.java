@@ -16,7 +16,7 @@ public final class CategoryDialog extends EntityDialog<Category> {
     private Color selectedColor;
 
     public CategoryDialog(Category category) {
-        this.category = category;
+        this.category = new Category(category);
 
         setupColorChooser();
         setValues();

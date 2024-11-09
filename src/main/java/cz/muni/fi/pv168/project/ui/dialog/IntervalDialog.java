@@ -14,7 +14,7 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
     private final TimeUnit timeUnit;
 
     public IntervalDialog(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
+        this.timeUnit = new TimeUnit(timeUnit);
         setValues();
         addFields();
     }

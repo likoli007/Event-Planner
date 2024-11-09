@@ -13,6 +13,12 @@ public class Category extends Entity {
         this.color = color;
     }
 
+    public Category(Category category) {
+        this.id = category.id;
+        this.name = category.name;
+        this.color = category.color;
+    }
+
     public String getName() {
         return name;
     }

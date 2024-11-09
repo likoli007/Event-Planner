@@ -24,7 +24,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
     private final Template template;
 
     public TemplateDialog(Template template, AllTableModels allTableModels) {
-        this.template = template;
+        this.template = new Template(template);
         this.categoryModel = new DefaultListModel<>();
         for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
             this.categoryModel.addElement(category);

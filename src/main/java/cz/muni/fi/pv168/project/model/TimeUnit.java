@@ -15,6 +15,13 @@ public class TimeUnit extends Entity {
         this.minutes = minutes;
     }
 
+    public TimeUnit(TimeUnit timeUnit) {
+        this.id = timeUnit.id;
+        this.name = timeUnit.name;
+        this.shortcut = timeUnit.shortcut;
+        this.minutes = timeUnit.minutes;
+    }
+
     public static TimeUnit minute() {
         return MINUTE;
     }

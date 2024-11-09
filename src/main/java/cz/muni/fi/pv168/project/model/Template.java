@@ -30,6 +30,15 @@ public class Template extends Entity {
         this.categories = categories;
     }
 
+    public Template(Template template) {
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
+    }
+
     public String getName() {
         return name;
     }
