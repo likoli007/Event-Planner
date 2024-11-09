@@ -20,6 +20,8 @@ import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -31,6 +33,8 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainWindow {
     private final JFrame frame;
@@ -53,6 +57,10 @@ public class MainWindow {
     private final Action aboutAction;
     private final Action keybindsAction;
     private final Action contactAction;
+
+    //panels used for showing statistics
+    JTextArea statisticsArea;
+    JTextArea statisticsLengthArea;
 
     public MainWindow() {
         frame = createFrame();
@@ -121,6 +129,13 @@ public class MainWindow {
             }
         });
 
+        eventTableModel.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                computeEventStatistics();
+            }
+        });
+
         frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
@@ -139,6 +154,54 @@ public class MainWindow {
         return eventsTab;
     }
 
+
+    public void computeCategoryStatistics(){
+        int categoryEventCount = 0;
+        int percentageCount = 0;
+    }
+
+    public void computeEventStatistics(){
+        int doneEvents = 0;
+        int plannedEvents = 0;
+        int totalEvents = 0;
+        int totalLength = 0;
+
+        int doneColumnIndex = eventTableModel.getColumnIndexByName("Done");
+        int intervalColumnIndex = eventTableModel.getColumnIndexByName("Interval");
+
+        for (int i = 0; i < eventTable.getRowCount(); i++) {
+            if (eventTable.getValueAt(i, doneColumnIndex) != null) {
+                if (eventTable.getValueAt(i, doneColumnIndex).equals(true)) {
+                    doneEvents++;
+                    System.out.println(eventTable.getValueAt(i, intervalColumnIndex));
+
+                    //since table column is of string type not interval, need to get string value
+                    String interval = (String) eventTable.getValueAt(i, intervalColumnIndex);
+                    Pattern pattern = Pattern.compile("(\\d+)\\s+min");
+                    Matcher matcher = pattern.matcher(interval);
+
+                    if (matcher.find()) {
+                        int number = Integer.parseInt(matcher.group(1));
+                        totalLength += number;
+                    }
+                }
+                else{
+                    plannedEvents++;
+
+                }
+                totalEvents++;
+            }
+        }
+
+        statisticsArea.setText(
+              "Total No. of Done Events: " + doneEvents + "\n" +
+              "Total No. of Planned Events: " + plannedEvents + "\n"
+        );
+        statisticsLengthArea.setText(
+              "Total length of done events: " + totalLength + " min\n" +
+              "Total number of events: " + totalEvents + "\n"
+        );
+    }
     //TODO: actual computing of statistics
     // can use this to display statistics between the different tabs, left alone for now
     //  i.e. use createStatisticsPanel to just create the panel, then make a 'changeDisplayedStatistics' function
@@ -146,19 +209,11 @@ public class MainWindow {
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
-        JTextArea statisticsArea = new JTextArea(
-                """
-                Total No. of Done Events: 42
-                Total No. of Planned Events: 13
-                """
-        );
+        statisticsArea = new JTextArea();
 
-        JTextArea statisticsLengthArea = new JTextArea(
-                """
-                Total length of done events: 189 minutes
-                Total number of events: 55 events
-                """
-        );
+        statisticsLengthArea = new JTextArea();
+
+        computeEventStatistics();
 
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
