@@ -1,7 +1,10 @@
 package cz.muni.fi.pv168.project.validation;
 
+import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
+
+import java.util.List;
 
 public class Validator {
     public static int parseInt(String fieldName, String input) {
@@ -9,6 +12,12 @@ public class Validator {
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
             throw new ValidationException(fieldName + "must be number, not \"" + input + "\".");
+        }
+    }
+
+    public static void validateCategoryList(List<Category> categoryList) {
+        if (categoryList.isEmpty()) {
+            throw new ValidationException("No categories selected.");
         }
     }
 

@@ -8,6 +8,7 @@ import cz.muni.fi.pv168.project.validation.Validator;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 
 public final class TemplateDialog extends EntityDialog<Template> {
@@ -75,7 +76,10 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         template.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        template.setCategories(categoryList.getSelectedValuesList());
+
+        List<Category> selectedCategories = categoryList.getSelectedValuesList();
+        Validator.validateCategoryList(selectedCategories);
+        template.setCategories(selectedCategories);
 
         return template;
     }
