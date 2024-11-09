@@ -41,6 +41,39 @@ public final class EditAction extends AbstractAction {
         });
     }
 
+    private void tryEditTemplate(JTable currentTable, TemplateTableModel templateTableModel, int modelRow) {
+        Template originalTemplate = templateTableModel.getEntity(modelRow);
+        TemplateDialog dialog = new TemplateDialog(originalTemplate, allTableModels);
+        dialog.show(currentTable, "Edit Template").ifPresent(template -> {
+            Validator.validateEditTemplate(allTableModels, originalTemplate, template);
+
+            templateTableModel.updateRow(template);
+            SuccessDialog.show("Template edited successfully!");
+        });
+    }
+
+    private void tryEditCategory(JTable currentTable, CategoryTableModel categoryTableModel, int modelRow) {
+        Category originalCategory = categoryTableModel.getEntity(modelRow);
+        CategoryDialog dialog = new CategoryDialog(originalCategory);
+        dialog.show(currentTable, "Edit Category").ifPresent(category -> {
+            Validator.validateEditCategory(allTableModels, originalCategory, category);
+
+            categoryTableModel.updateRow(category);
+            SuccessDialog.show("Category edited successfully!");
+        });
+    }
+
+    private void tryEditTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel, int modelRow) {
+        TimeUnit originalTimeUnit = timeUnitTableModel.getEntity(modelRow);
+        IntervalDialog dialog = new IntervalDialog(originalTimeUnit);
+        dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnit -> {
+            Validator.validateEditTimeUnit(allTableModels, originalTimeUnit, timeUnit);
+
+            timeUnitTableModel.updateRow(timeUnit);
+            SuccessDialog.show("Time unit edited successfully!");
+        });
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         JTable currentTable = tableSupplier.get();
@@ -64,18 +97,12 @@ public final class EditAction extends AbstractAction {
         try {
             if (model instanceof EventTableModel eventTableModel) {
                 tryEditEvent(currentTable, eventTableModel, modelRow);
-            } else if (model instanceof CategoryTableModel categoryTableModel) {
-                Category category = categoryTableModel.getEntity(modelRow);
-                CategoryDialog dialog = new CategoryDialog(category);
-                dialog.show(currentTable, "Edit Category").ifPresent(categoryTableModel::updateRow);
             } else if (model instanceof TemplateTableModel templateTableModel) {
-                Template template = templateTableModel.getEntity(modelRow);
-                TemplateDialog dialog = new TemplateDialog(template, allTableModels);
-                dialog.show(currentTable, "Edit Template").ifPresent(templateTableModel::updateRow);
+                tryEditTemplate(currentTable, templateTableModel, modelRow);
+            } else if (model instanceof CategoryTableModel categoryTableModel) {
+                tryEditCategory(currentTable, categoryTableModel, modelRow);
             } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
-                TimeUnit timeUnit = timeUnitTableModel.getEntity(modelRow);
-                IntervalDialog dialog = new IntervalDialog(timeUnit);
-                dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnitTableModel::updateRow);
+                tryEditTimeUnit(currentTable, timeUnitTableModel, modelRow);
             } else {
                 JOptionPane.showMessageDialog(currentTable,
                         "Unsupported table model for editing.",
