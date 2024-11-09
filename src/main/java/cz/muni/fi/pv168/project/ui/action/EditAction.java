@@ -3,14 +3,12 @@ package cz.muni.fi.pv168.project.ui.action;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
-import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
+import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.validation.ValidationException;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -33,16 +31,13 @@ public final class EditAction extends AbstractAction {
     }
 
     private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
-        TodoEvent eventToEdit = eventTableModel.getEntity(modelRow);
-        TodoEventDialog dialog = new TodoEventDialog(eventToEdit, allTableModels);
+        TodoEvent originalEvent = eventTableModel.getEntity(modelRow);
+        TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
         dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
-            var possibleDuplicate = allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent);
-            // Name, date or time changed - the result would be a duplicate
-            if (possibleDuplicate.isPresent() && !possibleDuplicate.get().equals(eventToEdit)) {
-                throw new ValidationException("Event with given name for given date and time is already present.");
-            }
+            Validator.validateEditEvent(allTableModels, originalEvent, todoEvent);
 
             eventTableModel.updateRow(todoEvent);
+            SuccessDialog.show("Event edited successfully!");
         });
     }
 
@@ -87,11 +82,6 @@ public final class EditAction extends AbstractAction {
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
-
-            JOptionPane.showMessageDialog(null,
-                    "Entity edited successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
         } catch (ValidationException ex) {
             JOptionPane.showMessageDialog(null,
                     ex.getMessage(),

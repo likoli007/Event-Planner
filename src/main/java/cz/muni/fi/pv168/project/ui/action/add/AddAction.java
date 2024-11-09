@@ -1,12 +1,10 @@
 package cz.muni.fi.pv168.project.ui.action.add;
 
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
-import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
+import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
+import cz.muni.fi.pv168.project.validation.Validator;
 import cz.muni.fi.pv168.project.validation.ValidationException;
 
 import javax.swing.*;
@@ -43,11 +41,10 @@ public abstract class AddAction extends AbstractAction {
 
         TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
         dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
-            if (allTableModels.getEventTableModel().getTodoEventCrudService().findDuplicate(todoEvent).isPresent()) {
-                throw new ValidationException("Event with given name for given date and time is already present.");
-            }
+            Validator.validateAddEvent(allTableModels, todoEvent);
 
             eventTableModel.addRow(todoEvent);
+            SuccessDialog.show("Event created successfully!");
         });
     }
 
@@ -83,11 +80,6 @@ public abstract class AddAction extends AbstractAction {
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
-
-            JOptionPane.showMessageDialog(null,
-                    "Entity created successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
         } catch (ValidationException ex) {
             JOptionPane.showMessageDialog(null,
                     ex.getMessage(),
