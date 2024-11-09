@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.ui.action;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.ui.dialog.SuccessDialog;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.validation.ValidationException;
@@ -60,16 +61,19 @@ public final class DeleteAction extends AbstractAction {
                 .mapToInt(Integer::intValue)
                 .toArray();
 
+        int counter = 0;
         try {
             if (model instanceof EventTableModel eventTableModel) {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     eventTableModel.deleteRow(modelRow);
+                    counter++;
                 }
             } else if (model instanceof TemplateTableModel templateTableModel) {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     templateTableModel.deleteRow(modelRow);
+                    counter++;
                 }
             } else if (model instanceof CategoryTableModel categoryTableModel) {
                 for (int viewRow : selectedRows) {
@@ -77,6 +81,7 @@ public final class DeleteAction extends AbstractAction {
                     Category categoryToDelete = categoryTableModel.getEntity(modelRow);
                     Validator.validateCategoryDeletion(allTableModels, categoryToDelete);
                     categoryTableModel.deleteRow(modelRow);
+                    counter++;
                 }
             } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
                 for (int viewRow : selectedRows) {
@@ -84,6 +89,7 @@ public final class DeleteAction extends AbstractAction {
                     TimeUnit timeUnitToDelete = timeUnitTableModel.getEntity(modelRow);
                     Validator.validateTimeUnitDeletion(allTableModels, timeUnitToDelete);
                     timeUnitTableModel.deleteRow(modelRow);
+                    counter++;
                 }
             } else {
                 JOptionPane.showMessageDialog(currentTable,
@@ -96,6 +102,10 @@ public final class DeleteAction extends AbstractAction {
                     ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (counter > 0) {
+                SuccessDialog.show("Number of successfully deleted entities: " + counter);
+            }
         }
     }
 }
