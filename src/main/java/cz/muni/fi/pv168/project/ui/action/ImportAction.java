@@ -26,14 +26,13 @@ public class ImportAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         ImportDialog dialog = new ImportDialog(parentFrame);
-
-        String filePath = dialog.getResultFilePath();
-        if (filePath != null) {
-            try {
+        try {
+            String filePath = dialog.getResultFilePath();
+            if (filePath != null) {
                 importService.importData(filePath);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
