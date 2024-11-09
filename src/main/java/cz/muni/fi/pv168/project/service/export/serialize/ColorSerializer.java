@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.awt.*;
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 public class ColorSerializer extends JsonSerializer<Color> {
     @Override
