@@ -60,8 +60,9 @@ public class MainWindow {
 
     //panels used for showing statistics
     JTextArea statisticsArea;
+    JTextArea catgoryStatisticsArea;
     JTextArea statisticsLengthArea;
-
+    private boolean categoryTableShown = true;
     public MainWindow() {
         frame = createFrame();
 
@@ -108,8 +109,12 @@ public class MainWindow {
             int selectedIndex = tabPanel.getSelectedIndex();
             if (selectedIndex == 0) {
                 currentTable = eventTable;
+                computeEventStatistics();
             } else if (selectedIndex == 1) {
                 currentTable = managerTabTable;
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
             int selectedRowsCount = currentTable.getSelectedRowCount();
             changeActionsState(selectedRowsCount);
@@ -126,6 +131,9 @@ public class MainWindow {
             if (!e.getValueIsAdjusting() && currentTable == managerTabTable) {
                 int selectedRowsCount = managerTabTable.getSelectedRowCount();
                 changeActionsState(selectedRowsCount);
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
         });
 
@@ -135,6 +143,7 @@ public class MainWindow {
                 computeEventStatistics();
             }
         });
+        computeEventStatistics();
 
         frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
@@ -157,7 +166,35 @@ public class MainWindow {
 
     public void computeCategoryStatistics(){
         int categoryEventCount = 0;
-        int percentageCount = 0;
+        int categoryColumnIndex = eventTableModel.getColumnIndexByName("Categories");
+        int[] selectedRows = managerTabTable.getSelectedRows();
+
+
+        int totalRows = eventTable.getRowCount();
+        for (int i = 0; i < eventTable.getRowCount(); i++) {
+            for (int j = 0; j < selectedRows.length; j++) {
+                boolean categoryFound = false;
+                Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
+                for (Category eventCategory : (List<Category>) eventTable.getValueAt(i, categoryColumnIndex)) {
+                    if (eventCategory.equals(category)) {
+                        categoryEventCount++;
+                        categoryFound = true;
+                        break;
+                    }
+                }
+                if (categoryFound) {
+                    break;
+                }
+            }
+        }
+
+        double percentage = ((double) categoryEventCount / (double) totalRows) * 100.0;
+
+        catgoryStatisticsArea.setText(
+                "Total No. of Tasks With Selected Category(ies): " + categoryEventCount + "\n" +
+                "Percentage of Total Tasks With Selected Category: " + String.format("%.1f", percentage) + "%\n"
+        );
+
     }
 
     public void computeEventStatistics(){
@@ -173,7 +210,6 @@ public class MainWindow {
             if (eventTable.getValueAt(i, doneColumnIndex) != null) {
                 if (eventTable.getValueAt(i, doneColumnIndex).equals(true)) {
                     doneEvents++;
-                    System.out.println(eventTable.getValueAt(i, intervalColumnIndex));
 
                     //since table column is of string type not interval, need to get string value
                     String interval = (String) eventTable.getValueAt(i, intervalColumnIndex);
@@ -213,8 +249,6 @@ public class MainWindow {
 
         statisticsLengthArea = new JTextArea();
 
-        computeEventStatistics();
-
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
         statisticsPanel.add(statisticsArea, BorderLayout.WEST);
@@ -231,15 +265,11 @@ public class MainWindow {
         JButton categoryButton = new JButton("Categories");
         JButton intervalButton = new JButton("Intervals");
 
-        JTextArea statisticsArea = new JTextArea();
-        statisticsArea.setEditable(false);
-        statisticsArea.setBackground(null);
-        // Default text shown
-        // TODO: in the future fetch these statistics
-        statisticsArea.setText("""
-        Total No. of Tasks With Selected Category: 5
-        Percentage of Total Tasks With Selected Category: 14%
-        """);
+
+        catgoryStatisticsArea = new JTextArea();
+        catgoryStatisticsArea.setEditable(false);
+        catgoryStatisticsArea.setBackground(null);
+        computeCategoryStatistics();
 
 
         JPanel managerTab = new JPanel(new BorderLayout());
@@ -253,16 +283,26 @@ public class MainWindow {
 
 
         managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
-        managerTab.add(statisticsArea, BorderLayout.SOUTH);
+        managerTab.add(catgoryStatisticsArea, BorderLayout.SOUTH);
 
-        categoryButton.addActionListener(e -> updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, statisticsArea));
-        templateButton.addActionListener(e -> updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, statisticsArea));
-        intervalButton.addActionListener(e -> updateTableModel(ManagedEntity.INTERVALS, managerTabTable, statisticsArea));
+        categoryButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = true;
+            computeCategoryStatistics();
+        });
+        templateButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
+        intervalButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.INTERVALS, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
 
         return managerTab;
     }
 
-    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea statisticsArea) {
+    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea categoryStatisticsArea) {
         TestDataGenerator testDataGenerator = new TestDataGenerator();
         TableModel newModel;
 
@@ -270,26 +310,24 @@ public class MainWindow {
             case CATEGORIES -> {
                 newModel = categoryTableModel;
 
-                statisticsArea.setText("""
-                    Total No. of Tasks With Selected Category: 5
-                    Percentage of Total Tasks With Selected Category: 14%
-                """);
+                categoryStatisticsArea.setVisible(true);
                 //TODO: statistics like this should be in its own function where they will be calculated
             }
             case TEMPLATES -> {
                 newModel = templateTableModel;
-
+                categoryStatisticsArea.setVisible(false);
                 //TODO: statistics for used templates? for now leaving blank
-                statisticsArea.setText("");
+                //statisticsArea.setText("");
             }
             case INTERVALS -> {
                 newModel = timeUnitTableModel;
-
+                categoryStatisticsArea.setVisible(false);
                 //TODO: statistics for used intervals? for now leaving blank
-                statisticsArea.setText("");
+                //statisticsArea.setText("");
             }
             default -> {
                 newModel = timeUnitTableModel;
+                categoryStatisticsArea.setVisible(false);
             }
         }
 
