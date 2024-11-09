@@ -34,7 +34,7 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
     @Override
     public Optional<T> findDuplicate(T entity) {
         for (T possibleDuplicateEntity : data.values()) {
-            if (possibleDuplicateEntity.equals(entity)) {
+            if (possibleDuplicateEntity.isDuplicate(entity)) {
                 return Optional.of(possibleDuplicateEntity);
             }
         }

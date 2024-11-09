@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.model;
 
 import java.awt.Color;
+import java.util.Objects;
 
 public class Category extends Entity {
     private String name;
@@ -30,6 +31,13 @@ public class Category extends Entity {
 
     public Category getCategory(){
         return this;
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        Category category = (Category) e;
+        return Objects.equals(name, category.name);
     }
 
     @Override

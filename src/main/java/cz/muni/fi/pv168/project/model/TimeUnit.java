@@ -44,20 +44,14 @@ public class TimeUnit extends Entity {
     }
 
     @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        TimeUnit timeUnit = (TimeUnit) e;
+        return Objects.equals(name, timeUnit.name) || Objects.equals(shortcut, timeUnit.shortcut);
+    }
+
+    @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TimeUnit timeUnit = (TimeUnit) o;
-        return minutes == timeUnit.minutes && Objects.equals(name, timeUnit.name) && Objects.equals(shortcut, timeUnit.shortcut);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, shortcut, minutes);
     }
 }

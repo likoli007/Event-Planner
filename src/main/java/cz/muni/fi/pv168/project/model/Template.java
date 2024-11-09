@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Template extends Entity {
     private String name;
@@ -75,6 +76,13 @@ public class Template extends Entity {
 
     public TodoEvent toTodoEvent(){
             return new TodoEvent(name,details, startTime.atDate(LocalDate.now()), getInterval().getTimeUnit(), getInterval().getAmount(), categories );
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        Template template = (Template) e;
+        return Objects.equals(name, template.name);
     }
 
     @Override
