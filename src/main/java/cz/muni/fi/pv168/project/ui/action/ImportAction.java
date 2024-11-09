@@ -12,11 +12,13 @@ public class ImportAction extends AbstractAction {
 
     private final JFrame parentFrame;
     private final ImportService importService;
+    private final Runnable callback;
 
-    public ImportAction(JFrame parentFrame, ImportService importService) {
+    public ImportAction(JFrame parentFrame, ImportService importService, Runnable callback) {
         super("Import");
         this.parentFrame = parentFrame;
         this.importService = importService;
+        this.callback = callback;
 
         putValue(SHORT_DESCRIPTION, "Imports data from JSON");
         putValue(MNEMONIC_KEY, KeyEvent.VK_I);
@@ -29,7 +31,8 @@ public class ImportAction extends AbstractAction {
         try {
             String filePath = dialog.getResultFilePath();
             if (filePath != null) {
-                importService.importData(filePath);
+                importService.importData(filePath, parentFrame);
+                callback.run();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

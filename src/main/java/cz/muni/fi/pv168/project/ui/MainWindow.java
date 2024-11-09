@@ -73,6 +73,7 @@ public class MainWindow {
         var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
         var eventCrudService = new TodoEventCrudService(eventRepository);
 
+
         var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
                 templateCrudService, eventCrudService, List.of(new JSONFileExporter()));
 
@@ -94,8 +95,11 @@ public class MainWindow {
         addActionContextual = new AddContextual(() -> currentTable, allTableModels);
         deleteAction = new DeleteAction(() -> currentTable, allTableModels);
         editAction = new EditAction(() -> currentTable, allTableModels);
-        importAction = new ImportAction(frame, importService);
+
+        importAction = new ImportAction(frame, importService, this::refresh);
         exportAction = new ExportAction(frame, exportService);
+
+
         aboutAction = new AboutAction(frame);
         keybindsAction = new KeybindsAction(frame);
         contactAction = new ContactAction(frame);
@@ -136,6 +140,13 @@ public class MainWindow {
         frame.setJMenuBar(createMenuBar());
         frame.pack();
         changeActionsState(0);
+    }
+
+    private void refresh() {
+        eventTableModel.refresh();
+        categoryTableModel.refresh();
+        templateTableModel.refresh();
+        timeUnitTableModel.refresh();
     }
 
     public JPanel createEventsTab(){

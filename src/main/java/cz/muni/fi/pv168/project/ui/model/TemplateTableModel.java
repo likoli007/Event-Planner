@@ -79,7 +79,10 @@ public class TemplateTableModel extends AbstractTableModel {
         templates.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
     }
-
+    public void refresh() {
+        this.templates = new ArrayList<>(templateCrudService.findAll());
+        fireTableDataChanged();
+    }
     public CrudService<Template> getTemplateCrudService() {
         return templateCrudService;
     }

@@ -142,13 +142,14 @@ public class JSONFileImporter implements BatchImporter {
 
             if (desiredTimeUnit == null) {
                 event = new TodoEvent(
-                        name, details, startDate, desiredTimeUnit, amount, categoriesList
+                        name, details, startDate, amount, categoriesList
                 );
             }
             else{
-               event = new TodoEvent(
-                       name, details, startDate, amount, categoriesList
-               );
+                event = new TodoEvent(
+                        name, details, startDate, desiredTimeUnit, amount, categoriesList
+                );
+
             }
             events.add(event);
         }

@@ -101,7 +101,10 @@ public class EventTableModel extends AbstractTableModel {
         todoEvents.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
     }
-
+    public void refresh() {
+        this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
+        fireTableDataChanged();
+    }
     public CrudService<TodoEvent> getTodoEventCrudService() {
         return todoEventCrudService;
     }
