@@ -73,4 +73,40 @@ public class Validator {
             throw new ValidationException("Time unit with given name or shortcut is already present.");
         }
     }
+
+    public static void validateCategoryDeletion(AllTableModels allTableModels, Category category) {
+        for (TodoEvent todoEvent : allTableModels.getEventTableModel().getTodoEventCrudService().findAll()) {
+            for (Category todoEventCategory : todoEvent.getCategories()) {
+                if (todoEventCategory.isDuplicate(category)) {
+                    throw new ValidationException("Category with name \"" + category.getName()
+                            + "\" cannot be deleted, it is used in event \"" + todoEvent.getName() + "\".");
+                }
+            }
+        }
+
+        for (Template template : allTableModels.getTemplateTableModel().getTemplateCrudService().findAll()) {
+            for (Category templateCategory : template.getCategories()) {
+                if (templateCategory.isDuplicate(category)) {
+                    throw new ValidationException("Category with name \"" + category.getName()
+                            + "\" cannot be deleted, it is used in template \"" + template.getName() + "\".");
+                }
+            }
+        }
+    }
+
+    public static void validateTimeUnitDeletion(AllTableModels allTableModels, TimeUnit timeUnit) {
+        for (TodoEvent todoEvent : allTableModels.getEventTableModel().getTodoEventCrudService().findAll()) {
+            if (todoEvent.getInterval().getTimeUnit().isDuplicate(timeUnit)) {
+                throw new ValidationException("Time unit with name \"" + timeUnit.getName()
+                        + "\" cannot be deleted, it is used in event \"" + todoEvent.getName() + "\".");
+            }
+        }
+
+        for (Template template : allTableModels.getTemplateTableModel().getTemplateCrudService().findAll()) {
+            if (template.getInterval().getTimeUnit().isDuplicate(timeUnit)) {
+                throw new ValidationException("Time unit with name \"" + timeUnit.getName()
+                        + "\" cannot be deleted, it is used in template \"" + template.getName() + "\".");
+            }
+        }
+    }
 }
