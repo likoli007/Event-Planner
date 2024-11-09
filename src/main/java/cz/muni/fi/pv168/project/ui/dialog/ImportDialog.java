@@ -1,5 +1,8 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -7,6 +10,7 @@ import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 
 public class ImportDialog{
 
@@ -76,20 +80,39 @@ public class ImportDialog{
         return resultFilePath;
     }
 
+
+    private int getArrayLength(JsonNode rootNode, String fieldName) {
+        JsonNode arrayNode = rootNode.get(fieldName);
+        if (arrayNode != null && arrayNode.isArray()) {
+            return arrayNode.size();
+        }
+        return 0;
+    }
+
+    private void getJSONStatistics(File file) throws IOException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(file);
+
+        fileInfoTextArea.setText(
+                "Total No. of events: " + getArrayLength(rootNode, "events") + "\n" +
+                "Total No. of categories: " + getArrayLength(rootNode, "categories") + "\n" +
+                "Total No. of templates: " + getArrayLength(rootNode, "templates") + "\n" +
+                "Total No. of intervals: " + getArrayLength(rootNode, "timeUnits") + "\n"
+        );
+    }
+
     private void openButtonClicked(ActionEvent e){
         fileChooser.setFileFilter(filter);
         int result = fileChooser.showOpenDialog(mainPanel);
         if(result == JFileChooser.APPROVE_OPTION){
             File file = fileChooser.getSelectedFile();
             textField.setText(file.getAbsolutePath());
-
-            fileInfoTextArea.setText("""
-                            Total No. of events: 10
-                            Total No. of categories: 9
-                            Total No. of templates: 8
-                            Total No. of intervals: 7
-                            """);
-
+            try {
+                getJSONStatistics(file);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }else{
             textField.setText("");
         }
