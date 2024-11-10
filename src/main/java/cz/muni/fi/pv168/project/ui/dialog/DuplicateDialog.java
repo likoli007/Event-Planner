@@ -46,6 +46,8 @@ public class DuplicateDialog {
         originalTextArea.setEditable(false);
         originalTextArea.setBackground(null);
 
+        duplicatePanel.setLayout(new BoxLayout(duplicatePanel, BoxLayout.Y_AXIS));
+        originalPanel.setLayout(new BoxLayout(originalPanel, BoxLayout.Y_AXIS));
         duplicatePanel.add(duplicateTextArea);
         originalPanel.add(originalTextArea);
         duplicatePanel.setBorder(BorderFactory.createTitledBorder("Duplicate"));
