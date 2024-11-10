@@ -199,8 +199,9 @@ public class GenericImportService implements ImportService {
     public void importData(String filePath, JFrame frame) throws IOException {
         var batch = getImporter(filePath).importBatch(filePath);
 
-        handleDuplicates(batch, frame);
-
+        if (batch != null) {
+            handleDuplicates(batch, frame);
+        }
     }
 
     private void createCategory(Category category) {
