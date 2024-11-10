@@ -393,12 +393,14 @@ public class MainWindow {
         var intervalStr = intervals.stream().map(TimeUnit::getName).toArray(String[]::new);
         JComboBox<String> unitComboBox = createMultiSelectComboBox(intervalStr);
 
-//        var intervalsComboBox = new JComboBox<>(intervals.toArray(new TimeUnit[0]));
 
 
         JLabel categoryLabel = new JLabel("Category:");
-        var categories = categoryCrudService.findAll().stream().map(Category::getName).toArray(String[]::new);
-        JComboBox<String> categoryComboBox = createMultiSelectComboBox(categories);
+        List<String> categories = new ArrayList<String>();
+        categories.add(null);  // Add null as the first "no category" option
+        categories.addAll(categoryCrudService.findAll().stream().map(Category::getName).toList());
+        JComboBox<String> categoryComboBox = new JComboBox<>(categories.toArray(new String[0]));
+
 
         JLabel statusLabel = new JLabel("Status:");
         JCheckBox doneCheckBox = new JCheckBox("Done");
@@ -413,6 +415,9 @@ public class MainWindow {
             toTimePicker.clear();
             doneCheckBox.setSelected(false);
             plannedCheckBox.setSelected(false);
+            categoryComboBox.setSelectedIndex(0);
+
+            filter.clear();
         });
 
         // Add listener to update 'from' DateTime filter
@@ -436,6 +441,11 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
+        categoryComboBox.addActionListener(e -> {
+            String selectedCategory = (String) categoryComboBox.getSelectedItem();
+            filter.setSelectedCategory(selectedCategory);
+            eventTableModel.refetch(filter);
+        });
 
         doneCheckBox.addActionListener(e -> {
             boolean done = doneCheckBox.isSelected();
