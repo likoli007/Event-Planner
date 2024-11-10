@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.ui;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
+import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.service.crud.*;
@@ -16,7 +17,6 @@ import cz.muni.fi.pv168.project.ui.renderer.CategoryListRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -452,22 +452,18 @@ public class MainWindow {
             doneCheckBox.setSelected(false);
             eventTableModel.refetch(filter);
         });
-//
-//        plannedCheckBox.addActionListener(e -> {
-//            updateDoneStatus();
-//            tableModel.refetch(filter);
-//        });
-//
+
+
 //        categoryComboBox.addItemListener(e -> {
-//            filter.setSelectedCategories(getSelectedItemsFromComboBox(categoryComboBox));
+//            filter.setSelectedCategories( getSelectedItemsFromComboBox(categoryComboBox));
 //            tableModel.refetch(filter);
 //        });
-//
-//        // Add clear button listener to reset the filter
-//        clearButton.addActionListener(e -> {
-//            clearFilter(); // Reset all filter fields
-//            tableModel.refetch(filter);
-//        });
+
+        // Add clear button listener to reset the filter
+        clearButton.addActionListener(e -> {
+            filter.clear();
+            eventTableModel.refetch(filter);
+        });
 
 
        List<Component> components = List.of(

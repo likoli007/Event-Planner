@@ -1,14 +1,11 @@
 package cz.muni.fi.pv168.project.ui.model;
 
-import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.model.TodoEventFilter;
+import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,15 +29,7 @@ public class EventTableModel extends AbstractTableModel {
 
     public void refetch(TodoEventFilter filter) {
         // this logic will be moved
-        todoEvents = todoEventCrudService.findAll().stream().filter(
-
-                        event -> filter.getDone() == null || event.isDone() == filter.getDone()
-                ).filter(
-                        event-> filter.getFromDate() == null ||  event.getStart().toLocalDate().isBefore(filter.getFromDate())
-                ).filter(
-                        event-> filter.getToDate() == null ||  event.getStart().toLocalDate().isAfter(filter.getToDate())
-                )
-                .toList();
+        todoEvents = todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
         fireTableDataChanged();
     }
 
