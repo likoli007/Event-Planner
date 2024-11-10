@@ -4,29 +4,19 @@ import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TodoEventFilter implements Filter<TodoEvent> {
     private LocalDate fromDate;
     private LocalTime fromTime;
     private LocalDate toDate;
     private LocalTime toTime;
-    private List<String> selectedUnits;      // For selected time units (intervals)
-    private List<String> selectedCategories; // For selected categories
+    private String selectedUnit;      // For selected time units (intervals)
+    private String selectedCategory; // For selected categories
     private Boolean isDone;
 
-
-    public TodoEventFilter() {
-        this.selectedUnits = new ArrayList<>();
-        this.selectedCategories = new ArrayList<>();
+    public void setSelectedCategory(String selectedCategory){
+        this.selectedCategory = selectedCategory;
     }
-
-    public void addSelectedCategory(String selectedCategory){
-
-        this.selectedCategories.add(selectedCategory);
-    }
-
     public void setDone(Boolean done) {
         isDone = done;
     }
@@ -52,21 +42,24 @@ public class TodoEventFilter implements Filter<TodoEvent> {
         fromTime = null;
         toDate = null;
         toTime = null;
-        selectedUnits.clear();
-        selectedCategories.clear();
+        selectedUnit = null;
+        selectedCategory = null;
         isDone = null;
     }
 
     @Override
     public Boolean isMatch(TodoEvent entity){
+        LocalDate eventDate = entity.getStart().toLocalDate();
+        LocalTime eventTime = entity.getStart().toLocalTime();
+
         return (isDone == null || isDone == entity.isDone())
-                && (fromDate == null || !fromDate.isAfter(entity.getStart().toLocalDate()))
-                && (fromTime == null || !fromTime.isAfter(entity.getStart().toLocalTime()))
-                && (toDate == null || !toDate.isBefore(entity.getStart().toLocalDate()))
-                && (toTime == null || !toTime.isBefore(entity.getStart().toLocalTime()))
-                && (selectedUnits.isEmpty() || selectedUnits.contains(entity.getInterval().getTimeUnit().getName()))
-                && (selectedCategories.isEmpty() || entity.getCategories().stream()
+                && (fromDate == null || !fromDate.isAfter(eventDate))
+                && (fromTime == null || !fromTime.isAfter(eventTime))
+                && (toDate == null || !toDate.isBefore(eventDate))
+                && (toTime == null || !toTime.isBefore(eventTime))
+                && (selectedUnit == null || selectedUnit.equals(entity.getInterval().getTimeUnit().getName()))
+                && (selectedCategory == null || entity.getCategories().stream()
                     .map(x -> x.getCategory().getName())
-                    .anyMatch(selectedCategories::contains));
+                    .anyMatch(selectedCategory::equals));
 }
 }
