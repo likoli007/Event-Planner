@@ -29,7 +29,7 @@ public class EventTableModel extends AbstractTableModel {
 
     public void refetch(TodoEventFilter filter) {
         // this logic will be moved
-        todoEvents = todoEventFacade.findAll().stream().filter(filter::isMatch).toList();
+        todoEvents = todoEventFacade.getEventsByFilter(filter);
         fireTableDataChanged();
     }
 
