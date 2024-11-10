@@ -111,7 +111,7 @@ public class ImportDialog{
             try {
                 getJSONStatistics(file);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "An error occured while importing!\n" +
+                JOptionPane.showMessageDialog(dialog, "An error occured while importing!\n" +
                                 "Skipping import!\n" + "Please ensure there are no faulty fields in the file.",
                         "Alert", JOptionPane.ERROR_MESSAGE);
                 dialog.dispose();
@@ -121,5 +121,4 @@ public class ImportDialog{
         }
         dialog.pack();
     }
-
 }
