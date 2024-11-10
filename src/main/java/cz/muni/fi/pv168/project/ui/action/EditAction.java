@@ -3,13 +3,12 @@ package cz.muni.fi.pv168.project.ui.action;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
-import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
+import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.validation.ValidationException;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -29,6 +28,50 @@ public final class EditAction extends AbstractAction {
         putValue(SHORT_DESCRIPTION, "Edits selected item");
         putValue(MNEMONIC_KEY, KeyEvent.VK_E);
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ctrl E"));
+    }
+
+    private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
+        TodoEvent originalEvent = eventTableModel.getEntity(modelRow);
+        TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
+        dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
+            Validator.validateEditEvent(allTableModels, originalEvent, todoEvent);
+
+            eventTableModel.updateRow(todoEvent);
+            SuccessDialog.show("Event edited successfully!");
+        });
+    }
+
+    private void tryEditTemplate(JTable currentTable, TemplateTableModel templateTableModel, int modelRow) {
+        Template originalTemplate = templateTableModel.getEntity(modelRow);
+        TemplateDialog dialog = new TemplateDialog(originalTemplate, allTableModels);
+        dialog.show(currentTable, "Edit Template").ifPresent(template -> {
+            Validator.validateEditTemplate(allTableModels, originalTemplate, template);
+
+            templateTableModel.updateRow(template);
+            SuccessDialog.show("Template edited successfully!");
+        });
+    }
+
+    private void tryEditCategory(JTable currentTable, CategoryTableModel categoryTableModel, int modelRow) {
+        Category originalCategory = categoryTableModel.getEntity(modelRow);
+        CategoryDialog dialog = new CategoryDialog(originalCategory);
+        dialog.show(currentTable, "Edit Category").ifPresent(category -> {
+            Validator.validateEditCategory(allTableModels, originalCategory, category);
+
+            categoryTableModel.updateRow(category);
+            SuccessDialog.show("Category edited successfully!");
+        });
+    }
+
+    private void tryEditTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel, int modelRow) {
+        TimeUnit originalTimeUnit = timeUnitTableModel.getEntity(modelRow);
+        IntervalDialog dialog = new IntervalDialog(originalTimeUnit);
+        dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnit -> {
+            Validator.validateEditTimeUnit(allTableModels, originalTimeUnit, timeUnit);
+
+            timeUnitTableModel.updateRow(timeUnit);
+            SuccessDialog.show("Time unit edited successfully!");
+        });
     }
 
     @Override
@@ -51,25 +94,24 @@ public final class EditAction extends AbstractAction {
         TableModel model = currentTable.getModel();
         int modelRow = currentTable.convertRowIndexToModel(selectedRows[0]);
 
-        if (model instanceof EventTableModel eventTableModel) {
-            TodoEvent todoEvent = eventTableModel.getEntity(modelRow);
-            TodoEventDialog dialog = new TodoEventDialog(todoEvent, allTableModels);
-            dialog.show(currentTable, "Edit Todo Event").ifPresent(eventTableModel::updateRow);
-        } else if (model instanceof CategoryTableModel categoryTableModel) {
-            Category category = categoryTableModel.getEntity(modelRow);
-            CategoryDialog dialog = new CategoryDialog(category);
-            dialog.show(currentTable, "Edit Category").ifPresent(categoryTableModel::updateRow);
-        } else if (model instanceof TemplateTableModel templateTableModel) {
-            Template template = templateTableModel.getEntity(modelRow);
-            TemplateDialog dialog = new TemplateDialog(template, allTableModels);
-            dialog.show(currentTable, "Edit Template").ifPresent(templateTableModel::updateRow);
-        } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
-            TimeUnit timeUnit = timeUnitTableModel.getEntity(modelRow);
-            IntervalDialog dialog = new IntervalDialog(timeUnit);
-            dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnitTableModel::updateRow);
-        } else {
-            JOptionPane.showMessageDialog(currentTable,
-                    "Unsupported table model for editing.",
+        try {
+            if (model instanceof EventTableModel eventTableModel) {
+                tryEditEvent(currentTable, eventTableModel, modelRow);
+            } else if (model instanceof TemplateTableModel templateTableModel) {
+                tryEditTemplate(currentTable, templateTableModel, modelRow);
+            } else if (model instanceof CategoryTableModel categoryTableModel) {
+                tryEditCategory(currentTable, categoryTableModel, modelRow);
+            } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
+                tryEditTimeUnit(currentTable, timeUnitTableModel, modelRow);
+            } else {
+                JOptionPane.showMessageDialog(currentTable,
+                        "Unsupported table model for editing.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (ValidationException ex) {
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }

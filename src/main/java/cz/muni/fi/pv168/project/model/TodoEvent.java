@@ -8,6 +8,7 @@ import cz.muni.fi.pv168.project.service.export.serialize.IntervalSerializer;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class TodoEvent extends Entity {
     private String name;
@@ -37,6 +38,16 @@ public class TodoEvent extends Entity {
         this.start = start;
         this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
+    }
+
+    public TodoEvent(TodoEvent todoEvent) {
+        this.id = todoEvent.id;
+        this.name = todoEvent.name;
+        this.details = todoEvent.details;
+        this.start = todoEvent.start;
+        this.interval = todoEvent.interval;
+        this.categories = todoEvent.categories;
+        this.done = todoEvent.done;
     }
 
     public String getName() {
@@ -85,6 +96,13 @@ public class TodoEvent extends Entity {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        TodoEvent todoEvent = (TodoEvent) e;
+        return Objects.equals(name, todoEvent.name) && Objects.equals(start, todoEvent.start);
     }
 
     public String formatInterval() {

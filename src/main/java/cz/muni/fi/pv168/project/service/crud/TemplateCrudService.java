@@ -1,9 +1,11 @@
 package cz.muni.fi.pv168.project.service.crud;
 
+import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -19,6 +21,16 @@ public class TemplateCrudService implements CrudService<Template> {
     @Override
     public List<Template> findAll() {
         return templateRepository.findAll();
+    }
+
+    @Override
+    public Optional<Template> findById(UUID id) {
+        return templateRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Template> findDuplicate(Template entity) {
+        return templateRepository.findDuplicate(entity);
     }
 
     @Override

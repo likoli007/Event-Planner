@@ -17,7 +17,14 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
         initEntities.forEach(this::create);
     }
 
-    private Optional<T> findById(UUID id) {
+    @Override
+    public List<T> findAll() {
+        return data.values().stream()
+                .toList();
+    }
+
+    @Override
+    public Optional<T> findById(UUID id) {
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null.");
         }
@@ -25,9 +32,14 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
     }
 
     @Override
-    public List<T> findAll() {
-        return data.values().stream()
-                .toList();
+    public Optional<T> findDuplicate(T entity) {
+        for (T possibleDuplicateEntity : data.values()) {
+            if (possibleDuplicateEntity.isDuplicate(entity)) {
+                return Optional.of(possibleDuplicateEntity);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override

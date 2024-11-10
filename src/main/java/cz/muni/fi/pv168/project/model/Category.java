@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import cz.muni.fi.pv168.project.service.export.serialize.ColorSerializer;
 
 import java.awt.Color;
+import java.util.Objects;
 
 public class Category extends Entity {
     private String name;
@@ -14,6 +15,12 @@ public class Category extends Entity {
     public Category(String name, Color color) {
         this.name = name;
         this.color = color;
+    }
+
+    public Category(Category category) {
+        this.id = category.id;
+        this.name = category.name;
+        this.color = category.color;
     }
 
     public String getName() {
@@ -35,6 +42,13 @@ public class Category extends Entity {
     @JsonIgnore
     public Category getCategory(){
         return this;
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        Category category = (Category) e;
+        return Objects.equals(name, category.name);
     }
 
     @Override
