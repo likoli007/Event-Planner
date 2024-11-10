@@ -417,6 +417,7 @@ public class MainWindow {
             doneCheckBox.setSelected(false);
             plannedCheckBox.setSelected(false);
             categoryComboBox.setSelectedIndex(0);
+            unitComboBox.setSelectedIndex(0);
 
             filter.clear();
         });
