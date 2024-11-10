@@ -385,11 +385,10 @@ public class MainWindow {
         });
 
         JLabel unitLabel = new JLabel("Units:");
-        var intervals = timeUnitCrudService.findAll();
-        var intervalStr = intervals.stream().map(TimeUnit::getName).toArray(String[]::new);
-        JComboBox<String> unitComboBox = createMultiSelectComboBox(intervalStr);
-
-
+        List<String> units = new ArrayList<String>();
+        units.add(null);  // Add null as the first "no unit" option
+        units.addAll(timeUnitCrudService.findAll().stream().map(TimeUnit::getName).toList());
+        JComboBox<String> unitComboBox = new JComboBox<>(units.toArray(new String[0]));
 
         JLabel categoryLabel = new JLabel("Category:");
         List<String> categories = new ArrayList<String>();
@@ -437,6 +436,12 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
+        unitComboBox.addActionListener(e -> {
+            String selectedUnit = (String) unitComboBox.getSelectedItem();
+            filter.setSelectedUnit(selectedUnit);
+            eventTableModel.refetch(filter);
+        });
+
         categoryComboBox.addActionListener(e -> {
             String selectedCategory = (String) categoryComboBox.getSelectedItem();
             filter.setSelectedCategory(selectedCategory);
@@ -459,34 +464,20 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
-
-//        categoryComboBox.addItemListener(e -> {
-//            filter.setSelectedCategories( getSelectedItemsFromComboBox(categoryComboBox));
-//            tableModel.refetch(filter);
-//        });
-
-        // Add clear button listener to reset the filter
-        clearButton.addActionListener(e -> {
-            filter.clear();
-            eventTableModel.refetch(filter);
-        });
-
-
        List<Component> components = List.of(
             fromLabel, fromDatePicker, fromTimeLabel, fromTimePicker,
             toLabel, toDatePicker, toTimeLabel, toTimePicker,
             todayButton, thisWeekButton,
-//            unitLabel, unitComboBox,intervalsComboBox,
-               categoryLabel, categoryComboBox,
+            unitLabel, unitComboBox,
+            categoryLabel, categoryComboBox,
             statusLabel, doneCheckBox, plannedCheckBox, clearButton
-        );
+       );
 
        for (Component component : components) {
             filterPanel.add(component);
-
        }
 
-        return filterPanel;
+       return filterPanel;
     }
 
     private static JComboBox<String> createMultiSelectComboBox(String[] options) {
