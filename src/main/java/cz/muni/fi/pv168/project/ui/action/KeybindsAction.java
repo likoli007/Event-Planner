@@ -17,10 +17,13 @@ public class KeybindsAction extends AbstractAction {
         JOptionPane.showMessageDialog(
                 parentFrame,
                 """
-                        Ctrl+A - Select all entities from current table
-                        Alt+F4 - Quit the app
-                        ...
-                        ...
+                        Ctrl + A - Select all items in the current table
+                        Ctrl + N - Add a new item to the current table
+                        Ctrl + E - Edit the selected item
+                        Ctrl + D - Delete the selected item
+                        Ctrl + Q - Quit the app
+                        Alt + I - Import data
+                        Alt + E - Export data
                         """,
                 "Important Keybinds",
                 JOptionPane.INFORMATION_MESSAGE

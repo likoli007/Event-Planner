@@ -126,6 +126,9 @@ public class MainWindow {
         frame.setJMenuBar(createMenuBar());
         frame.pack();
         changeActionsState(0);
+        setupKeyBindings(frame.getRootPane());
+        setupSelectAllShortcut(eventTable);
+        setupSelectAllShortcut(managerTabTable);
     }
 
     public JPanel createEventsTab(){
@@ -301,6 +304,11 @@ public class MainWindow {
 
         var fileMenu = new JMenu("File");
         fileMenu.setMnemonic('f');
+
+        importAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt I"));
+        exportAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt E"));
+        quitAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt Q"));
+
         fileMenu.add(importAction);
         fileMenu.add(exportAction);
         fileMenu.addSeparator();
@@ -321,6 +329,11 @@ public class MainWindow {
 
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
+
+        aboutAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt A"));
+        keybindsAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt K"));
+        contactAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt C"));
+
         helpMenu.add(aboutAction);
         helpMenu.add(keybindsAction);
         helpMenu.add(contactAction);
@@ -454,5 +467,37 @@ public class MainWindow {
         });
 
         return comboBox;
+    }
+
+    private void setupSelectAllShortcut(JTable table) {
+        KeyStroke ctrlA = KeyStroke.getKeyStroke("control A");
+
+        InputMap inputMap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        inputMap.put(ctrlA, "selectAll");
+
+        ActionMap actionMap = table.getActionMap();
+        actionMap.put("selectAll", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                table.selectAll();
+            }
+        });
+    }
+
+    private void setupKeyBindings(JComponent component) {
+        InputMap inputMap = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = component.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl N"), "addActionContextual");
+        actionMap.put("addActionContextual", addActionContextual);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl D"), "deleteAction");
+        actionMap.put("deleteAction", deleteAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl E"), "editAction");
+        actionMap.put("editAction", editAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl Q"), "quitAction");
+        actionMap.put("quitAction", quitAction);
     }
 }
