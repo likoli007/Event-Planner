@@ -1,8 +1,8 @@
 package cz.muni.fi.pv168.project.ui.model;
 
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDateTime;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
-    private final CrudService<TodoEvent> todoEventCrudService;
+    private final TodoEventsServiceFacade todoEventFacade;
     private List<TodoEvent> todoEvents;
 
     private final List<Column<TodoEvent, ?>> columns = List.of(
@@ -22,14 +22,14 @@ public class EventTableModel extends AbstractTableModel {
             Column.editable("Done", Boolean.class, TodoEvent::isDone, TodoEvent::setDone)
     );
 
-    public EventTableModel(CrudService<TodoEvent> todoEventCrudService) {
-        this.todoEventCrudService = todoEventCrudService;
-        this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
+    public EventTableModel(TodoEventsServiceFacade todoEventFacade) {
+        this.todoEventFacade = todoEventFacade;
+        this.todoEvents = new ArrayList<>(todoEventFacade.findAll());
     }
 
     public void refetch(TodoEventFilter filter) {
         // this logic will be moved
-        todoEvents = todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
+        todoEvents = todoEventFacade.findAll().stream().filter(filter::isMatch).toList();
         fireTableDataChanged();
     }
 
@@ -87,28 +87,22 @@ public class EventTableModel extends AbstractTableModel {
     }
 
     public void addRow(TodoEvent todoEvent) {
-        todoEventCrudService.create(todoEvent);
+        todoEventFacade.create(todoEvent);
         todoEvents.add(todoEvent);
         int rowIndex = todoEvents.size() - 1;
         fireTableRowsInserted(rowIndex, rowIndex);
     }
 
     public void updateRow(TodoEvent todoEvent) {
-        todoEventCrudService.update(todoEvent);
+        todoEventFacade.update(todoEvent);
         int rowIndex = todoEvents.indexOf(todoEvent);
         fireTableRowsUpdated(rowIndex, rowIndex);
     }
 
     public void deleteRow(int modelRow) {
         var template = getEntity(modelRow);
-        todoEventCrudService.deleteById(template.getId());
+        todoEventFacade.deleteById(template.getId());
         todoEvents.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
-    }
-
-
-
-    public CrudService<TodoEvent> getTodoEventCrudService() {
-        return todoEventCrudService;
     }
 }

@@ -2,6 +2,8 @@ package cz.muni.fi.pv168.project.ui;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacadeImpl;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
@@ -40,6 +42,8 @@ public class MainWindow {
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
 
+    private final TodoEventsServiceFacade todoEventsServiceFacade;
+
 
     private final EventTableModel eventTableModel;
     private final CategoryTableModel categoryTableModel;
@@ -73,8 +77,10 @@ public class MainWindow {
         templateCrudService = new TemplateCrudService(templateRepository);
         timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
         eventCrudService = new TodoEventCrudService(eventRepository);
+        todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
 
-        eventTableModel = new EventTableModel(eventCrudService);
+
+        eventTableModel = new EventTableModel(todoEventsServiceFacade);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
         templateTableModel = new TemplateTableModel(templateCrudService);
         timeUnitTableModel = new TimeUnitTableModel(timeUnitCrudService);
