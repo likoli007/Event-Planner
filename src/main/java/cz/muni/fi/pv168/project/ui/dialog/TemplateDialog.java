@@ -66,7 +66,10 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
     @Override
     Template getEntity() {
-        template.setName(nameField.getText());
+        String name = nameField.getText();
+        Validator.validateNonemptyString("Template name", name);
+        template.setName(name);
+
         template.setDetails(detailsField.getText());
 
         LocalTime time = timeField.getTime();

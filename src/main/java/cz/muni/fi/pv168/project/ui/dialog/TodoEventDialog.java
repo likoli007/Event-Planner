@@ -133,7 +133,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
     @Override
     TodoEvent getEntity() {
-        todoEvent.setName(nameField.getText());
+        String name = nameField.getText();
+        Validator.validateNonemptyString("Event name", name);
+        todoEvent.setName(name);
+
         todoEvent.setDetails(detailsField.getText());
 
         LocalDate date = dateField.getDate();

@@ -15,6 +15,12 @@ public class Validator {
         }
     }
 
+    public static void validateNonemptyString(String fieldName, String input) {
+        if (input.isEmpty()) {
+            throw new ValidationException(fieldName + " must not be empty.");
+        }
+    }
+
     public static void validateCategoryList(List<Category> categoryList) {
         if (categoryList.isEmpty()) {
             throw new ValidationException("No categories selected.");
