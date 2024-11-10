@@ -1,8 +1,13 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
+import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.ui.dialog.SuccessDialog;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
+import cz.muni.fi.pv168.project.validation.ValidationException;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -10,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 public final class DeleteAction extends AbstractAction {
@@ -54,31 +60,52 @@ public final class DeleteAction extends AbstractAction {
                 .sorted(Comparator.reverseOrder())
                 .mapToInt(Integer::intValue)
                 .toArray();
-        if (model instanceof EventTableModel eventTableModel) {
-            for (int viewRow : selectedRows) {
-                int modelRow = currentTable.convertRowIndexToModel(viewRow);
-                eventTableModel.deleteRow(modelRow);
+
+        int counter = 0;
+        try {
+            if (model instanceof EventTableModel eventTableModel) {
+                for (int viewRow : selectedRows) {
+                    int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                    eventTableModel.deleteRow(modelRow);
+                    counter++;
+                }
+            } else if (model instanceof TemplateTableModel templateTableModel) {
+                for (int viewRow : selectedRows) {
+                    int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                    templateTableModel.deleteRow(modelRow);
+                    counter++;
+                }
+            } else if (model instanceof CategoryTableModel categoryTableModel) {
+                for (int viewRow : selectedRows) {
+                    int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                    Category categoryToDelete = categoryTableModel.getEntity(modelRow);
+                    Validator.validateCategoryDeletion(allTableModels, categoryToDelete);
+                    categoryTableModel.deleteRow(modelRow);
+                    counter++;
+                }
+            } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
+                for (int viewRow : selectedRows) {
+                    int modelRow = currentTable.convertRowIndexToModel(viewRow);
+                    TimeUnit timeUnitToDelete = timeUnitTableModel.getEntity(modelRow);
+                    Validator.validateTimeUnitDeletion(allTableModels, timeUnitToDelete);
+                    timeUnitTableModel.deleteRow(modelRow);
+                    counter++;
+                }
+            } else {
+                JOptionPane.showMessageDialog(currentTable,
+                        "Unsupported table model for deleting.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
-        } else if (model instanceof CategoryTableModel categoryTableModel) {
-            for (int viewRow : selectedRows) {
-                int modelRow = currentTable.convertRowIndexToModel(viewRow);
-                categoryTableModel.deleteRow(modelRow);
-            }
-        } else if (model instanceof TemplateTableModel templateTableModel) {
-            for (int viewRow : selectedRows) {
-                int modelRow = currentTable.convertRowIndexToModel(viewRow);
-                templateTableModel.deleteRow(modelRow);
-            }
-        } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
-            for (int viewRow : selectedRows) {
-                int modelRow = currentTable.convertRowIndexToModel(viewRow);
-                timeUnitTableModel.deleteRow(modelRow);
-            }
-        } else {
-            JOptionPane.showMessageDialog(currentTable,
-                    "Unsupported table model for deleting.",
+        } catch (ValidationException ex) {
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (counter > 0) {
+                SuccessDialog.show("Number of successfully deleted entities: " + counter);
+            }
         }
     }
 }

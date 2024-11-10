@@ -3,10 +3,12 @@ package cz.muni.fi.pv168.project.ui.dialog;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 
 public final class TemplateDialog extends EntityDialog<Template> {
@@ -22,7 +24,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
     private final Template template;
 
     public TemplateDialog(Template template, AllTableModels allTableModels) {
-        this.template = template;
+        this.template = new Template(template);
         this.categoryModel = new DefaultListModel<>();
         for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
             this.categoryModel.addElement(category);
@@ -64,7 +66,10 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
     @Override
     Template getEntity() {
-        template.setName(nameField.getText());
+        String name = nameField.getText();
+        Validator.validateNonemptyString("Template name", name);
+        template.setName(name);
+
         template.setDetails(detailsField.getText());
 
         LocalTime time = timeField.getTime();
@@ -72,9 +77,12 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setStartTime(time);
         }
 
-        template.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        template.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        template.setCategories(categoryList.getSelectedValuesList());
+
+        List<Category> selectedCategories = categoryList.getSelectedValuesList();
+        Validator.validateCategoryList(selectedCategories);
+        template.setCategories(selectedCategories);
 
         return template;
     }
