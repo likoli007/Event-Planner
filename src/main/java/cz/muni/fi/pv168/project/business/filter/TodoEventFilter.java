@@ -14,6 +14,9 @@ public class TodoEventFilter implements Filter<TodoEvent> {
     private String selectedCategory; // For selected categories
     private Boolean isDone;
 
+    public void setSelectedUnit(String selectedUnit) {
+        this.selectedUnit = selectedUnit;
+    }
     public void setSelectedCategory(String selectedCategory){
         this.selectedCategory = selectedCategory;
     }
