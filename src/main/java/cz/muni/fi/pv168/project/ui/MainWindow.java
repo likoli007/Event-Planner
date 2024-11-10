@@ -354,19 +354,15 @@ public class MainWindow {
 
         JLabel fromLabel = new JLabel("From Date:");
         DatePicker fromDatePicker = new DatePicker();
-        fromDatePicker.setDateToToday();
 
         JLabel fromTimeLabel = new JLabel("Time:");
         TimePicker fromTimePicker = new TimePicker();
-        fromTimePicker.setTimeToNow();
 
         JLabel toLabel = new JLabel("To Date:");
         DatePicker toDatePicker = new DatePicker();
-        toDatePicker.setDateToToday();
 
         JLabel toTimeLabel = new JLabel("Time:");
         TimePicker toTimePicker = new TimePicker();
-        toTimePicker.setTimeToNow();
 
         JButton todayButton = new JButton("Today");
         todayButton.addActionListener(e -> {
