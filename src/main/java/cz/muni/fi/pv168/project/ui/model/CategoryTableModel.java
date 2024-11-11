@@ -77,6 +77,13 @@ public class CategoryTableModel extends AbstractTableModel {
         fireTableRowsDeleted(rowIndex, rowIndex);
     }
 
+
+
+    public void refresh() {
+        this.categories = new ArrayList<>(categoryCrudService.findAll());
+        fireTableDataChanged();
+    }
+
     public CrudService<Category> getCategoryCrudService() {
         return categoryCrudService;
     }

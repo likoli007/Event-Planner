@@ -1,21 +1,25 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.filechooser.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 public class ImportDialog{
 
     private JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
     private FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "json");
 
-    JPanel dialogPanel = new JPanel(new BorderLayout());
-    JPanel importPanel = new JPanel(new BorderLayout());
+    JPanel mainPanel = new JPanel();
+
+    JPanel importPanel = new JPanel();
 
     JLabel filePathLabel = new JLabel("File Path:");
     JButton openButton = new JButton("Open");
@@ -23,14 +27,24 @@ public class ImportDialog{
     JTextArea fileInfoTextArea = new JTextArea();
     JButton importButton = new JButton("Import");
 
+    JPanel buttonPanel = new JPanel();
+
     private JDialog dialog;
 
+    private String resultFilePath;
+
     public ImportDialog(JFrame parentFrame) {
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        importPanel.setLayout(new FlowLayout());
+
         dialog = new JDialog(parentFrame, "Import", true);
         dialog.setSize(300, 150);
         dialog.setLocationRelativeTo(parentFrame);
+        dialog.setResizable(false);
 
-        textField.setEditable(false);
+        textField.setEditable(true);
+        textField.setSize(200, 20);
+        textField.setPreferredSize(new Dimension(200, 20));
         fileInfoTextArea.setEditable(false);
         fileInfoTextArea.setBackground(null);
 
@@ -42,39 +56,69 @@ public class ImportDialog{
         importPanel.add(textField, BorderLayout.CENTER);
         importPanel.add(openButton, BorderLayout.EAST);
 
-        dialogPanel.add(fileInfoTextArea, BorderLayout.CENTER);
-        dialogPanel.add(importPanel, BorderLayout.NORTH);
-        dialogPanel.add(importButton, BorderLayout.SOUTH);
+        mainPanel.add(importPanel);
+        mainPanel.add(fileInfoTextArea);
 
-        dialog.add(dialogPanel);
+        //mainPanel.add(importButton);
+
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.add(importButton);
+        mainPanel.add(buttonPanel);
+
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        dialog.add(mainPanel);
+        dialog.pack();
         dialog.setVisible(true);
     }
 
     private void importButtonClicked(ActionEvent e){
-        //TODO: actual import logic
+        resultFilePath = textField.getText();
         dialog.dispose();
+    }
+
+    public String getResultFilePath(){
+        return resultFilePath;
+    }
+
+
+    private int getArrayLength(JsonNode rootNode, String fieldName) {
+        JsonNode arrayNode = rootNode.get(fieldName);
+        if (arrayNode != null && arrayNode.isArray()) {
+            return arrayNode.size();
+        }
+        return 0;
+    }
+
+    private void getJSONStatistics(File file) throws IOException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(file);
+
+        fileInfoTextArea.setText(
+                "Total No. of events: " + getArrayLength(rootNode, "events") + "\n" +
+                "Total No. of categories: " + getArrayLength(rootNode, "categories") + "\n" +
+                "Total No. of templates: " + getArrayLength(rootNode, "templates") + "\n" +
+                "Total No. of intervals: " + getArrayLength(rootNode, "timeUnits") + "\n"
+        );
     }
 
     private void openButtonClicked(ActionEvent e){
         fileChooser.setFileFilter(filter);
-        int result = fileChooser.showOpenDialog(dialogPanel);
+        int result = fileChooser.showOpenDialog(mainPanel);
         if(result == JFileChooser.APPROVE_OPTION){
-            //TODO: actual import logic, exceptions checking
-            // actual import logic should be done only after the user selects the 'import' button
-
             File file = fileChooser.getSelectedFile();
             textField.setText(file.getAbsolutePath());
-
-            fileInfoTextArea.setText("""
-                            Total No. of events: 10
-                            Total No. of categories: 9
-                            Total No. of templates: 8
-                            Total No. of intervals: 7
-                            """);
-
+            try {
+                getJSONStatistics(file);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog, "An error occured while importing!\n" +
+                                "Skipping import!\n" + "Please ensure there are no faulty fields in the file.",
+                        "Alert", JOptionPane.ERROR_MESSAGE);
+                dialog.dispose();
+            }
         }else{
             textField.setText("");
         }
+        dialog.pack();
     }
-
 }
