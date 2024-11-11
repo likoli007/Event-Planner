@@ -1,19 +1,19 @@
 package cz.muni.fi.pv168.project.ui.model;
 
-import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
+import cz.muni.fi.pv168.project.business.filter.Filter;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 
 import javax.swing.table.AbstractTableModel;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
-    private final CrudService<TodoEvent> todoEventCrudService;
+    private final TodoEventsServiceFacade todoEventFacade;
     private List<TodoEvent> todoEvents;
+    private Filter<TodoEvent> filter;
 
     private final List<Column<TodoEvent, ?>> columns = List.of(
             Column.readonly("Name", String.class, TodoEvent::getName),
@@ -24,9 +24,16 @@ public class EventTableModel extends AbstractTableModel {
             Column.editable("Done", Boolean.class, TodoEvent::isDone, TodoEvent::setDone)
     );
 
-    public EventTableModel(CrudService<TodoEvent> todoEventCrudService) {
-        this.todoEventCrudService = todoEventCrudService;
-        this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
+    public EventTableModel(TodoEventsServiceFacade todoEventFacade, Filter<TodoEvent> filter) {
+        this.todoEventFacade = todoEventFacade;
+        this.todoEvents = new ArrayList<>(todoEventFacade.findAll());
+        this.filter = filter;
+    }
+
+    public void refetch(TodoEventFilter filter) {
+        this.filter = filter;
+        todoEvents = new ArrayList<>( todoEventFacade.getEventsByFilter(filter));
+        fireTableDataChanged();
     }
 
     @Override
@@ -83,29 +90,36 @@ public class EventTableModel extends AbstractTableModel {
     }
 
     public void addRow(TodoEvent todoEvent) {
-        todoEventCrudService.create(todoEvent);
+        todoEventFacade.create(todoEvent);
+
+        if(!filter.isMatch(todoEvent)){
+            return;
+        }
+        // only add the event to table if it matches the filter
         todoEvents.add(todoEvent);
         int rowIndex = todoEvents.size() - 1;
         fireTableRowsInserted(rowIndex, rowIndex);
     }
 
     public void updateRow(TodoEvent todoEvent) {
-        todoEventCrudService.update(todoEvent);
+        todoEventFacade.update(todoEvent);
+
+        // delete the event from table if it doesn't match the filter anymore
+        if(!filter.isMatch(todoEvent)){
+            int rowIndex = todoEvents.indexOf(todoEvent);
+            todoEvents.remove(todoEvent);
+            fireTableRowsDeleted(rowIndex, rowIndex);
+            return;
+        }
+
         int rowIndex = todoEvents.indexOf(todoEvent);
         fireTableRowsUpdated(rowIndex, rowIndex);
     }
 
     public void deleteRow(int modelRow) {
         var template = getEntity(modelRow);
-        todoEventCrudService.deleteById(template.getId());
+        todoEventFacade.deleteById(template.getId());
         todoEvents.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
-    }
-    public void refresh() {
-        this.todoEvents = new ArrayList<>(todoEventCrudService.findAll());
-        fireTableDataChanged();
-    }
-    public CrudService<TodoEvent> getTodoEventCrudService() {
-        return todoEventCrudService;
     }
 }
