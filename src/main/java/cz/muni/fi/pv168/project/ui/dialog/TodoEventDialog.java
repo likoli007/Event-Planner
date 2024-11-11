@@ -6,6 +6,8 @@ import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
+import cz.muni.fi.pv168.project.validation.ValidationException;
+import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +33,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private AllTableModels allTableModels;
 
     public TodoEventDialog(TodoEvent todoEvent, AllTableModels allTableModels) {
-        this.todoEvent = todoEvent;
+        this.todoEvent = new TodoEvent(todoEvent);
         this.allTableModels = allTableModels;
         this.categoryModel = new DefaultListModel<>();
         for (Category category : allTableModels.getCategoryTableModel().getCategoryCrudService().findAll()) {
@@ -107,9 +109,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         String name = nameField.getText();
         String details = detailsField.getText();
         LocalTime time = timeField.getTime();
-        int intervalAmount = Integer.parseInt(intervalField.getText());
+        int intervalAmount = Validator.parseInt("Interval length", intervalField.getText());
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
+        Validator.validateCategoryList(selectedCategories);
 
         Template newTemplate = new Template(
                 name,
@@ -119,7 +122,6 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
                 intervalAmount,
                 selectedCategories
         );
-
         allTableModels.getTemplateTableModel().addRow(newTemplate);
 
         JOptionPane.showMessageDialog(null,
@@ -130,7 +132,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
     @Override
     TodoEvent getEntity() {
-        todoEvent.setName(nameField.getText());
+        String name = nameField.getText();
+        Validator.validateNonemptyString("Event name", name);
+        todoEvent.setName(name);
+
         todoEvent.setDetails(detailsField.getText());
 
         LocalDate date = dateField.getDate();
@@ -139,9 +144,12 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        todoEvent.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
-        todoEvent.setCategories(categoryList.getSelectedValuesList());
+
+        List<Category> selectedCategories = categoryList.getSelectedValuesList();
+        Validator.validateCategoryList(selectedCategories);
+        todoEvent.setCategories(selectedCategories);
 
         return todoEvent;
     }

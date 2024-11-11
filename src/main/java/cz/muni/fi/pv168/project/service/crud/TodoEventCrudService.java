@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,16 @@ public class TodoEventCrudService implements CrudService<TodoEvent> {
     @Override
     public List<TodoEvent> findAll() {
         return todoEventRepository.findAll();
+    }
+
+    @Override
+    public Optional<TodoEvent> findById(UUID id) {
+        return todoEventRepository.findById(id);
+    }
+
+    @Override
+    public Optional<TodoEvent> findDuplicate(TodoEvent entity) {
+        return todoEventRepository.findDuplicate(entity);
     }
 
     @Override
