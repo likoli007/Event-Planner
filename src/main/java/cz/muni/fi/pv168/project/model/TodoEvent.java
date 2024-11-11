@@ -1,5 +1,10 @@
 package cz.muni.fi.pv168.project.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import cz.muni.fi.pv168.project.service.export.serialize.CategorySerializer;
+import cz.muni.fi.pv168.project.service.export.serialize.DateTimeSerializer;
+import cz.muni.fi.pv168.project.service.export.serialize.IntervalSerializer;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -8,8 +13,14 @@ import java.util.Objects;
 public class TodoEvent extends Entity {
     private String name;
     private String details;
+
+    @JsonSerialize(using = DateTimeSerializer.class)
     private LocalDateTime start;
+
+    @JsonSerialize(using = IntervalSerializer.class)
     private Interval interval;
+
+    @JsonSerialize(contentUsing = CategorySerializer.class)
     private List<Category> categories;
     private boolean done = false;
 

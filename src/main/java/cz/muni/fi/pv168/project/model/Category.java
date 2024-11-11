@@ -1,4 +1,7 @@
 package cz.muni.fi.pv168.project.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import cz.muni.fi.pv168.project.service.export.serialize.ColorSerializer;
 
 import java.awt.Color;
 import java.util.Objects;
@@ -6,6 +9,7 @@ import java.util.Objects;
 public class Category extends Entity {
     private String name;
 
+    @JsonSerialize (using = ColorSerializer.class)
     private Color color;
 
     public Category(String name, Color color) {
@@ -35,6 +39,7 @@ public class Category extends Entity {
         this.color = color;
     }
 
+    @JsonIgnore
     public Category getCategory(){
         return this;
     }

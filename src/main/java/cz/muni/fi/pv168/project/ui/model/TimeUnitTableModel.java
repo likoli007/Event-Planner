@@ -75,7 +75,10 @@ public class TimeUnitTableModel extends AbstractTableModel {
         timeUnits.remove(modelRow);
         fireTableRowsDeleted(modelRow, modelRow);
     }
-
+    public void refresh() {
+        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
+        fireTableDataChanged();
+    }
     public CrudService<TimeUnit> getTimeUnitCrudService() {
         return timeUnitCrudService;
     }

@@ -8,6 +8,7 @@ import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.service.crud.*;
+import cz.muni.fi.pv168.project.service.export.*;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
@@ -80,6 +81,12 @@ public class MainWindow {
         todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
 
 
+        var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
+                templateCrudService, todoEventsServiceFacade, List.of(new JSONFileExporter()));
+
+        var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
+                templateCrudService, eventCrudService, List.of(new JSONFileImporter()));
+
         eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
         templateTableModel = new TemplateTableModel(templateCrudService);
@@ -95,8 +102,15 @@ public class MainWindow {
         addActionContextual = new AddContextual(() -> currentTable, allTableModels);
         deleteAction = new DeleteAction(() -> currentTable, allTableModels);
         editAction = new EditAction(() -> currentTable, allTableModels);
-        importAction = new ImportAction(frame);
-        exportAction = new ExportAction(frame);
+
+        importAction = new ImportAction(frame, importService, this::refresh);
+
+
+        exportAction = new ExportAction(frame, exportService,todoEventsServiceFacade::getFilteredEvents,
+                this.todoEventsServiceFacade::findAll
+                );
+
+
         aboutAction = new AboutAction(frame);
         keybindsAction = new KeybindsAction(frame);
         contactAction = new ContactAction(frame);
@@ -140,6 +154,13 @@ public class MainWindow {
         setupKeyBindings(frame.getRootPane());
         setupSelectAllShortcut(eventTable);
         setupSelectAllShortcut(managerTabTable);
+    }
+
+    private void refresh() {
+        eventTableModel.refresh();
+        categoryTableModel.refresh();
+        templateTableModel.refresh();
+        timeUnitTableModel.refresh();
     }
 
     public JPanel createEventsTab(){
