@@ -239,30 +239,20 @@ public class MainWindow {
         int totalEvents = 0;
         int totalLength = 0;
 
-        int doneColumnIndex = eventTableModel.getColumnIndexByName("Done");
-        int intervalColumnIndex = eventTableModel.getColumnIndexByName("Interval");
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
 
-        for (int i = 0; i < eventTable.getRowCount(); i++) {
-            if (eventTable.getValueAt(i, doneColumnIndex) != null) {
-                if (eventTable.getValueAt(i, doneColumnIndex).equals(true)) {
-                    doneEvents++;
 
-                    //since table column is of string type not interval, need to get string value
-                    String interval = (String) eventTable.getValueAt(i, intervalColumnIndex);
-                    Pattern pattern = Pattern.compile("(\\d+)\\s+min");
-                    Matcher matcher = pattern.matcher(interval);
-
-                    if (matcher.find()) {
-                        int number = Integer.parseInt(matcher.group(1));
-                        totalLength += number;
-                    }
-                }
-                else{
-                    plannedEvents++;
-
-                }
-                totalEvents++;
+        for (int i = 0; i < eventList.size(); i++) {
+            if (eventList.get(i).isDone()) {
+                doneEvents++;
+                Interval interval = eventList.get(i).getInterval();
+                TimeUnit timeUnit = interval.getTimeUnit();
+                totalLength += interval.getAmount() * timeUnit.getMinutes();
             }
+            else{
+                plannedEvents++;
+            }
+            totalEvents++;
         }
 
         statisticsArea.setText(
@@ -274,10 +264,7 @@ public class MainWindow {
               "Total number of events: " + totalEvents + "\n"
         );
     }
-    //TODO: actual computing of statistics
-    // can use this to display statistics between the different tabs, left alone for now
-    //  i.e. use createStatisticsPanel to just create the panel, then make a 'changeDisplayedStatistics' function
-    //  which sets the currently relevant statistics
+
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
