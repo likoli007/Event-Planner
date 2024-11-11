@@ -348,16 +348,12 @@ public class MainWindow {
         menuBar.add(fileMenu);
 
         var editMenu = new JMenu("Edit");
-        editMenu.setMnemonic('e');
+        editMenu.setMnemonic('d');
         editMenu.add(new AddEvent(() -> currentTable, allTableModels));
         editMenu.add(new AddCategory(() -> currentTable, allTableModels));
         editMenu.add(new AddTemplate(() -> currentTable, allTableModels));
         editMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
         menuBar.add(editMenu);
-
-        var optionsMenu = new JMenu("Options");
-        optionsMenu.setMnemonic('o');
-        menuBar.add(optionsMenu);
 
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
