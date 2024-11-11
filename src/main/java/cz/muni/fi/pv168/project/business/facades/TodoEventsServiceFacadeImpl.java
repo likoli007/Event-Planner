@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
     private final CrudService<TodoEvent> todoEventCrudService;
+    private Filter<TodoEvent> filter;
 
     public TodoEventsServiceFacadeImpl(CrudService<TodoEvent> todoEventCrudService) {
         this.todoEventCrudService = todoEventCrudService;
@@ -36,7 +37,17 @@ public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
 
     @Override
     public List<TodoEvent> getEventsByFilter(Filter<TodoEvent> filter) {
-        return todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
+        this.filter = filter;
+
+        return getFilteredEvents();
+
+    }
+
+    public List<TodoEvent> getFilteredEvents(){
+        if(filter != null){
+            return todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
+        }
+        return findAll();
     }
 
     @Override

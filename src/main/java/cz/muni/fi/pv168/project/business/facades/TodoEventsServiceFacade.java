@@ -13,5 +13,6 @@ public interface TodoEventsServiceFacade {
         void update(TodoEvent entity);
         void deleteById(UUID id);
         List<TodoEvent> getEventsByFilter(Filter<TodoEvent> filter);
+        List<TodoEvent> getFilteredEvents();
         CrudService<TodoEvent> getTodoEventCrudService();
 }
