@@ -20,6 +20,9 @@ import cz.muni.fi.pv168.project.ui.renderer.CategoryListRenderer;
 import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -31,6 +34,8 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainWindow {
     private final JFrame frame;
@@ -62,6 +67,10 @@ public class MainWindow {
     private final Action keybindsAction;
     private final Action contactAction;
 
+    //panels used for showing statistics
+    JTextArea statisticsArea;
+    JTextArea catgoryStatisticsArea;
+    private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
 
     public MainWindow() {
@@ -125,8 +134,12 @@ public class MainWindow {
             int selectedIndex = tabPanel.getSelectedIndex();
             if (selectedIndex == 0) {
                 currentTable = eventTable;
+                computeEventStatistics();
             } else if (selectedIndex == 1) {
                 currentTable = managerTabTable;
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
             int selectedRowsCount = currentTable.getSelectedRowCount();
             changeActionsState(selectedRowsCount);
@@ -143,8 +156,19 @@ public class MainWindow {
             if (!e.getValueIsAdjusting() && currentTable == managerTabTable) {
                 int selectedRowsCount = managerTabTable.getSelectedRowCount();
                 changeActionsState(selectedRowsCount);
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
         });
+
+        eventTableModel.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                computeEventStatistics();
+            }
+        });
+        computeEventStatistics();
 
         frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
@@ -174,33 +198,85 @@ public class MainWindow {
         return eventsTab;
     }
 
-    //TODO: actual computing of statistics
-    // can use this to display statistics between the different tabs, left alone for now
-    //  i.e. use createStatisticsPanel to just create the panel, then make a 'changeDisplayedStatistics' function
-    //  which sets the currently relevant statistics
+
+    public void computeCategoryStatistics(){
+        int categoryEventCount = 0;
+        int categoryColumnIndex = eventTableModel.getColumnIndexByName("Categories");
+        int[] selectedRows = managerTabTable.getSelectedRows();
+
+
+        int totalRows = eventTable.getRowCount();
+        for (int i = 0; i < eventTable.getRowCount(); i++) {
+            for (int j = 0; j < selectedRows.length; j++) {
+                boolean categoryFound = false;
+                Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
+                for (Category eventCategory : (List<Category>) eventTable.getValueAt(i, categoryColumnIndex)) {
+                    if (eventCategory.equals(category)) {
+                        categoryEventCount++;
+                        categoryFound = true;
+                        break;
+                    }
+                }
+                if (categoryFound) {
+                    break;
+                }
+            }
+        }
+
+        double percentage = ((double) categoryEventCount / (double) totalRows) * 100.0;
+
+        catgoryStatisticsArea.setText(
+                "Total No. of Tasks With Selected Category(ies): " + categoryEventCount + "\n" +
+                "Percentage of Total Tasks With Selected Category: " + String.format("%.1f", percentage) + "%\n"
+        );
+
+    }
+
+    public void computeEventStatistics(){
+        int doneEvents = 0;
+        int plannedEvents = 0;
+        int totalEvents = 0;
+        int totalDoneLength = 0;
+        int totalPlannedLength = 0;
+
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+
+
+
+        for (int i = 0; i < eventList.size(); i++) {
+            if (eventList.get(i).isDone()) {
+                doneEvents++;
+                Interval interval = eventList.get(i).getInterval();
+                TimeUnit timeUnit = interval.getTimeUnit();
+                totalDoneLength += interval.getAmount() * timeUnit.getMinutes();
+            }
+            else{
+                plannedEvents++;
+                Interval interval = eventList.get(i).getInterval();
+                TimeUnit timeUnit = interval.getTimeUnit();
+                totalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
+            }
+            totalEvents++;
+        }
+
+        statisticsArea.setText(
+              "Total no. of done events: " + doneEvents + "\n" +
+              "Total no. of planned events: " + plannedEvents + "\n" +
+              "Total length of done events: " + totalDoneLength + " min\n" +
+              "Total length of planned events: " + totalPlannedLength + " min\n" +
+              "Total number of events: " + totalEvents + "\n"
+        );
+
+    }
+
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
-        JTextArea statisticsArea = new JTextArea(
-                """
-                Total No. of Done Events: 42
-                Total No. of Planned Events: 13
-                """
-        );
-
-        JTextArea statisticsLengthArea = new JTextArea(
-                """
-                Total length of done events: 189 minutes
-                Total number of events: 55 events
-                """
-        );
-
+        statisticsArea = new JTextArea();
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
+
         statisticsPanel.add(statisticsArea, BorderLayout.WEST);
-        statisticsLengthArea.setEditable(false);
-        statisticsLengthArea.setBackground(null);
-        statisticsPanel.add(statisticsLengthArea, BorderLayout.EAST);
         return statisticsPanel;
     }
 
@@ -211,15 +287,11 @@ public class MainWindow {
         JButton categoryButton = new JButton("Categories");
         JButton intervalButton = new JButton("Intervals");
 
-        JTextArea statisticsArea = new JTextArea();
-        statisticsArea.setEditable(false);
-        statisticsArea.setBackground(null);
-        // Default text shown
-        // TODO: in the future fetch these statistics
-        statisticsArea.setText("""
-        Total No. of Tasks With Selected Category: 5
-        Percentage of Total Tasks With Selected Category: 14%
-        """);
+
+        catgoryStatisticsArea = new JTextArea();
+        catgoryStatisticsArea.setEditable(false);
+        catgoryStatisticsArea.setBackground(null);
+        computeCategoryStatistics();
 
 
         JPanel managerTab = new JPanel(new BorderLayout());
@@ -233,16 +305,26 @@ public class MainWindow {
 
 
         managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
-        managerTab.add(statisticsArea, BorderLayout.SOUTH);
+        managerTab.add(catgoryStatisticsArea, BorderLayout.SOUTH);
 
-        categoryButton.addActionListener(e -> updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, statisticsArea));
-        templateButton.addActionListener(e -> updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, statisticsArea));
-        intervalButton.addActionListener(e -> updateTableModel(ManagedEntity.INTERVALS, managerTabTable, statisticsArea));
+        categoryButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = true;
+            computeCategoryStatistics();
+        });
+        templateButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
+        intervalButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.INTERVALS, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
 
         return managerTab;
     }
 
-    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea statisticsArea) {
+    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea categoryStatisticsArea) {
         TestDataGenerator testDataGenerator = new TestDataGenerator();
         TableModel newModel;
 
@@ -250,26 +332,24 @@ public class MainWindow {
             case CATEGORIES -> {
                 newModel = categoryTableModel;
 
-                statisticsArea.setText("""
-                    Total No. of Tasks With Selected Category: 5
-                    Percentage of Total Tasks With Selected Category: 14%
-                """);
+                categoryStatisticsArea.setVisible(true);
                 //TODO: statistics like this should be in its own function where they will be calculated
             }
             case TEMPLATES -> {
                 newModel = templateTableModel;
-
+                categoryStatisticsArea.setVisible(false);
                 //TODO: statistics for used templates? for now leaving blank
-                statisticsArea.setText("");
+                //statisticsArea.setText("");
             }
             case INTERVALS -> {
                 newModel = timeUnitTableModel;
-
+                categoryStatisticsArea.setVisible(false);
                 //TODO: statistics for used intervals? for now leaving blank
-                statisticsArea.setText("");
+                //statisticsArea.setText("");
             }
             default -> {
                 newModel = timeUnitTableModel;
+                categoryStatisticsArea.setVisible(false);
             }
         }
 
