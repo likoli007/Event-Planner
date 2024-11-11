@@ -14,20 +14,21 @@ public class KeybindsAction extends AbstractAction {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        JOptionPane.showMessageDialog(
-                parentFrame,
+        JOptionPane optionPane = new JOptionPane(
                 """
-                        Ctrl + A - Select all items in the current table
-                        Ctrl + N - Add a new item to the current table
-                        Ctrl + E - Edit the selected item
-                        Ctrl + D - Delete the selected item
-                        Ctrl + Q - Quit the app
-                        Alt + I - Import data
-                        Alt + E - Export data
-                        """,
-                "Important Keybinds",
+                Ctrl + A - Select all items in the current table
+                Ctrl + N - Add a new item to the current table
+                Ctrl + E - Edit the selected item
+                Ctrl + D - Delete the selected item
+                Ctrl + Q - Quit the app
+                Alt + I - Import data
+                Alt + E - Export data
+                """,
                 JOptionPane.INFORMATION_MESSAGE
         );
-    }
 
+        JDialog dialog = optionPane.createDialog(parentFrame, "Important Keybinds");
+        dialog.setModal(false);
+        dialog.setVisible(true);
+    }
 }
