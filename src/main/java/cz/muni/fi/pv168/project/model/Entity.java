@@ -10,4 +10,6 @@ public abstract class Entity {
     }
 
     public abstract boolean isDuplicate(Entity e);
+
+    public abstract void update(Entity e);
 }

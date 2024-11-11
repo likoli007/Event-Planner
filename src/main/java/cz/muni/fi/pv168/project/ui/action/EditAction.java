@@ -36,7 +36,8 @@ public final class EditAction extends AbstractAction {
         dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
             Validator.validateEditEvent(allTableModels, originalEvent, todoEvent);
 
-            eventTableModel.updateRow(todoEvent);
+            originalEvent.update(todoEvent);
+            eventTableModel.updateRow(originalEvent);
             SuccessDialog.show("Event edited successfully!");
         });
     }
@@ -47,7 +48,8 @@ public final class EditAction extends AbstractAction {
         dialog.show(currentTable, "Edit Template").ifPresent(template -> {
             Validator.validateEditTemplate(allTableModels, originalTemplate, template);
 
-            templateTableModel.updateRow(template);
+            originalTemplate.update(template);
+            templateTableModel.updateRow(originalTemplate);
             SuccessDialog.show("Template edited successfully!");
         });
     }
@@ -58,7 +60,8 @@ public final class EditAction extends AbstractAction {
         dialog.show(currentTable, "Edit Category").ifPresent(category -> {
             Validator.validateEditCategory(allTableModels, originalCategory, category);
 
-            categoryTableModel.updateRow(category);
+            originalCategory.update(category);
+            categoryTableModel.updateRow(originalCategory);
             SuccessDialog.show("Category edited successfully!");
         });
     }
@@ -69,7 +72,8 @@ public final class EditAction extends AbstractAction {
         dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnit -> {
             Validator.validateEditTimeUnit(allTableModels, originalTimeUnit, timeUnit);
 
-            timeUnitTableModel.updateRow(timeUnit);
+            originalTimeUnit.update(timeUnit);
+            timeUnitTableModel.updateRow(originalTimeUnit);
             SuccessDialog.show("Time unit edited successfully!");
         });
     }

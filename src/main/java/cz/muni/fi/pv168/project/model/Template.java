@@ -49,6 +49,20 @@ public class Template extends Entity {
         this.categories = template.categories;
     }
 
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof Template template)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
+    }
+
     public String getName() {
         return name;
     }

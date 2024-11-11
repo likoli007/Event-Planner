@@ -23,6 +23,17 @@ public class Category extends Entity {
         this.color = category.color;
     }
 
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof Category category)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = category.id;
+        this.name = category.name;
+        this.color = category.color;
+    }
+
     public String getName() {
         return name;
     }
