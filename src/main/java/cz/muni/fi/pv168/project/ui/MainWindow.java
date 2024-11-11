@@ -355,10 +355,6 @@ public class MainWindow {
         editMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
         menuBar.add(editMenu);
 
-        var optionsMenu = new JMenu("Options");
-        optionsMenu.setMnemonic('o');
-        menuBar.add(optionsMenu);
-
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
 
