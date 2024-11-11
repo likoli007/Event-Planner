@@ -11,6 +11,9 @@ public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
     private final CrudService<TodoEvent> todoEventCrudService;
     private Filter<TodoEvent> filter;
 
+    //TODO: dont do this
+    private Filter<TodoEvent> filter;
+
     public TodoEventsServiceFacadeImpl(CrudService<TodoEvent> todoEventCrudService) {
         this.todoEventCrudService = todoEventCrudService;
     }
