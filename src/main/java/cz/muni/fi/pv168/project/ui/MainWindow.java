@@ -80,7 +80,7 @@ public class MainWindow {
         todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
 
 
-        eventTableModel = new EventTableModel(todoEventsServiceFacade);
+        eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
         templateTableModel = new TemplateTableModel(templateCrudService);
         timeUnitTableModel = new TimeUnitTableModel(timeUnitCrudService);
