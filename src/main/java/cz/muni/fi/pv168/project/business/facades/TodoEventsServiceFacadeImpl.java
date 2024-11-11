@@ -38,4 +38,9 @@ public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
     public List<TodoEvent> getEventsByFilter(Filter<TodoEvent> filter) {
         return todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
     }
+
+    @Override
+    public CrudService<TodoEvent> getTodoEventCrudService(){
+        return this.todoEventCrudService;
+    }
 }

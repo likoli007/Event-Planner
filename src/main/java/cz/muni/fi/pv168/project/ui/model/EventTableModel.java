@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.business.filter.Filter;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
+import cz.muni.fi.pv168.project.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDateTime;
@@ -121,5 +122,14 @@ public class EventTableModel extends AbstractTableModel {
         todoEventFacade.deleteById(template.getId());
         todoEvents.remove(template);
         fireTableRowsDeleted(modelRow, modelRow);
+    }
+
+    public void refresh() {
+        this.todoEvents = new ArrayList<>(todoEventFacade.findAll());
+        fireTableDataChanged();
+    }
+
+    public CrudService<TodoEvent> getTodoEventCrudService(){
+        return this.todoEventFacade.getTodoEventCrudService();
     }
 }

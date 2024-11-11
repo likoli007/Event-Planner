@@ -16,18 +16,18 @@ import java.util.Collection;
 
 public class GenericExportService implements ExportService {
 
-    private final TodoEventCrudService todoEventCrudService;
-    private final TemplateCrudService templateCrudService;
-    private final TimeUnitCrudService timeUnitCrudService;
-    private final CategoryCrudService categoryCrudService;
+    private final CrudService<TodoEvent> todoEventCrudService;
+    private final CrudService<Category> categoryCrudService;
+    private final CrudService<Template> templateCrudService;
+    private final CrudService<TimeUnit> timeUnitCrudService;
 
     private final FormatMapping<BatchExporter> exporters;
 
     public GenericExportService(
-            CategoryCrudService categoryCrudService,
-            TimeUnitCrudService timeUnitCrudService,
-            TemplateCrudService templateCrudService,
-            TodoEventCrudService todoEventCrudService,
+            CrudService<Category> categoryCrudService,
+            CrudService<TimeUnit> timeUnitCrudService,
+            CrudService<Template> templateCrudService,
+            CrudService<TodoEvent> todoEventCrudService,
             Collection<BatchExporter> exporters) {
         this.todoEventCrudService = todoEventCrudService;
         this.templateCrudService = templateCrudService;

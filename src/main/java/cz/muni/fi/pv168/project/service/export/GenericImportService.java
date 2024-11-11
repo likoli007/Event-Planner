@@ -1,10 +1,7 @@
 package cz.muni.fi.pv168.project.service.export;
 
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.service.crud.CategoryCrudService;
-import cz.muni.fi.pv168.project.service.crud.TemplateCrudService;
-import cz.muni.fi.pv168.project.service.crud.TimeUnitCrudService;
-import cz.muni.fi.pv168.project.service.crud.TodoEventCrudService;
+import cz.muni.fi.pv168.project.service.crud.*;
 import cz.muni.fi.pv168.project.service.export.batch.Batch;
 import cz.muni.fi.pv168.project.service.export.batch.BatchImporter;
 import cz.muni.fi.pv168.project.service.export.batch.BatchOperationException;
@@ -21,17 +18,17 @@ import java.util.Optional;
 
 public class GenericImportService implements ImportService {
 
-    private final TodoEventCrudService todoEventCrudService;
-    private final TemplateCrudService templateCrudService;
-    private final TimeUnitCrudService timeUnitCrudService;
-    private final CategoryCrudService categoryCrudService;
+    private final CrudService<TodoEvent> todoEventCrudService;
+    private final CrudService<Category> categoryCrudService;
+    private final CrudService<Template> templateCrudService;
+    private final CrudService<TimeUnit> timeUnitCrudService;
     private final FormatMapping<BatchImporter> importers;
 
     public GenericImportService(
-            CategoryCrudService categoryCrudService,
-            TimeUnitCrudService timeUnitCrudService,
-            TemplateCrudService templateCrudService,
-            TodoEventCrudService todoEventCrudService,
+            CrudService<Category> categoryCrudService,
+            CrudService<TimeUnit> timeUnitCrudService,
+            CrudService<Template> templateCrudService,
+            CrudService<TodoEvent> todoEventCrudService,
             Collection<BatchImporter> importers
     ) {
         this.todoEventCrudService = todoEventCrudService;
