@@ -22,6 +22,18 @@ public class TimeUnit extends Entity {
         this.minutes = timeUnit.minutes;
     }
 
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof TimeUnit timeUnit)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = timeUnit.id;
+        this.name = timeUnit.name;
+        this.shortcut = timeUnit.shortcut;
+        this.minutes = timeUnit.minutes;
+    }
+
     public static TimeUnit minute() {
         return MINUTE;
     }

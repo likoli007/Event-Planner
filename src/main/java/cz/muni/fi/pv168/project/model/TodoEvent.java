@@ -50,6 +50,21 @@ public class TodoEvent extends Entity {
         this.done = todoEvent.done;
     }
 
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof TodoEvent todoEvent)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = todoEvent.id;
+        this.name = todoEvent.name;
+        this.details = todoEvent.details;
+        this.start = todoEvent.start;
+        this.interval = todoEvent.interval;
+        this.categories = todoEvent.categories;
+        this.done = todoEvent.done;
+    }
+
     public String getName() {
         return name;
     }
