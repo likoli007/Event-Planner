@@ -70,7 +70,6 @@ public class MainWindow {
     //panels used for showing statistics
     JTextArea statisticsArea;
     JTextArea catgoryStatisticsArea;
-    JTextArea statisticsLengthArea;
     private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
 
@@ -237,9 +236,11 @@ public class MainWindow {
         int doneEvents = 0;
         int plannedEvents = 0;
         int totalEvents = 0;
-        int totalLength = 0;
+        int totalDoneLength = 0;
+        int totalPlannedLength = 0;
 
         List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+
 
 
         for (int i = 0; i < eventList.size(); i++) {
@@ -247,37 +248,35 @@ public class MainWindow {
                 doneEvents++;
                 Interval interval = eventList.get(i).getInterval();
                 TimeUnit timeUnit = interval.getTimeUnit();
-                totalLength += interval.getAmount() * timeUnit.getMinutes();
+                totalDoneLength += interval.getAmount() * timeUnit.getMinutes();
             }
             else{
                 plannedEvents++;
+                Interval interval = eventList.get(i).getInterval();
+                TimeUnit timeUnit = interval.getTimeUnit();
+                totalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
             }
             totalEvents++;
         }
 
         statisticsArea.setText(
-              "Total No. of Done Events: " + doneEvents + "\n" +
-              "Total No. of Planned Events: " + plannedEvents + "\n"
-        );
-        statisticsLengthArea.setText(
-              "Total length of done events: " + totalLength + " min\n" +
+              "Total no. of done events: " + doneEvents + "\n" +
+              "Total no. of planned events: " + plannedEvents + "\n" +
+              "Total length of done events: " + totalDoneLength + " min\n" +
+              "Total length of planned events: " + totalPlannedLength + " min\n" +
               "Total number of events: " + totalEvents + "\n"
         );
+
     }
 
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
         statisticsArea = new JTextArea();
-
-        statisticsLengthArea = new JTextArea();
-
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
+
         statisticsPanel.add(statisticsArea, BorderLayout.WEST);
-        statisticsLengthArea.setEditable(false);
-        statisticsLengthArea.setBackground(null);
-        statisticsPanel.add(statisticsLengthArea, BorderLayout.EAST);
         return statisticsPanel;
     }
 
