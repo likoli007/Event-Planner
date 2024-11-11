@@ -30,9 +30,15 @@ public class ExportDialog {
 
     private final JDialog dialog;
 
-    public ExportDialog(JFrame parentFrame) {
+    private int allEventsCount;
+    private int filteredEventsCount;
+
+    public ExportDialog(JFrame parentFrame, int allEventsCount, int filteredEventsCount) {
         this.fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
         this.filter = new FileNameExtensionFilter("JSON Files", "json");
+        this.allEventsCount = allEventsCount;
+        this.filteredEventsCount = filteredEventsCount;
+
 
         this.mainPanel = new JPanel();
         this.exportPanel = new JPanel(new FlowLayout());
@@ -72,7 +78,7 @@ public class ExportDialog {
         filterLabel.setBorder(new EmptyBorder(10, 5, 5, 0));
         exportStatisticsLabel.setBorder(new EmptyBorder(0, 5, 5, 0));
         exportStatisticsLabel.setVisible(true);
-        exportStatisticsLabel.setText("Will export 90 events.");
+        exportStatisticsLabel.setText("Will export " + allEventsCount +" events.");
 
         filterRadioButton.addActionListener(this::filterRadioButtonClicked);
         noFilterRadioButton.addActionListener(this::noFilterRadioButtonClicked);
@@ -100,18 +106,16 @@ public class ExportDialog {
     }
 
     private void filterRadioButtonClicked(ActionEvent e) {
-        //TODO: actual statistics logic
-        exportStatisticsLabel.setText("Will export 78 out of 90 events.");
+        exportStatisticsLabel.setText("Will export " + filteredEventsCount + " out of " + allEventsCount + " events.");
         exportStatisticsLabel.setVisible(true);
     }
 
     private void noFilterRadioButtonClicked(ActionEvent e) {
-        exportStatisticsLabel.setText("Will export 90 events.");
+        exportStatisticsLabel.setText("Will export " + allEventsCount +"events.");
         exportStatisticsLabel.setVisible(true);
     }
 
     private void exportButtonClicked(ActionEvent e) {
-        //TODO: actual export logic
         resultFilePath = textField.getText();
         exportFiltered = filterRadioButton.isSelected();
         dialog.dispose();

@@ -12,6 +12,6 @@ import java.util.Collection;
 public interface ExportService {
 
 
-    void exportData(String filePath) throws IOException;
+    void exportData(String filePath, boolean exportFiltered) throws IOException;
     Collection<Format> getFormats();
 }

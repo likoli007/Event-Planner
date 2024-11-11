@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.project.service.export;
 
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
@@ -13,10 +14,12 @@ import cz.muni.fi.pv168.project.service.export.format.FormatMapping;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class GenericExportService implements ExportService {
 
-    private final CrudService<TodoEvent> todoEventCrudService;
+    private final TodoEventsServiceFacade todoEventCrudService;
     private final CrudService<Category> categoryCrudService;
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
@@ -27,7 +30,7 @@ public class GenericExportService implements ExportService {
             CrudService<Category> categoryCrudService,
             CrudService<TimeUnit> timeUnitCrudService,
             CrudService<Template> templateCrudService,
-            CrudService<TodoEvent> todoEventCrudService,
+            TodoEventsServiceFacade todoEventCrudService,
             Collection<BatchExporter> exporters) {
         this.todoEventCrudService = todoEventCrudService;
         this.templateCrudService = templateCrudService;
@@ -42,11 +45,13 @@ public class GenericExportService implements ExportService {
     }
 
     @Override
-    public void exportData(String filePath) throws IOException {
+    public void exportData(String filePath, boolean exportFiltered) throws IOException {
         var exporter = getExporter(filePath);
 
+        List<TodoEvent> eventsList = exportFiltered ? todoEventCrudService.getFilteredEvents() : todoEventCrudService.findAll();
+
         var batch = new Batch(categoryCrudService.findAll(), timeUnitCrudService.findAll(),
-                templateCrudService.findAll(), todoEventCrudService.findAll());
+                templateCrudService.findAll(), eventsList);
         exporter.exportBatch(batch, filePath);
     }
 

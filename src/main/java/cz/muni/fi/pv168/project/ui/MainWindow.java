@@ -82,7 +82,7 @@ public class MainWindow {
 
 
         var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
-                templateCrudService, eventCrudService, List.of(new JSONFileExporter()));
+                templateCrudService, todoEventsServiceFacade, List.of(new JSONFileExporter()));
 
         var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
                 templateCrudService, eventCrudService, List.of(new JSONFileImporter()));
@@ -104,7 +104,11 @@ public class MainWindow {
         editAction = new EditAction(() -> currentTable, allTableModels);
 
         importAction = new ImportAction(frame, importService, this::refresh);
-        exportAction = new ExportAction(frame, exportService);
+
+
+        exportAction = new ExportAction(frame, exportService,todoEventsServiceFacade::getFilteredEvents,
+                this.todoEventsServiceFacade::findAll
+                );
 
 
         aboutAction = new AboutAction(frame);
