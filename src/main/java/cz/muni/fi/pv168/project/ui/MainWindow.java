@@ -13,16 +13,14 @@ import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
-import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.LocalTimeRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.CategoryListRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
+import cz.muni.fi.pv168.project.ui.renderer.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -325,35 +323,35 @@ public class MainWindow {
     }
 
     private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea categoryStatisticsArea) {
-        TestDataGenerator testDataGenerator = new TestDataGenerator();
-        TableModel newModel;
-
         switch (selectedEntity) {
-            case CATEGORIES -> {
-                newModel = categoryTableModel;
-
-                categoryStatisticsArea.setVisible(true);
-                //TODO: statistics like this should be in its own function where they will be calculated
-            }
             case TEMPLATES -> {
-                newModel = templateTableModel;
+                table.setModel(templateTableModel);
                 categoryStatisticsArea.setVisible(false);
-                //TODO: statistics for used templates? for now leaving blank
-                //statisticsArea.setText("");
+                categoryTableShown = false;
             }
             case INTERVALS -> {
-                newModel = timeUnitTableModel;
+                table.setModel(timeUnitTableModel);
                 categoryStatisticsArea.setVisible(false);
-                //TODO: statistics for used intervals? for now leaving blank
-                //statisticsArea.setText("");
+                categoryTableShown = false;
+                configureMinutesColumnRenderer(table);
             }
             default -> {
-                newModel = timeUnitTableModel;
-                categoryStatisticsArea.setVisible(false);
+                table.setModel(categoryTableModel);
+                categoryStatisticsArea.setVisible(true);
+                categoryTableShown = true;
+                computeCategoryStatistics();
             }
         }
+    }
 
-        table.setModel(newModel);
+    private void configureMinutesColumnRenderer(JTable table) {
+        int minutesColumnIndex = timeUnitTableModel.getColumnIndexByName("Minutes");
+        if (minutesColumnIndex != -1) {
+            TableColumnModel columnModel = table.getColumnModel();
+            if (minutesColumnIndex < columnModel.getColumnCount()) {
+                columnModel.getColumn(minutesColumnIndex).setCellRenderer(new LeftAlignedCellRenderer());
+            }
+        }
     }
 
     public void show() {
@@ -377,14 +375,32 @@ public class MainWindow {
 
         int startColumnIndex = model.getColumnIndexByName("Start");
         if (startColumnIndex != -1) {
-            table.getColumnModel().getColumn(startColumnIndex).setCellRenderer(new LocalDateTimeRenderer());
+            TableColumn startColumn = table.getColumnModel().getColumn(startColumnIndex);
+            startColumn.setCellRenderer(new LocalDateTimeRenderer());
+            startColumn.setPreferredWidth(200);
+            startColumn.setMaxWidth(200);
+            startColumn.setMinWidth(200);
+        }
+
+        int intervalColumnIndex = model.getColumnIndexByName("Interval");
+        if (intervalColumnIndex != -1) {
+            TableColumn intervalColumn = table.getColumnModel().getColumn(intervalColumnIndex);
+            intervalColumn.setPreferredWidth(150);
+            intervalColumn.setMaxWidth(200);
+            intervalColumn.setMinWidth(100);
         }
 
         int doneColumnIndex = model.getColumnIndexByName("Done");
         if (doneColumnIndex != -1) {
-            table.getColumnModel().getColumn(doneColumnIndex).setCellRenderer(table.getDefaultRenderer(Boolean.class));
-            table.getColumnModel().getColumn(doneColumnIndex).setCellEditor(table.getDefaultEditor(Boolean.class));
+            TableColumn doneColumn = table.getColumnModel().getColumn(doneColumnIndex);
+            doneColumn.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+            doneColumn.setCellEditor(table.getDefaultEditor(Boolean.class));
+
+            doneColumn.setPreferredWidth(50);
+            doneColumn.setMaxWidth(50);
+            doneColumn.setMinWidth(50);
         }
+
         int categoryColumnIndex = model.getColumnIndexByName("Categories");
         if (categoryColumnIndex != -1) {
             table.getColumnModel().getColumn(categoryColumnIndex).setCellRenderer(new CategoryListRenderer());

@@ -82,4 +82,13 @@ public class TimeUnitTableModel extends AbstractTableModel {
     public CrudService<TimeUnit> getTimeUnitCrudService() {
         return timeUnitCrudService;
     }
+
+    public int getColumnIndexByName(String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).getName().equals(columnName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
