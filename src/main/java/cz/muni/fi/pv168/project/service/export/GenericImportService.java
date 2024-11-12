@@ -110,7 +110,7 @@ public class GenericImportService implements ImportService {
                     crudCategory.setColor(category.getColor());
                     changeImportedCategoryReferences(crudCategory);
                 }
-                if (result == DuplicateType.DUPLICATE) {
+                else if (result == DuplicateType.DUPLICATE) {
                     category.setName(category.getName() + " (copy)");
                     createCategory(category);
                 }
@@ -147,7 +147,7 @@ public class GenericImportService implements ImportService {
                     crudTimeUnit.setShortcut(timeUnit.getShortcut());
                     changeImportedTimeUnitReferences(crudTimeUnit);
                 }
-                if (result == DuplicateType.DUPLICATE) {
+                else if (result == DuplicateType.DUPLICATE) {
                     timeUnit.setName(timeUnit.getName() + " (copy)");
                     createInterval(timeUnit);
                 }
