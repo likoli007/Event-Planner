@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.project.service.export;
 
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.service.crud.*;
 import cz.muni.fi.pv168.project.service.export.batch.Batch;
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 public class GenericImportService implements ImportService {
 
-    private final CrudService<TodoEvent> todoEventCrudService;
+    private final TodoEventsServiceFacade todoEventFacade;
     private final CrudService<Category> categoryCrudService;
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
@@ -31,10 +32,10 @@ public class GenericImportService implements ImportService {
             CrudService<Category> categoryCrudService,
             CrudService<TimeUnit> timeUnitCrudService,
             CrudService<Template> templateCrudService,
-            CrudService<TodoEvent> todoEventCrudService,
+            TodoEventsServiceFacade todoEventFacade,
             Collection<BatchImporter> importers
     ) {
-        this.todoEventCrudService = todoEventCrudService;
+        this.todoEventFacade = todoEventFacade;
         this.templateCrudService = templateCrudService;
         this.timeUnitCrudService = timeUnitCrudService;
         this.categoryCrudService = categoryCrudService;
@@ -207,7 +208,7 @@ public class GenericImportService implements ImportService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy EEE");
 
         for (var event : events) {
-            Optional<TodoEvent> original = todoEventCrudService.findDuplicate(event);
+            Optional<TodoEvent> original = todoEventFacade.findDuplicate(event);
 
             if (original.isEmpty()) {
                 createEvent(event);
@@ -278,7 +279,7 @@ public class GenericImportService implements ImportService {
         templateCrudService.create(template);
     }
     private void createEvent(TodoEvent event){
-        todoEventCrudService.create(event);
+        todoEventFacade.create(event);
     }
 
     @Override
