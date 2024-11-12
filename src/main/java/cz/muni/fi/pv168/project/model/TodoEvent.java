@@ -98,7 +98,7 @@ public class TodoEvent extends Entity {
     }
 
     public List<Category> getCategories() {
-        return Collections.unmodifiableList(categories);
+        return categories;
     }
 
     public void setCategories(List<Category> categories) {
