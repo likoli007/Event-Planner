@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 public class GenericImportService implements ImportService {
@@ -23,6 +24,8 @@ public class GenericImportService implements ImportService {
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
     private final FormatMapping<BatchImporter> importers;
+
+    private Batch importedBatch;
 
     public GenericImportService(
             CrudService<Category> categoryCrudService,
@@ -38,6 +41,58 @@ public class GenericImportService implements ImportService {
         this.importers = new FormatMapping<>(importers);
     }
 
+    private void changeImportedCategoryReferences(Category category){
+        for (TodoEvent e : importedBatch.events()){
+            boolean hasCategoryReference = false;
+            Iterator<Category> it = e.getCategories().iterator();
+            while (it.hasNext()) {
+                Category originalCategory = it.next();
+
+                if (category.isDuplicate(originalCategory)) {
+                    it.remove();
+                    hasCategoryReference = true;
+                }
+            }
+            if (hasCategoryReference){
+                e.getCategories().add(category);
+            }
+        }
+
+        for (Template t : importedBatch.templates()){
+            Iterator<Category> it = t.getCategories().iterator();
+            boolean hasCategoryReference = false;
+            while (it.hasNext()) {
+                Category originalCategory = it.next();
+
+                if (category.isDuplicate(originalCategory)) {
+                    it.remove();
+                }
+            }
+            if (hasCategoryReference){
+                t.getCategories().add(category);
+            }
+        }
+    }
+
+    private void changeImportedTimeUnitReferences(TimeUnit timeUnit){
+        for (TodoEvent e : importedBatch.events()){
+            Interval originalInterval = e.getInterval();
+            TimeUnit originalTimeUnit = originalInterval.getTimeUnit();
+
+            if (originalTimeUnit.isDuplicate(originalTimeUnit)){
+                e.getInterval().setTimeUnit(originalTimeUnit);
+            }
+        }
+        for (Template t : importedBatch.templates()){
+            Interval originalInterval = t.getInterval();
+            TimeUnit originalTimeUnit = originalInterval.getTimeUnit();
+            if (originalTimeUnit.isDuplicate(originalTimeUnit)){
+                t.getInterval().setTimeUnit(originalTimeUnit);
+            }
+        }
+    }
+
+
     private void handleDuplicateCategories(Collection<Category> categories, JFrame parentFrame) {
         for (var category : categories) {
             Optional<Category> original = categoryCrudService.findDuplicate(category);
@@ -52,10 +107,14 @@ public class GenericImportService implements ImportService {
                 if (result == DuplicateType.OVERWRITE) {
                     crudCategory.setName(category.getName());
                     crudCategory.setColor(category.getColor());
+                    changeImportedCategoryReferences(crudCategory);
                 }
                 if (result == DuplicateType.DUPLICATE) {
                     category.setName(category.getName() + " (copy)");
                     createCategory(category);
+                }
+                else{
+                    changeImportedCategoryReferences(crudCategory);
                 }
             }
         }
@@ -85,10 +144,14 @@ public class GenericImportService implements ImportService {
                     crudTimeUnit.setName(timeUnit.getName());
                     crudTimeUnit.setMinutes(timeUnit.getMinutes());
                     crudTimeUnit.setShortcut(timeUnit.getShortcut());
+                    changeImportedTimeUnitReferences(crudTimeUnit);
                 }
                 if (result == DuplicateType.DUPLICATE) {
                     timeUnit.setName(timeUnit.getName() + " (copy)");
                     createInterval(timeUnit);
+                }
+                else{
+                    changeImportedTimeUnitReferences(crudTimeUnit);
                 }
             }
         }
@@ -187,10 +250,12 @@ public class GenericImportService implements ImportService {
 
     private void handleDuplicates(Batch batch, JFrame parentFrame) {
         //TODO: templated function? but the different classes differ in multiple aspects
-        handleDuplicateCategories(batch.categories(), parentFrame);
-        handleDuplicateTimeUnits(batch.timeUnits(), parentFrame);
-        handleDuplicateTemplates(batch.templates(), parentFrame);
-        handleDuplicateEvents(batch.events(), parentFrame);
+
+        importedBatch = batch;
+        handleDuplicateCategories(importedBatch.categories(), parentFrame);
+        handleDuplicateTimeUnits(importedBatch.timeUnits(), parentFrame);
+        handleDuplicateTemplates(importedBatch.templates(), parentFrame);
+        handleDuplicateEvents(importedBatch.events(), parentFrame);
     }
     @Override
     public void importData(String filePath, JFrame frame) throws IOException {
