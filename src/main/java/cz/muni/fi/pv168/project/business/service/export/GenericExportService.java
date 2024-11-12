@@ -6,7 +6,6 @@ import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.service.crud.*;
 import cz.muni.fi.pv168.project.business.service.export.batch.Batch;
 import cz.muni.fi.pv168.project.business.service.export.batch.BatchExporter;
 import cz.muni.fi.pv168.project.business.service.export.batch.BatchOperationException;

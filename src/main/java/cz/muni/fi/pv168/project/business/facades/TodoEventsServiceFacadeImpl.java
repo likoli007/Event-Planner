@@ -5,6 +5,7 @@ import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
@@ -43,7 +44,7 @@ public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
         return getFilteredEvents();
 
     }
-
+@Override
     public List<TodoEvent> getFilteredEvents(){
         if(filter != null){
             return todoEventCrudService.findAll().stream().filter(filter::isMatch).toList();
@@ -54,5 +55,10 @@ public class TodoEventsServiceFacadeImpl implements TodoEventsServiceFacade {
     @Override
     public CrudService<TodoEvent> getTodoEventCrudService(){
         return this.todoEventCrudService;
+    }
+
+    @Override
+    public Optional<TodoEvent> findDuplicate(TodoEvent entity) {
+        return todoEventCrudService.findDuplicate(entity);
     }
 }
