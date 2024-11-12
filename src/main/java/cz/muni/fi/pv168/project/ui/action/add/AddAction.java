@@ -1,7 +1,6 @@
 package cz.muni.fi.pv168.project.ui.action.add;
 
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.service.crud.CategoryCrudService;
 import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
@@ -12,11 +11,9 @@ import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public abstract class AddAction extends AbstractAction {
@@ -37,7 +34,7 @@ public abstract class AddAction extends AbstractAction {
                 "",
                 LocalDateTime.now(),
                 1,
-                List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
+                new ArrayList<>()
         );
 
         TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
@@ -55,7 +52,7 @@ public abstract class AddAction extends AbstractAction {
                 "",
                 LocalTime.now(),
                 1,
-                List.of(allTableModels.getCategoryTableModel().getCategoryCrudService().findAll().get(0))
+                new ArrayList<>()
         );
 
         TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
