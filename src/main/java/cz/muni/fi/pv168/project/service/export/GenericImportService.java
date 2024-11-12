@@ -66,6 +66,7 @@ public class GenericImportService implements ImportService {
 
                 if (category.isDuplicate(originalCategory)) {
                     it.remove();
+                    hasCategoryReference = true;
                 }
             }
             if (hasCategoryReference){
