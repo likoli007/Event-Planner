@@ -6,6 +6,7 @@ import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
+import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalTime;
 import java.util.List;
@@ -46,7 +47,10 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         intervalField.setText(String.valueOf(template.getInterval().getAmount()));
         for (Category category : template.getCategories()) {
-            categoryList.setSelectedValue(category, true);
+            int index = categoryList.getNextMatch(category.toString(), 0, Position.Bias.Forward);
+            if (index != -1) {
+                categoryList.addSelectionInterval(index, index);
+            }
         }
         timeUnitModel.setSelectedItem(template.getInterval().getTimeUnit());
     }
