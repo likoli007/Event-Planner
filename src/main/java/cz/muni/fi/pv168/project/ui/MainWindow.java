@@ -13,16 +13,14 @@ import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
-import cz.muni.fi.pv168.project.ui.renderer.EventTableCellRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.LocalDateTimeRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.LocalTimeRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.CategoryListRenderer;
-import cz.muni.fi.pv168.project.ui.renderer.CategoryRenderer;
+import cz.muni.fi.pv168.project.ui.renderer.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -325,35 +323,35 @@ public class MainWindow {
     }
 
     private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea categoryStatisticsArea) {
-        TestDataGenerator testDataGenerator = new TestDataGenerator();
-        TableModel newModel;
-
         switch (selectedEntity) {
-            case CATEGORIES -> {
-                newModel = categoryTableModel;
-
-                categoryStatisticsArea.setVisible(true);
-                //TODO: statistics like this should be in its own function where they will be calculated
-            }
             case TEMPLATES -> {
-                newModel = templateTableModel;
+                table.setModel(templateTableModel);
                 categoryStatisticsArea.setVisible(false);
-                //TODO: statistics for used templates? for now leaving blank
-                //statisticsArea.setText("");
+                categoryTableShown = false;
             }
             case INTERVALS -> {
-                newModel = timeUnitTableModel;
+                table.setModel(timeUnitTableModel);
                 categoryStatisticsArea.setVisible(false);
-                //TODO: statistics for used intervals? for now leaving blank
-                //statisticsArea.setText("");
+                categoryTableShown = false;
+                configureMinutesColumnRenderer(table);
             }
             default -> {
-                newModel = timeUnitTableModel;
-                categoryStatisticsArea.setVisible(false);
+                table.setModel(categoryTableModel);
+                categoryStatisticsArea.setVisible(true);
+                categoryTableShown = true;
+                computeCategoryStatistics();
             }
         }
+    }
 
-        table.setModel(newModel);
+    private void configureMinutesColumnRenderer(JTable table) {
+        int minutesColumnIndex = timeUnitTableModel.getColumnIndexByName("Minutes");
+        if (minutesColumnIndex != -1) {
+            TableColumnModel columnModel = table.getColumnModel();
+            if (minutesColumnIndex < columnModel.getColumnCount()) {
+                columnModel.getColumn(minutesColumnIndex).setCellRenderer(new LeftAlignedCellRenderer());
+            }
+        }
     }
 
     public void show() {
@@ -377,14 +375,32 @@ public class MainWindow {
 
         int startColumnIndex = model.getColumnIndexByName("Start");
         if (startColumnIndex != -1) {
-            table.getColumnModel().getColumn(startColumnIndex).setCellRenderer(new LocalDateTimeRenderer());
+            TableColumn startColumn = table.getColumnModel().getColumn(startColumnIndex);
+            startColumn.setCellRenderer(new LocalDateTimeRenderer());
+            startColumn.setPreferredWidth(200);
+            startColumn.setMaxWidth(200);
+            startColumn.setMinWidth(200);
+        }
+
+        int intervalColumnIndex = model.getColumnIndexByName("Interval");
+        if (intervalColumnIndex != -1) {
+            TableColumn intervalColumn = table.getColumnModel().getColumn(intervalColumnIndex);
+            intervalColumn.setPreferredWidth(150);
+            intervalColumn.setMaxWidth(200);
+            intervalColumn.setMinWidth(100);
         }
 
         int doneColumnIndex = model.getColumnIndexByName("Done");
         if (doneColumnIndex != -1) {
-            table.getColumnModel().getColumn(doneColumnIndex).setCellRenderer(table.getDefaultRenderer(Boolean.class));
-            table.getColumnModel().getColumn(doneColumnIndex).setCellEditor(table.getDefaultEditor(Boolean.class));
+            TableColumn doneColumn = table.getColumnModel().getColumn(doneColumnIndex);
+            doneColumn.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+            doneColumn.setCellEditor(table.getDefaultEditor(Boolean.class));
+
+            doneColumn.setPreferredWidth(50);
+            doneColumn.setMaxWidth(50);
+            doneColumn.setMinWidth(50);
         }
+
         int categoryColumnIndex = model.getColumnIndexByName("Categories");
         if (categoryColumnIndex != -1) {
             table.getColumnModel().getColumn(categoryColumnIndex).setCellRenderer(new CategoryListRenderer());
@@ -466,20 +482,60 @@ public class MainWindow {
     }
 
     private JPanel createFilterPanel() {
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel filterPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel fromLabel = new JLabel("From Date:");
+        // Row 1: From Date, From Time, To Date, To Time, Today and This Week buttons
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("From Date:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
         DatePicker fromDatePicker = new DatePicker();
+        filterPanel.add(fromDatePicker, gbc);
 
-        JLabel fromTimeLabel = new JLabel("Time:");
+        gbc.gridx = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Time:"), gbc);
+
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
         TimePicker fromTimePicker = new TimePicker();
+        filterPanel.add(fromTimePicker, gbc);
 
-        JLabel toLabel = new JLabel("To Date:");
+        gbc.gridx = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("To Date:"), gbc);
+
+        gbc.gridx = 5;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
         DatePicker toDatePicker = new DatePicker();
+        filterPanel.add(toDatePicker, gbc);
 
-        JLabel toTimeLabel = new JLabel("Time:");
+        gbc.gridx = 6;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Time:"), gbc);
+
+        gbc.gridx = 7;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
         TimePicker toTimePicker = new TimePicker();
+        filterPanel.add(toTimePicker, gbc);
 
+        gbc.gridx = 8;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         JButton todayButton = new JButton("Today");
         todayButton.addActionListener(e -> {
             fromDatePicker.setDateToToday();
@@ -487,7 +543,9 @@ public class MainWindow {
             fromTimePicker.setTime(LocalTime.MIN);
             toTimePicker.setTime(LocalTime.MAX);
         });
+        filterPanel.add(todayButton, gbc);
 
+        gbc.gridx = 9;
         JButton thisWeekButton = new JButton("This Week");
         thisWeekButton.addActionListener(e -> {
             LocalDate today = LocalDate.now();
@@ -499,26 +557,54 @@ public class MainWindow {
             fromTimePicker.setTime(LocalTime.MIN);
             toTimePicker.setTime(LocalTime.MAX);
         });
+        filterPanel.add(thisWeekButton, gbc);
 
-        JLabel unitLabel = new JLabel("Units:");
-        List<String> units = new ArrayList<String>();
-        units.add(null);  // Add null as the first "no unit" option
-        units.addAll(timeUnitCrudService.findAll().stream().map(TimeUnit::getName).toList());
-        JComboBox<String> unitComboBox = new JComboBox<>(units.toArray(new String[0]));
+        // Row 2: Category, Units, Status, and Clear button
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        filterPanel.add(new JLabel("Category:"), gbc);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        List<String> categories = new ArrayList<String>();
-        categories.add(null);  // Add null as the first "no category" option
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        List<String> categories = new ArrayList<>();
+        categories.add(null);
         categories.addAll(categoryCrudService.findAll().stream().map(Category::getName).toList());
         JComboBox<String> categoryComboBox = new JComboBox<>(categories.toArray(new String[0]));
+        filterPanel.add(categoryComboBox, gbc);
 
+        gbc.gridx = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Units:"), gbc);
 
-        JLabel statusLabel = new JLabel("Status:");
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        List<String> units = new ArrayList<>();
+        units.add(null);
+        units.addAll(timeUnitCrudService.findAll().stream().map(TimeUnit::getName).toList());
+        JComboBox<String> unitComboBox = new JComboBox<>(units.toArray(new String[0]));
+        filterPanel.add(unitComboBox, gbc);
+
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         JCheckBox doneCheckBox = new JCheckBox("Done");
         JCheckBox plannedCheckBox = new JCheckBox("Planned");
+        statusPanel.add(new JLabel("Status:"));
+        statusPanel.add(doneCheckBox);
+        statusPanel.add(plannedCheckBox);
 
+        gbc.gridx = 4;
+        gbc.gridwidth = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(statusPanel, gbc);
+
+        gbc.gridx = 9;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
         JButton clearButton = new JButton("Clear");
-
         clearButton.addActionListener(e -> {
             fromDatePicker.clear();
             fromTimePicker.clear();
@@ -528,9 +614,9 @@ public class MainWindow {
             plannedCheckBox.setSelected(false);
             categoryComboBox.setSelectedIndex(0);
             unitComboBox.setSelectedIndex(0);
-
             filter.clear();
         });
+        filterPanel.add(clearButton, gbc);
 
         // Add listener to update 'from' DateTime filter
         fromDatePicker.addDateChangeListener(event -> {
@@ -554,47 +640,28 @@ public class MainWindow {
         });
 
         unitComboBox.addActionListener(e -> {
-            String selectedUnit = (String) unitComboBox.getSelectedItem();
-            filter.setSelectedUnit(selectedUnit);
+            filter.setSelectedUnit((String) unitComboBox.getSelectedItem());
             eventTableModel.refetch(filter);
         });
 
         categoryComboBox.addActionListener(e -> {
-            String selectedCategory = (String) categoryComboBox.getSelectedItem();
-            filter.setSelectedCategory(selectedCategory);
+            filter.setSelectedCategory((String) categoryComboBox.getSelectedItem());
             eventTableModel.refetch(filter);
         });
 
         doneCheckBox.addActionListener(e -> {
-            boolean done = doneCheckBox.isSelected();
-            var isDone = done ? Boolean.TRUE : null;
-            filter.setDone(isDone);
+            filter.setDone(doneCheckBox.isSelected() ? Boolean.TRUE : null);
             plannedCheckBox.setSelected(false);
             eventTableModel.refetch(filter);
         });
 
         plannedCheckBox.addActionListener(e -> {
-            boolean planned = plannedCheckBox.isSelected();
-            var isPlanned = planned ? Boolean.FALSE : null;
-            filter.setDone(isPlanned);
+            filter.setDone(plannedCheckBox.isSelected() ? Boolean.FALSE : null);
             doneCheckBox.setSelected(false);
             eventTableModel.refetch(filter);
         });
 
-       List<Component> components = List.of(
-            fromLabel, fromDatePicker, fromTimeLabel, fromTimePicker,
-            toLabel, toDatePicker, toTimeLabel, toTimePicker,
-            todayButton, thisWeekButton,
-            unitLabel, unitComboBox,
-            categoryLabel, categoryComboBox,
-            statusLabel, doneCheckBox, plannedCheckBox, clearButton
-       );
-
-       for (Component component : components) {
-            filterPanel.add(component);
-       }
-
-       return filterPanel;
+        return filterPanel;
     }
 
     private static JComboBox<String> createMultiSelectComboBox(String[] options) {
