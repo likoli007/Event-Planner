@@ -2,7 +2,7 @@ package cz.muni.fi.pv168.project.business.facades;
 
 import cz.muni.fi.pv168.project.business.filter.Filter;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import java.util.List;
 import java.util.UUID;

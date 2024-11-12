@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import cz.muni.fi.pv168.project.service.export.serialize.ColorSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.ColorSerializer;
 
 import java.awt.Color;
 import java.util.Objects;
