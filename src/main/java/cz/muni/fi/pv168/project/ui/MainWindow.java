@@ -3,25 +3,21 @@ package cz.muni.fi.pv168.project.ui;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
-import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacadeImpl;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.export.GenericExportService;
+import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.service.crud.*;
-import cz.muni.fi.pv168.project.service.export.*;
-import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,8 +28,6 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MainWindow {
     private final JFrame frame;
@@ -41,12 +35,15 @@ public class MainWindow {
     private final JTable managerTabTable;
     private JTable currentTable;
 
-    private final CrudService<TodoEvent> eventCrudService;
+    private final GenericImportService importService;
+    private final GenericExportService exportService;
+
+
     private final CrudService<Category> categoryCrudService;
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
-
     private final TodoEventsServiceFacade todoEventsServiceFacade;
+
 
 
     private final EventTableModel eventTableModel;
@@ -71,28 +68,24 @@ public class MainWindow {
     private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
 
-    public MainWindow() {
+    public MainWindow( TodoEventsServiceFacade todoEventsServiceFacade,
+                      CrudService<Category> categoryCrudService,
+                      CrudService<Template> templateCrudService,
+                      CrudService<TimeUnit> timeUnitCrudService,
+                      GenericImportService importService,
+                      GenericExportService exportService) {
+
+
         frame = createFrame();
 
-        var testDataGenerator = new TestDataGenerator();
+        this.todoEventsServiceFacade = todoEventsServiceFacade;
+        this.categoryCrudService = categoryCrudService;
+        this.templateCrudService = templateCrudService;
+        this.timeUnitCrudService = timeUnitCrudService;
 
-        var categoryRepository = new InMemoryRepository<>(testDataGenerator.createCategories());
-        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
-        var timeUnitRepository = new InMemoryRepository<>(testDataGenerator.createTimeUnits());
-        var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
+        this.importService = importService;
+        this.exportService = exportService;
 
-        categoryCrudService = new CategoryCrudService(categoryRepository);
-        templateCrudService = new TemplateCrudService(templateRepository);
-        timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
-        eventCrudService = new TodoEventCrudService(eventRepository);
-        todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
-
-
-        var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
-                templateCrudService, todoEventsServiceFacade, List.of(new JSONFileExporter()));
-
-        var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
-                templateCrudService, eventCrudService, List.of(new JSONFileImporter()));
 
         eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
         categoryTableModel = new CategoryTableModel(categoryCrudService);

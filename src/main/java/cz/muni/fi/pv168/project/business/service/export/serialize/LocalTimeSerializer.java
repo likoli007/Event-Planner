@@ -1,4 +1,4 @@
-package cz.muni.fi.pv168.project.service.export.serialize;
+package cz.muni.fi.pv168.project.business.service.export.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

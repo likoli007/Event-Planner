@@ -1,7 +1,6 @@
 package cz.muni.fi.pv168.project.validation;
 
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 
 import java.util.List;

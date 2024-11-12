@@ -1,15 +1,12 @@
 package cz.muni.fi.pv168.project.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import cz.muni.fi.pv168.project.service.export.serialize.CategorySerializer;
-import cz.muni.fi.pv168.project.service.export.serialize.DateTimeSerializer;
-import cz.muni.fi.pv168.project.service.export.serialize.IntervalSerializer;
-import cz.muni.fi.pv168.project.service.export.serialize.LocalTimeSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.CategorySerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.IntervalSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.LocalTimeSerializer;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

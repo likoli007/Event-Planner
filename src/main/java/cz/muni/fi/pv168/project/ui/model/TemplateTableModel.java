@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Template;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalTime;

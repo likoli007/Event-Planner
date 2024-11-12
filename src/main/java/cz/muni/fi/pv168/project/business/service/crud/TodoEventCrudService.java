@@ -1,4 +1,4 @@
-package cz.muni.fi.pv168.project.service.crud;
+package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.repository.Repository;

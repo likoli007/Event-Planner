@@ -1,4 +1,4 @@
-package cz.muni.fi.pv168.project.service.export.batch;
+package cz.muni.fi.pv168.project.business.service.export.batch;
 
 /**
  * Exception thrown in case there is a problem with a bulk operation.
