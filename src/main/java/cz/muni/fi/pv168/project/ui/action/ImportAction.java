@@ -32,6 +32,8 @@ public class ImportAction extends AbstractAction {
             String filePath = dialog.getResultFilePath();
             if (filePath != null) {
                 importService.importData(filePath, parentFrame);
+                JOptionPane.showMessageDialog(parentFrame, "Import Successful! ",
+                        "Import", JOptionPane.INFORMATION_MESSAGE);
                 callback.run();
             }
         } catch (IOException e) {

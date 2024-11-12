@@ -47,6 +47,9 @@ public class ExportAction extends AbstractAction {
             String filePath = dialog.getResultFilePath();
             if (filePath != null) {
                 exportService.exportData(dialog.getResultFilePath(), dialog.getExportFiltered());
+
+                JOptionPane.showMessageDialog(parentFrame, "Exported to " + filePath + ".",
+                        "Export Successful!", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
