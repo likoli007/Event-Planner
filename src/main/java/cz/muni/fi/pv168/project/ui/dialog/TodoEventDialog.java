@@ -2,14 +2,12 @@ package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.validation.ValidationException;
 import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
+import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -68,7 +66,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         intervalField.setText(String.valueOf(todoEvent.getInterval().getAmount()));
         for (Category category : todoEvent.getCategories()) {
-            categoryList.setSelectedValue(category, true);
+            int index = categoryList.getNextMatch(category.toString(), 0, Position.Bias.Forward);
+            if (index != -1) {
+                categoryList.addSelectionInterval(index, index);
+            }
         }
         timeUnitModel.setSelectedItem(todoEvent.getInterval().getTimeUnit());
     }
