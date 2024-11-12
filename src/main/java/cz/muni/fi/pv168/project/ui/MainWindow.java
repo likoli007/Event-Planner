@@ -41,12 +41,15 @@ public class MainWindow {
     private final JTable managerTabTable;
     private JTable currentTable;
 
-    private final CrudService<TodoEvent> eventCrudService;
+    private final GenericImportService importService;
+    private final GenericExportService exportService;
+
+
     private final CrudService<Category> categoryCrudService;
     private final CrudService<Template> templateCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
-
     private final TodoEventsServiceFacade todoEventsServiceFacade;
+
 
 
     private final EventTableModel eventTableModel;
@@ -71,28 +74,24 @@ public class MainWindow {
     private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
 
-    public MainWindow() {
+    public MainWindow( TodoEventsServiceFacade todoEventsServiceFacade,
+                      CrudService<Category> categoryCrudService,
+                      CrudService<Template> templateCrudService,
+                      CrudService<TimeUnit> timeUnitCrudService,
+                      GenericImportService importService,
+                      GenericExportService exportService) {
+
+
         frame = createFrame();
 
-        var testDataGenerator = new TestDataGenerator();
+        this.todoEventsServiceFacade = todoEventsServiceFacade;
+        this.categoryCrudService = categoryCrudService;
+        this.templateCrudService = templateCrudService;
+        this.timeUnitCrudService = timeUnitCrudService;
 
-        var categoryRepository = new InMemoryRepository<>(testDataGenerator.createCategories());
-        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
-        var timeUnitRepository = new InMemoryRepository<>(testDataGenerator.createTimeUnits());
-        var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
+        this.importService = importService;
+        this.exportService = exportService;
 
-        categoryCrudService = new CategoryCrudService(categoryRepository);
-        templateCrudService = new TemplateCrudService(templateRepository);
-        timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
-        eventCrudService = new TodoEventCrudService(eventRepository);
-        todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
-
-
-        var exportService = new GenericExportService(categoryCrudService, timeUnitCrudService,
-                templateCrudService, todoEventsServiceFacade, List.of(new JSONFileExporter()));
-
-        var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
-                templateCrudService, eventCrudService, List.of(new JSONFileImporter()));
 
         eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
