@@ -33,6 +33,10 @@ public class ImportDialog{
 
     private String resultFilePath;
 
+    private boolean importAllowed = false;
+
+
+
     public ImportDialog(JFrame parentFrame) {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         importPanel.setLayout(new FlowLayout());
@@ -73,6 +77,12 @@ public class ImportDialog{
 
     private void importButtonClicked(ActionEvent e){
         resultFilePath = textField.getText();
+        if (resultFilePath.isEmpty()){
+            JOptionPane.showMessageDialog(dialog, "Error: file path cannot be empty!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        importAllowed = true;
         dialog.dispose();
     }
 
@@ -80,6 +90,9 @@ public class ImportDialog{
         return resultFilePath;
     }
 
+    public boolean canImport(){
+        return importAllowed;
+    }
 
     private int getArrayLength(JsonNode rootNode, String fieldName) {
         JsonNode arrayNode = rootNode.get(fieldName);

@@ -28,16 +28,19 @@ public class ImportAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         ImportDialog dialog = new ImportDialog(parentFrame);
-        try {
-            String filePath = dialog.getResultFilePath();
-            if (filePath != null) {
-                importService.importData(filePath, parentFrame);
-                JOptionPane.showMessageDialog(parentFrame, "Import Successful! ",
-                        "Import", JOptionPane.INFORMATION_MESSAGE);
-                callback.run();
+        if (dialog.canImport()){
+            try {
+                String filePath = dialog.getResultFilePath();
+                if (filePath != null) {
+                    importService.importData(filePath, parentFrame);
+                    JOptionPane.showMessageDialog(parentFrame, "Import Successful! ",
+                            "Import", JOptionPane.INFORMATION_MESSAGE);
+                    callback.run();
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(parentFrame, "Error during import:\n" + e.getMessage(),
+                        "Import Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
