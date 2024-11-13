@@ -117,6 +117,11 @@ public class ExportDialog {
 
     private void exportButtonClicked(ActionEvent e) {
         resultFilePath = textField.getText();
+        if (resultFilePath.isEmpty()){
+            JOptionPane.showMessageDialog(dialog, "Error: file path cannot be empty!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         exportFiltered = filterRadioButton.isSelected();
         dialog.dispose();
     }
