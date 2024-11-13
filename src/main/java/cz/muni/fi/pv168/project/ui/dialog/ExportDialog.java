@@ -33,6 +33,8 @@ public class ExportDialog {
     private int allEventsCount;
     private int filteredEventsCount;
 
+    boolean exportAllowed = false;
+
     public ExportDialog(JFrame parentFrame, int allEventsCount, int filteredEventsCount) {
         this.fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
         this.filter = new FileNameExtensionFilter("JSON Files", "json");
@@ -115,8 +117,19 @@ public class ExportDialog {
         exportStatisticsLabel.setVisible(true);
     }
 
+
+    public boolean canExport(){
+        return exportAllowed;
+    }
+
     private void exportButtonClicked(ActionEvent e) {
         resultFilePath = textField.getText();
+        if (resultFilePath.isEmpty()){
+            JOptionPane.showMessageDialog(dialog, "Error: file path cannot be empty!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        exportAllowed = true;
         exportFiltered = filterRadioButton.isSelected();
         dialog.dispose();
     }
