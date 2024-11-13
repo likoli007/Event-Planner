@@ -41,19 +41,21 @@ public class ExportAction extends AbstractAction {
         int allEventsCount = allEvents.size();
 
         ExportDialog dialog = new ExportDialog(parentFrame, allEventsCount, filteredEventsCount);
+        if (dialog.canExport()){
+            try {
+                String filePath = dialog.getResultFilePath();
+                if (filePath != null && !filePath.isEmpty()) {
+                    exportService.exportData(dialog.getResultFilePath(), dialog.getExportFiltered());
 
-        try {
-            String filePath = dialog.getResultFilePath();
-            if (filePath != null && !filePath.isEmpty()) {
-                exportService.exportData(dialog.getResultFilePath(), dialog.getExportFiltered());
-
-                JOptionPane.showMessageDialog(parentFrame, "Exported to " + filePath + ".",
-                        "Export Successful!", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Exported to " + filePath + ".",
+                            "Export Successful!", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(parentFrame, "Error during export:\n" + e.getMessage(),
+                        "Export Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(parentFrame, "Error during export:\n" + e.getMessage(),
-                    "Export Error", JOptionPane.INFORMATION_MESSAGE);
         }
+
 
     }
 }
