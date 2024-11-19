@@ -1,7 +1,6 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
@@ -48,7 +47,6 @@ public final class CategoryDialog extends EntityDialog<Category> {
     @Override
     Category getEntity() {
         String name = nameField.getText();
-        ValidatorUtils.validateNonemptyString("Category name", name);
         category.setName(name);
 
         selectedColor = (Color) colorChooser.getColor();

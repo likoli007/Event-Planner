@@ -74,19 +74,6 @@ public class ValidatorUtils {
         }
     }
 
-    public static void validateAddCategory(AllTableModels allTableModels, Category newCategory) {
-        if (allTableModels.getCategoryTableModel().getCategoryCrudService().findDuplicate(newCategory).isPresent()) {
-            throw new ValidationException("Category with given name is already present.");
-        }
-    }
-
-    public static void validateEditCategory(AllTableModels allTableModels, Category originalCategory, Category editedCategory) {
-        var possibleDuplicate = allTableModels.getCategoryTableModel().getCategoryCrudService().findDuplicate(editedCategory);
-        if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalCategory)) {
-            throw new ValidationException("Category with given name is already present.");
-        }
-    }
-
     public static void validateAddTimeUnit(AllTableModels allTableModels, TimeUnit newTimeUnit) {
         if (allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findDuplicate(newTimeUnit).isPresent()) {
             throw new ValidationException("Time unit with given name or shortcut is already present.");
@@ -97,26 +84,6 @@ public class ValidatorUtils {
         var possibleDuplicate = allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findDuplicate(editedTimeUnit);
         if (possibleDuplicate.isPresent() && !possibleDuplicate.get().isDuplicate(originalTimeUnit)) {
             throw new ValidationException("Time unit with given name or shortcut is already present.");
-        }
-    }
-
-    public static void validateCategoryDeletion(AllTableModels allTableModels, Category category) {
-        for (TodoEvent todoEvent : allTableModels.getEventTableModel().getTodoEventCrudService().findAll()) {
-            for (Category todoEventCategory : todoEvent.getCategories()) {
-                if (todoEventCategory.isDuplicate(category)) {
-                    throw new ValidationException("Category with name \"" + category.getName()
-                            + "\" cannot be deleted, it is used in event \"" + todoEvent.getName() + "\".");
-                }
-            }
-        }
-
-        for (Template template : allTableModels.getTemplateTableModel().getTemplateCrudService().findAll()) {
-            for (Category templateCategory : template.getCategories()) {
-                if (templateCategory.isDuplicate(category)) {
-                    throw new ValidationException("Category with name \"" + category.getName()
-                            + "\" cannot be deleted, it is used in template \"" + template.getName() + "\".");
-                }
-            }
         }
     }
 

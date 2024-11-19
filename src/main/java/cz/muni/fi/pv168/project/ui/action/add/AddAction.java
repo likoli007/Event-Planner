@@ -1,11 +1,10 @@
 package cz.muni.fi.pv168.project.ui.action.add;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
-import cz.muni.fi.pv168.project.business.service.validation.ValidationException;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -69,7 +68,11 @@ public abstract class AddAction extends AbstractAction {
 
         CategoryDialog dialog = new CategoryDialog(newCategory);
         dialog.show(currentTable, "Add New Category").ifPresent(category -> {
-            ValidatorUtils.validateAddCategory(allTableModels, category);
+            Validator<Category> validator = new CategoryValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, category);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             categoryTableModel.addRow(category);
             SuccessDialog.show("Category created successfully!");

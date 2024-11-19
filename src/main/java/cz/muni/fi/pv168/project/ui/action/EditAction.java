@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
@@ -7,8 +8,6 @@ import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.business.service.validation.ValidationException;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -58,7 +57,11 @@ public final class EditAction extends AbstractAction {
         Category originalCategory = categoryTableModel.getEntity(modelRow);
         CategoryDialog dialog = new CategoryDialog(originalCategory);
         dialog.show(currentTable, "Edit Category").ifPresent(category -> {
-            ValidatorUtils.validateEditCategory(allTableModels, originalCategory, category);
+            Validator<Category> validator = new CategoryValidator();
+            ValidationResult result = validator.validateEdit(allTableModels, originalCategory, category);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             originalCategory.update(category);
             categoryTableModel.updateRow(originalCategory);

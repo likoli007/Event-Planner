@@ -1,12 +1,11 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.ui.dialog.SuccessDialog;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
-import cz.muni.fi.pv168.project.business.service.validation.ValidationException;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -77,7 +76,13 @@ public final class DeleteAction extends AbstractAction {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     Category categoryToDelete = categoryTableModel.getEntity(modelRow);
-                    ValidatorUtils.validateCategoryDeletion(allTableModels, categoryToDelete);
+
+                    Validator<Category> validator = new CategoryValidator();
+                    ValidationResult result = validator.validateDelete(allTableModels, categoryToDelete);
+                    if (!result.isValid()) {
+                        throw new ValidationException(result.toString());
+                    }
+
                     categoryTableModel.deleteRow(modelRow);
                     counter++;
                 }
