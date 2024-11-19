@@ -90,7 +90,13 @@ public final class DeleteAction extends AbstractAction {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     TimeUnit timeUnitToDelete = timeUnitTableModel.getEntity(modelRow);
-                    ValidatorUtils.validateTimeUnitDeletion(allTableModels, timeUnitToDelete);
+
+                    Validator<TimeUnit> validator = new TimeUnitValidator();
+                    ValidationResult result = validator.validateDelete(allTableModels, timeUnitToDelete);
+                    if (!result.isValid()) {
+                        throw new ValidationException(result.toString());
+                    }
+
                     timeUnitTableModel.deleteRow(modelRow);
                     counter++;
                 }

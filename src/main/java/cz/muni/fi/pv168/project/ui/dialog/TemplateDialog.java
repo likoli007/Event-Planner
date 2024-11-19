@@ -71,7 +71,6 @@ public final class TemplateDialog extends EntityDialog<Template> {
     @Override
     Template getEntity() {
         String name = nameField.getText();
-        ValidatorUtils.validateNonemptyStringOld("Template name", name);
         template.setName(name);
 
         template.setDetails(detailsField.getText());
@@ -85,7 +84,6 @@ public final class TemplateDialog extends EntityDialog<Template> {
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        ValidatorUtils.validateCategoryListOld(selectedCategories);
         template.setCategories(selectedCategories);
 
         return template;

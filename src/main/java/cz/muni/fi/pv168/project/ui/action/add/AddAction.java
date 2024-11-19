@@ -38,7 +38,11 @@ public abstract class AddAction extends AbstractAction {
 
         TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
         dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
-            ValidatorUtils.validateAddEvent(allTableModels, todoEvent);
+            Validator<TodoEvent> validator = new TodoEventValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, todoEvent);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             eventTableModel.addRow(todoEvent);
             SuccessDialog.show("Event created successfully!");
@@ -56,7 +60,11 @@ public abstract class AddAction extends AbstractAction {
 
         TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
         dialog.show(currentTable, "Add New Template").ifPresent(template -> {
-            ValidatorUtils.validateAddTemplate(allTableModels, template);
+            Validator<Template> validator = new TemplateValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, template);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             templateTableModel.addRow(template);
             SuccessDialog.show("Template created successfully!");
@@ -84,7 +92,11 @@ public abstract class AddAction extends AbstractAction {
 
         IntervalDialog dialog = new IntervalDialog(newTimeUnit);
         dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnit -> {
-            ValidatorUtils.validateAddTimeUnit(allTableModels, timeUnit);
+            Validator<TimeUnit> validator = new TimeUnitValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, timeUnit);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             timeUnitTableModel.addRow(timeUnit);
             SuccessDialog.show("Time unit created successfully!");
