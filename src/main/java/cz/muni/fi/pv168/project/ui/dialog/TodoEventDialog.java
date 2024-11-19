@@ -4,7 +4,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
-import cz.muni.fi.pv168.project.validation.Validator;
+import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
 import javax.swing.text.Position;
@@ -110,10 +110,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         String name = nameField.getText();
         String details = detailsField.getText();
         LocalTime time = timeField.getTime();
-        int intervalAmount = Validator.parseInt("Interval length", intervalField.getText());
+        int intervalAmount = ValidatorUtils.parseInt("Interval length", intervalField.getText());
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        Validator.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryList(selectedCategories);
 
         Template newTemplate = new Template(
                 name,
@@ -134,7 +134,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     @Override
     TodoEvent getEntity() {
         String name = nameField.getText();
-        Validator.validateNonemptyString("Event name", name);
+        ValidatorUtils.validateNonemptyString("Event name", name);
         todoEvent.setName(name);
 
         todoEvent.setDetails(detailsField.getText());
@@ -145,11 +145,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
+        todoEvent.getInterval().setAmount(ValidatorUtils.parseInt("Interval length", intervalField.getText()));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        Validator.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryList(selectedCategories);
         todoEvent.setCategories(selectedCategories);
 
         return todoEvent;

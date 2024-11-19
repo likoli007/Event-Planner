@@ -4,8 +4,8 @@ import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
-import cz.muni.fi.pv168.project.validation.Validator;
-import cz.muni.fi.pv168.project.validation.ValidationException;
+import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
+import cz.muni.fi.pv168.project.business.service.validation.ValidationException;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -39,7 +39,7 @@ public abstract class AddAction extends AbstractAction {
 
         TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
         dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
-            Validator.validateAddEvent(allTableModels, todoEvent);
+            ValidatorUtils.validateAddEvent(allTableModels, todoEvent);
 
             eventTableModel.addRow(todoEvent);
             SuccessDialog.show("Event created successfully!");
@@ -57,7 +57,7 @@ public abstract class AddAction extends AbstractAction {
 
         TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
         dialog.show(currentTable, "Add New Template").ifPresent(template -> {
-            Validator.validateAddTemplate(allTableModels, template);
+            ValidatorUtils.validateAddTemplate(allTableModels, template);
 
             templateTableModel.addRow(template);
             SuccessDialog.show("Template created successfully!");
@@ -69,7 +69,7 @@ public abstract class AddAction extends AbstractAction {
 
         CategoryDialog dialog = new CategoryDialog(newCategory);
         dialog.show(currentTable, "Add New Category").ifPresent(category -> {
-            Validator.validateAddCategory(allTableModels, category);
+            ValidatorUtils.validateAddCategory(allTableModels, category);
 
             categoryTableModel.addRow(category);
             SuccessDialog.show("Category created successfully!");
@@ -81,7 +81,7 @@ public abstract class AddAction extends AbstractAction {
 
         IntervalDialog dialog = new IntervalDialog(newTimeUnit);
         dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnit -> {
-            Validator.validateAddTimeUnit(allTableModels, timeUnit);
+            ValidatorUtils.validateAddTimeUnit(allTableModels, timeUnit);
 
             timeUnitTableModel.addRow(timeUnit);
             SuccessDialog.show("Time unit created successfully!");

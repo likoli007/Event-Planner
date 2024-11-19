@@ -1,11 +1,11 @@
-package cz.muni.fi.pv168.project.validation;
+package cz.muni.fi.pv168.project.business.service.validation;
 
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
 
 import java.util.List;
 
-public class Validator {
+public class ValidatorUtils {
     public static int parseInt(String fieldName, String input) {
         try {
             return Integer.parseInt(input);

@@ -3,7 +3,7 @@ package cz.muni.fi.pv168.project.ui.dialog;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
-import cz.muni.fi.pv168.project.validation.Validator;
+import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
 import javax.swing.text.Position;
@@ -71,7 +71,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
     @Override
     Template getEntity() {
         String name = nameField.getText();
-        Validator.validateNonemptyString("Template name", name);
+        ValidatorUtils.validateNonemptyString("Template name", name);
         template.setName(name);
 
         template.setDetails(detailsField.getText());
@@ -81,11 +81,11 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setStartTime(time);
         }
 
-        template.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
+        template.getInterval().setAmount(ValidatorUtils.parseInt("Interval length", intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        Validator.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryList(selectedCategories);
         template.setCategories(selectedCategories);
 
         return template;
