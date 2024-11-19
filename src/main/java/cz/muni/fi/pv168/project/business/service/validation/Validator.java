@@ -11,5 +11,5 @@ public interface Validator<E> {
     ValidationResult validate(E entity);
     ValidationResult validateAdd(AllTableModels allTableModels, E newEntity);
     ValidationResult validateEdit(AllTableModels allTableModels, E originalEntity, E editedEntity);
-    ValidationResult validateDelete(E entityToDelete);
+    ValidationResult validateDelete(AllTableModels allTableModels, E entityToDelete);
 }
