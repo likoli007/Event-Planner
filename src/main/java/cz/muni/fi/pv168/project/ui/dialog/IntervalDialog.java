@@ -34,14 +34,14 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
     @Override
     TimeUnit getEntity() {
         String name = nameField.getText();
-        ValidatorUtils.validateNonemptyString("Time unit name", name);
+        ValidatorUtils.validateNonemptyStringOld("Time unit name", name);
         timeUnit.setName(name);
 
         String shortcut = shortcutField.getText();
-        ValidatorUtils.validateNonemptyString("Time unit shortcut", shortcut);
+        ValidatorUtils.validateNonemptyStringOld("Time unit shortcut", shortcut);
         timeUnit.setShortcut(shortcut);
 
-        timeUnit.setMinutes(ValidatorUtils.parseInt("Time unit length", minutesField.getText()));
+        timeUnit.setMinutes(ValidatorUtils.parseIntOld("Time unit length", minutesField.getText()));
         return timeUnit;
     }
 }

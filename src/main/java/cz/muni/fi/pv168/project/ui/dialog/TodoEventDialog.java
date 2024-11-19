@@ -110,10 +110,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         String name = nameField.getText();
         String details = detailsField.getText();
         LocalTime time = timeField.getTime();
-        int intervalAmount = ValidatorUtils.parseInt("Interval length", intervalField.getText());
+        int intervalAmount = ValidatorUtils.parseIntOld("Interval length", intervalField.getText());
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        ValidatorUtils.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryListOld(selectedCategories);
 
         Template newTemplate = new Template(
                 name,
@@ -134,7 +134,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     @Override
     TodoEvent getEntity() {
         String name = nameField.getText();
-        ValidatorUtils.validateNonemptyString("Event name", name);
+        ValidatorUtils.validateNonemptyStringOld("Event name", name);
         todoEvent.setName(name);
 
         todoEvent.setDetails(detailsField.getText());
@@ -145,11 +145,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.getInterval().setAmount(ValidatorUtils.parseInt("Interval length", intervalField.getText()));
+        todoEvent.getInterval().setAmount(ValidatorUtils.parseIntOld("Interval length", intervalField.getText()));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        ValidatorUtils.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryListOld(selectedCategories);
         todoEvent.setCategories(selectedCategories);
 
         return todoEvent;

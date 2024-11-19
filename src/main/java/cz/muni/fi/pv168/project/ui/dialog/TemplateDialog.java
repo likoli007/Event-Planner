@@ -71,7 +71,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
     @Override
     Template getEntity() {
         String name = nameField.getText();
-        ValidatorUtils.validateNonemptyString("Template name", name);
+        ValidatorUtils.validateNonemptyStringOld("Template name", name);
         template.setName(name);
 
         template.setDetails(detailsField.getText());
@@ -81,11 +81,11 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setStartTime(time);
         }
 
-        template.getInterval().setAmount(ValidatorUtils.parseInt("Interval length", intervalField.getText()));
+        template.getInterval().setAmount(ValidatorUtils.parseIntOld("Interval length", intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        ValidatorUtils.validateCategoryList(selectedCategories);
+        ValidatorUtils.validateCategoryListOld(selectedCategories);
         template.setCategories(selectedCategories);
 
         return template;

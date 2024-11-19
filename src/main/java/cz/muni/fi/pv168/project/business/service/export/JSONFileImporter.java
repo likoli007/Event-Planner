@@ -48,8 +48,8 @@ public class JSONFileImporter implements BatchImporter {
 
                 String name = c.get("name").asText();
                 String uuid = c.get("id").asText();
-                ValidatorUtils.validateNonemptyString("Category Name", name);
-                ValidatorUtils.validateNonemptyString("Category UUID", uuid);
+                ValidatorUtils.validateNonemptyStringOld("Category Name", name);
+                ValidatorUtils.validateNonemptyStringOld("Category UUID", uuid);
 
                 Category category = new Category(name, color);
 
@@ -65,9 +65,9 @@ public class JSONFileImporter implements BatchImporter {
                 int minutes = t.get("minutes").asInt();
                 String uuid = t.get("id").asText();
 
-                ValidatorUtils.validateNonemptyString("Time Unit Name", name);
-                ValidatorUtils.validateNonemptyString("Time Unit Shortcut", shortcut);
-                ValidatorUtils.validateNonemptyString("Time Unit UUID", uuid);
+                ValidatorUtils.validateNonemptyStringOld("Time Unit Name", name);
+                ValidatorUtils.validateNonemptyStringOld("Time Unit Shortcut", shortcut);
+                ValidatorUtils.validateNonemptyStringOld("Time Unit UUID", uuid);
 
                 TimeUnit timeUnit = new TimeUnit(name, shortcut, minutes);
 
@@ -86,7 +86,7 @@ public class JSONFileImporter implements BatchImporter {
                         0, 0);
 
                 String uuid = t.get("interval").get("timeUnit").get("id").asText();
-                ValidatorUtils.validateNonemptyString("Template UUID", uuid);
+                ValidatorUtils.validateNonemptyStringOld("Template UUID", uuid);
 
                 UUID targetUUID = UUID.fromString(uuid);
                 TimeUnit desiredTimeUnit;
@@ -103,8 +103,8 @@ public class JSONFileImporter implements BatchImporter {
                     categoriesList.add(categories.get(categoryUUIDs.indexOf(categoryUUID)));
                 }
 
-                ValidatorUtils.validateNonemptyString("Template Name", name);
-                ValidatorUtils.validateCategoryList(categoriesList);
+                ValidatorUtils.validateNonemptyStringOld("Template Name", name);
+                ValidatorUtils.validateCategoryListOld(categoriesList);
 
 
                 Template template;
@@ -132,7 +132,7 @@ public class JSONFileImporter implements BatchImporter {
             JsonNode eventsNode = rootNode.get("events");
             for (JsonNode e : eventsNode) {
                 String name = e.get("name").asText();
-                ValidatorUtils.validateNonemptyString("Event Name", name);
+                ValidatorUtils.validateNonemptyStringOld("Event Name", name);
 
                 String details = e.get("details").asText();
                 LocalDateTime startDate = LocalDateTime.of(e.get("start").get("year").asInt(),
