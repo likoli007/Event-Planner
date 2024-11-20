@@ -9,6 +9,7 @@ import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
@@ -29,11 +30,14 @@ public class EventTableModel extends AbstractTableModel {
         this.todoEventFacade = todoEventFacade;
         this.todoEvents = new ArrayList<>(todoEventFacade.findAll());
         this.filter = filter;
+
+        this.todoEvents.sort(Comparator.comparing(TodoEvent::getStart));
     }
 
     public void refetch(TodoEventFilter filter) {
         this.filter = filter;
         todoEvents = new ArrayList<>( todoEventFacade.getEventsByFilter(filter));
+        todoEvents.sort(Comparator.comparing(TodoEvent::getStart));
         fireTableDataChanged();
     }
 
@@ -98,6 +102,7 @@ public class EventTableModel extends AbstractTableModel {
         }
         // only add the event to table if it matches the filter
         todoEvents.add(todoEvent);
+        todoEvents.sort(Comparator.comparing(TodoEvent::getStart));
         int rowIndex = todoEvents.size() - 1;
         fireTableRowsInserted(rowIndex, rowIndex);
     }
