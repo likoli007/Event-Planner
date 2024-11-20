@@ -581,11 +581,20 @@ public class MainWindow {
         filterPanel.add(unitComboBox, gbc);
 
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        JCheckBox doneCheckBox = new JCheckBox("Done");
-        JCheckBox plannedCheckBox = new JCheckBox("Planned");
         statusPanel.add(new JLabel("Status:"));
-        statusPanel.add(doneCheckBox);
-        statusPanel.add(plannedCheckBox);
+        JRadioButton doneRadioButton = new JRadioButton("Done");
+        JRadioButton plannedRadioButton = new JRadioButton("Planned");
+        JRadioButton allRadioButton = new JRadioButton("All");
+        allRadioButton.setSelected(true);
+
+        ButtonGroup statusGroup = new ButtonGroup();
+        statusGroup.add(doneRadioButton);
+        statusGroup.add(plannedRadioButton);
+        statusGroup.add(allRadioButton);
+
+        statusPanel.add(doneRadioButton);
+        statusPanel.add(plannedRadioButton);
+        statusPanel.add(allRadioButton);
 
         gbc.gridx = 4;
         gbc.gridwidth = 5;
@@ -603,8 +612,8 @@ public class MainWindow {
             fromTimePicker.clear();
             toDatePicker.clear();
             toTimePicker.clear();
-            doneCheckBox.setSelected(false);
-            plannedCheckBox.setSelected(false);
+            statusGroup.clearSelection();
+            allRadioButton.setSelected(true);
             categoryComboBox.setSelectedIndex(0);
             unitComboBox.setSelectedIndex(0);
             filter.clear();
@@ -642,15 +651,18 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
-        doneCheckBox.addActionListener(e -> {
-            filter.setDone(doneCheckBox.isSelected() ? Boolean.TRUE : null);
-            plannedCheckBox.setSelected(false);
+        doneRadioButton.addActionListener(e -> {
+            filter.setDone(Boolean.TRUE);
             eventTableModel.refetch(filter);
         });
 
-        plannedCheckBox.addActionListener(e -> {
-            filter.setDone(plannedCheckBox.isSelected() ? Boolean.FALSE : null);
-            doneCheckBox.setSelected(false);
+        plannedRadioButton.addActionListener(e -> {
+            filter.setDone(Boolean.FALSE);
+            eventTableModel.refetch(filter);
+        });
+
+        allRadioButton.addActionListener(e -> {
+            filter.setDone(null);
             eventTableModel.refetch(filter);
         });
 
