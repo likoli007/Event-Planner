@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public final class AddEvent extends AddAction {
     public AddEvent(Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
-        super("Add event", tableSupplier, allTableModels);
+        super("New event", tableSupplier, allTableModels);
         putValue(SHORT_DESCRIPTION, "Adds new event");
         putValue(MNEMONIC_KEY, KeyEvent.VK_E);
     }

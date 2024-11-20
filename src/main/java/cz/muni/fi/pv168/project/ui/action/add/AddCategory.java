@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public final class AddCategory extends AddAction {
     public AddCategory(Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
-        super("Add category", tableSupplier, allTableModels);
+        super("New category", tableSupplier, allTableModels);
         putValue(SHORT_DESCRIPTION, "Adds new category");
         putValue(MNEMONIC_KEY, KeyEvent.VK_C);
     }

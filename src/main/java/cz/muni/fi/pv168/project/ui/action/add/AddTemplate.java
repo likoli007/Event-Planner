@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public final class AddTemplate extends AddAction {
     public AddTemplate(Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
-        super("Add template", tableSupplier, allTableModels);
+        super("New template", tableSupplier, allTableModels);
         putValue(SHORT_DESCRIPTION, "Adds new template");
         putValue(MNEMONIC_KEY, KeyEvent.VK_T);
     }

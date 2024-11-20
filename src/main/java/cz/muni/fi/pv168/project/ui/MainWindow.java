@@ -436,13 +436,13 @@ public class MainWindow {
         fileMenu.add(quitAction);
         menuBar.add(fileMenu);
 
-        var editMenu = new JMenu("Edit");
-        editMenu.setMnemonic('d');
-        editMenu.add(new AddEvent(() -> currentTable, allTableModels));
-        editMenu.add(new AddCategory(() -> currentTable, allTableModels));
-        editMenu.add(new AddTemplate(() -> currentTable, allTableModels));
-        editMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
-        menuBar.add(editMenu);
+        var addMenu = new JMenu("Add");
+        addMenu.setMnemonic('a');
+        addMenu.add(new AddEvent(() -> currentTable, allTableModels));
+        addMenu.add(new AddCategory(() -> currentTable, allTableModels));
+        addMenu.add(new AddTemplate(() -> currentTable, allTableModels));
+        addMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
+        menuBar.add(addMenu);
 
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
