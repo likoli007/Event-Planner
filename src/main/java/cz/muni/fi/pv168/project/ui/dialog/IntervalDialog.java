@@ -1,9 +1,10 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
+import cz.muni.fi.pv168.project.ui.documentFilters.NumericNonEmptyDocumentFilter;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 
 public final class IntervalDialog extends EntityDialog<TimeUnit> {
 
@@ -17,6 +18,8 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
         this.timeUnit = new TimeUnit(timeUnit);
         setValues();
         addFields();
+
+        ((AbstractDocument) minutesField.getDocument()).setDocumentFilter(new NumericNonEmptyDocumentFilter());
     }
 
     private void setValues() {
@@ -37,7 +40,7 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
         timeUnit.setName(name);
         String shortcut = shortcutField.getText();
         timeUnit.setShortcut(shortcut);
-        timeUnit.setMinutes(ValidatorUtils.parseIntOld("Time unit length", minutesField.getText()));
+        timeUnit.setMinutes(Integer.parseInt(minutesField.getText()));
         return timeUnit;
     }
 }

@@ -2,10 +2,11 @@ package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
+import cz.muni.fi.pv168.project.ui.documentFilters.NumericNonEmptyDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
-import cz.muni.fi.pv168.project.business.service.validation.ValidatorUtils;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalTime;
@@ -33,6 +34,8 @@ public final class TemplateDialog extends EntityDialog<Template> {
         this.categoryList = new JList<>(categoryModel);
 
         this.timeUnitModel = new DefaultComboBoxModel<>(allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findAll().toArray(new TimeUnit[0]));
+
+        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericNonEmptyDocumentFilter());
 
         setValues();
         addFields();
@@ -80,7 +83,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setStartTime(time);
         }
 
-        template.getInterval().setAmount(ValidatorUtils.parseIntOld("Interval length", intervalField.getText()));
+        template.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
