@@ -5,6 +5,10 @@ import cz.muni.fi.pv168.project.model.*;
 import java.util.List;
 
 public class ValidatorUtils {
+    static int DESCRIPTION_MAX_LENGTH = 36;
+    static int NAME_MAX_LENGTH = 25;
+    static int SHORTCUT_MAX_LENGTH = 4;
+
     /**
      * @deprecated use {@link #validateNonemptyString(ValidationResult, String, String)} instead.
      */
@@ -32,6 +36,17 @@ public class ValidatorUtils {
     public static void validateNonemptyString(ValidationResult validationResult, String fieldName, String input) {
         if (input.isEmpty()) {
             validationResult.add(fieldName + " must not be empty.");
+        }
+    }
+
+    public static void validateStringLength(ValidationResult validationResult, String fieldName, String input,
+                                            int maxLength, boolean required) {
+        if (required) {
+            validateNonemptyString(validationResult, fieldName, input);
+        }
+
+        if (input.length() > maxLength) {
+            validationResult.add(fieldName + " must not be longer than " + maxLength + " characters.");
         }
     }
 

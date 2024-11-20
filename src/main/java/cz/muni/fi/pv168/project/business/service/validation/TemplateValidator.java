@@ -9,7 +9,8 @@ public class TemplateValidator implements Validator<Template> {
         ValidationResult result = new ValidationResult();
 
         ValidatorUtils.validateNonNegativeInt(result, "Interval length", entity.getInterval().getAmount());
-        ValidatorUtils.validateNonemptyString(result, "Template name", entity.getName());
+        ValidatorUtils.validateStringLength(result, "Template name", entity.getName(), ValidatorUtils.NAME_MAX_LENGTH, true);
+        ValidatorUtils.validateStringLength(result, "Template description", entity.getName(), ValidatorUtils.DESCRIPTION_MAX_LENGTH, false);
         ValidatorUtils.validateCategoryList(result, entity.getCategories());
 
         return result;

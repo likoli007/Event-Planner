@@ -10,7 +10,7 @@ public class CategoryValidator implements Validator<Category> {
     public ValidationResult validate(Category entity) {
         ValidationResult result = new ValidationResult();
 
-        ValidatorUtils.validateNonemptyString(result,"Category name", entity.getName());
+        ValidatorUtils.validateStringLength(result,"Category name", entity.getName(), ValidatorUtils.NAME_MAX_LENGTH, true);
 
         return result;
     }

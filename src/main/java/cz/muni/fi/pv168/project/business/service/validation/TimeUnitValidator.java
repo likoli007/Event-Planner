@@ -11,8 +11,8 @@ public class TimeUnitValidator implements Validator<TimeUnit> {
         ValidationResult result = new ValidationResult();
 
         ValidatorUtils.validateNonNegativeInt(result, "Time unit length", entity.getMinutes());
-        ValidatorUtils.validateNonemptyString(result, "Time unit name", entity.getName());
-        ValidatorUtils.validateNonemptyString(result, "Time unit shortcut", entity.getShortcut());
+        ValidatorUtils.validateStringLength(result, "Time unit name", entity.getName(), ValidatorUtils.NAME_MAX_LENGTH, true);
+        ValidatorUtils.validateStringLength(result, "Time unit shortcut", entity.getShortcut(), ValidatorUtils.SHORTCUT_MAX_LENGTH, true);
 
         return result;
     }
