@@ -8,6 +8,7 @@ public class TodoEventValidator implements Validator<TodoEvent> {
     public ValidationResult validate(TodoEvent entity) {
         ValidationResult result = new ValidationResult();
 
+        ValidatorUtils.validateNonNegativeInt(result, "Interval length", entity.getInterval().getAmount());
         ValidatorUtils.validateNonemptyString(result,"Event name", entity.getName());
         ValidatorUtils.validateCategoryList(result, entity.getCategories());
 

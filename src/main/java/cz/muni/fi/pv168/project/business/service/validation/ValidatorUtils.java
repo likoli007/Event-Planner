@@ -17,6 +17,12 @@ public class ValidatorUtils {
         }
     }
 
+    public static void validateNonNegativeInt(ValidationResult validationResult, String fieldName, int input) {
+        if (input < 0) {
+            validationResult.add(fieldName + " must not be negative.");
+        }
+    }
+
     public static void validateNonemptyString(ValidationResult validationResult, String fieldName, String input) {
         if (input.isEmpty()) {
             validationResult.add(fieldName + " must not be empty.");

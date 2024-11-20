@@ -8,6 +8,7 @@ public class TemplateValidator implements Validator<Template> {
     public ValidationResult validate(Template entity) {
         ValidationResult result = new ValidationResult();
 
+        ValidatorUtils.validateNonNegativeInt(result, "Interval length", entity.getInterval().getAmount());
         ValidatorUtils.validateNonemptyString(result, "Template name", entity.getName());
         ValidatorUtils.validateCategoryList(result, entity.getCategories());
 
