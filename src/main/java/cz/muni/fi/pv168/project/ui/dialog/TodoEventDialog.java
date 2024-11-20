@@ -95,7 +95,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         JPanel templatePanel = new JPanel(new BorderLayout());
         templatePanel.add(templateComboBox, BorderLayout.CENTER);
-        templatePanel.add(createTemplateButton, BorderLayout.EAST);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(templatePanel, BorderLayout.NORTH);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(createTemplateButton);
 
         add("Template", templatePanel);
         add("Name:", nameField);
@@ -104,6 +108,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         add("Time:", timeField);
         add("Length:", intervalField);
         add("Categories:", categoryList);
+        add("", bottomPanel);
     }
 
     private void onCreateTemplate() {
