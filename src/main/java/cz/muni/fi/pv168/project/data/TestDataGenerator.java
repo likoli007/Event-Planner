@@ -1,5 +1,9 @@
 package cz.muni.fi.pv168.project.data;
 
+import cz.muni.fi.pv168.project.business.service.validation.CategoryValidator;
+import cz.muni.fi.pv168.project.business.service.validation.TemplateValidator;
+import cz.muni.fi.pv168.project.business.service.validation.TimeUnitValidator;
+import cz.muni.fi.pv168.project.business.service.validation.TodoEventValidator;
 import cz.muni.fi.pv168.project.model.*;
 
 import java.awt.*;
@@ -41,18 +45,57 @@ public final class TestDataGenerator {
                 new TodoEvent("Java Programming Lecture", "Databases", LocalDateTime.of(2024, 11, 14, 16, 0), teachingHour, 2, List.of(hobbyCategory)),
                 new TodoEvent("Ice Hockey Match", "Kometa vs Plzeň", LocalDateTime.of(2024, 11, 15, 18, 0), iceHockeyPeriod, 3, List.of(hobbyCategory, healthCategory))
         );
+
+        for (TodoEvent todoEvent : sampleTodoEvents) {
+            var validator = new TodoEventValidator();
+            var result = validator.validate(todoEvent);
+            if (!result.isValid()) {
+                throw new AssertionError("Todo event contains invalid data: " + todoEvent.getName());
+            }
+        }
+
         return new ArrayList<>(sampleTodoEvents);
     }
 
     public List<Template> createTemplates() {
-        return List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30, List.of(healthCategory, hobbyCategory)));
+        List<Template> sampleTemplates = List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30, List.of(healthCategory, hobbyCategory)));
+
+        for (Template template : sampleTemplates) {
+            var validator = new TemplateValidator();
+            var result = validator.validate(template);
+            if (!result.isValid()) {
+                throw new AssertionError("Template contains invalid data: " + template.getName());
+            }
+        }
+
+        return sampleTemplates;
     }
 
     public List<TimeUnit> createTimeUnits() {
-        return List.of(teachingHour, iceHockeyPeriod);
+        List<TimeUnit> sampleTimeUnits = List.of(teachingHour, iceHockeyPeriod);
+
+        for (TimeUnit timeUnit : sampleTimeUnits) {
+            var validator = new TimeUnitValidator();
+            var result = validator.validate(timeUnit);
+            if (!result.isValid()) {
+                throw new AssertionError("Time unit contains invalid data: " + timeUnit.getName());
+            }
+        }
+
+        return sampleTimeUnits;
     }
 
     public List<Category> createCategories() {
-        return List.of(workCategory, personalCategory, healthCategory, recreationCategory, hobbyCategory);
+        List<Category> sampleCategories = List.of(workCategory, personalCategory, healthCategory, recreationCategory, hobbyCategory);
+
+        for (Category category : sampleCategories) {
+            var validator = new CategoryValidator();
+            var result = validator.validate(category);
+            if (!result.isValid()) {
+                throw new AssertionError("Category contains invalid data: " + category.getName());
+            }
+        }
+
+        return sampleCategories;
     }
 }

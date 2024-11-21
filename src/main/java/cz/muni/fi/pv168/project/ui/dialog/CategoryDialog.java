@@ -1,12 +1,11 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import java.awt.*;
-import java.util.Locale;
+
 public final class CategoryDialog extends EntityDialog<Category> {
 
     private final JTextField nameField = new JTextField();
@@ -48,7 +47,6 @@ public final class CategoryDialog extends EntityDialog<Category> {
     @Override
     Category getEntity() {
         String name = nameField.getText();
-        Validator.validateNonemptyString("Category name", name);
         category.setName(name);
 
         selectedColor = (Color) colorChooser.getColor();

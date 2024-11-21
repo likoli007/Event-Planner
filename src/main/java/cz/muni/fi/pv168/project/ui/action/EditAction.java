@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
@@ -7,8 +8,6 @@ import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.validation.ValidationException;
-import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -34,7 +33,11 @@ public final class EditAction extends AbstractAction {
         TodoEvent originalEvent = eventTableModel.getEntity(modelRow);
         TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
         dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
-            Validator.validateEditEvent(allTableModels, originalEvent, todoEvent);
+            Validator<TodoEvent> validator = new TodoEventValidator();
+            ValidationResult result = validator.validateEdit(allTableModels, originalEvent, todoEvent);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             originalEvent.update(todoEvent);
             eventTableModel.updateRow(originalEvent);
@@ -46,7 +49,11 @@ public final class EditAction extends AbstractAction {
         Template originalTemplate = templateTableModel.getEntity(modelRow);
         TemplateDialog dialog = new TemplateDialog(originalTemplate, allTableModels);
         dialog.show(currentTable, "Edit Template").ifPresent(template -> {
-            Validator.validateEditTemplate(allTableModels, originalTemplate, template);
+            Validator<Template> validator = new TemplateValidator();
+            ValidationResult result = validator.validateEdit(allTableModels, originalTemplate, template);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             originalTemplate.update(template);
             templateTableModel.updateRow(originalTemplate);
@@ -58,7 +65,11 @@ public final class EditAction extends AbstractAction {
         Category originalCategory = categoryTableModel.getEntity(modelRow);
         CategoryDialog dialog = new CategoryDialog(originalCategory);
         dialog.show(currentTable, "Edit Category").ifPresent(category -> {
-            Validator.validateEditCategory(allTableModels, originalCategory, category);
+            Validator<Category> validator = new CategoryValidator();
+            ValidationResult result = validator.validateEdit(allTableModels, originalCategory, category);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             originalCategory.update(category);
             categoryTableModel.updateRow(originalCategory);
@@ -70,7 +81,11 @@ public final class EditAction extends AbstractAction {
         TimeUnit originalTimeUnit = timeUnitTableModel.getEntity(modelRow);
         IntervalDialog dialog = new IntervalDialog(originalTimeUnit);
         dialog.show(currentTable, "Edit Time Unit").ifPresent(timeUnit -> {
-            Validator.validateEditTimeUnit(allTableModels, originalTimeUnit, timeUnit);
+            Validator<TimeUnit> validator = new TimeUnitValidator();
+            ValidationResult result = validator.validateEdit(allTableModels, originalTimeUnit, timeUnit);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
 
             originalTimeUnit.update(timeUnit);
             timeUnitTableModel.updateRow(originalTimeUnit);

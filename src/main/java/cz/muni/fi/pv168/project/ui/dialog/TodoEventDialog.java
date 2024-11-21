@@ -3,10 +3,11 @@ package cz.muni.fi.pv168.project.ui.dialog;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
+import cz.muni.fi.pv168.project.ui.documentFilters.NumericNonEmptyDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
-import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalDate;
@@ -46,6 +47,8 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         templates.addAll(allTableModels.getTemplateTableModel().getTemplateCrudService().findAll());
 
         this.templateModel = new DefaultComboBoxModel<>(templates.toArray(new Template[0]));
+
+        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericNonEmptyDocumentFilter());
 
         setValues();
         addFields();
@@ -89,9 +92,9 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         });
 
         var timeUnitComboBox = new JComboBox<>(timeUnitModel);
-        JPanel intervalField = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        intervalField.add(this.intervalField);
-        intervalField.add(timeUnitComboBox);
+        JPanel intervalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        intervalPanel.add(this.intervalField);
+        intervalPanel.add(timeUnitComboBox);
 
         JPanel templatePanel = new JPanel(new BorderLayout());
         templatePanel.add(templateComboBox, BorderLayout.CENTER);
@@ -102,7 +105,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         add("Details:", detailsField);
         add("Date:", dateField);
         add("Time:", timeField);
-        add("Length:", intervalField);
+        add("Length:", intervalPanel);
         add("Categories:", categoryList);
     }
 
@@ -110,10 +113,9 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         String name = nameField.getText();
         String details = detailsField.getText();
         LocalTime time = timeField.getTime();
-        int intervalAmount = Validator.parseInt("Interval length", intervalField.getText());
+        int intervalAmount = Integer.parseInt(intervalField.getText());
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        Validator.validateCategoryList(selectedCategories);
 
         Template newTemplate = new Template(
                 name,
@@ -134,7 +136,6 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     @Override
     TodoEvent getEntity() {
         String name = nameField.getText();
-        Validator.validateNonemptyString("Event name", name);
         todoEvent.setName(name);
 
         todoEvent.setDetails(detailsField.getText());
@@ -145,11 +146,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.getInterval().setAmount(Validator.parseInt("Interval length", intervalField.getText()));
+        todoEvent.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
-        Validator.validateCategoryList(selectedCategories);
         todoEvent.setCategories(selectedCategories);
 
         return todoEvent;

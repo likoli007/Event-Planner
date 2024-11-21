@@ -1,13 +1,11 @@
 package cz.muni.fi.pv168.project.ui.action;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.ui.dialog.SuccessDialog;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
-import cz.muni.fi.pv168.project.validation.ValidationException;
-import cz.muni.fi.pv168.project.validation.Validator;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -15,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.Supplier;
 
 public final class DeleteAction extends AbstractAction {
@@ -79,7 +76,13 @@ public final class DeleteAction extends AbstractAction {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     Category categoryToDelete = categoryTableModel.getEntity(modelRow);
-                    Validator.validateCategoryDeletion(allTableModels, categoryToDelete);
+
+                    Validator<Category> validator = new CategoryValidator();
+                    ValidationResult result = validator.validateDelete(allTableModels, categoryToDelete);
+                    if (!result.isValid()) {
+                        throw new ValidationException(result.toString());
+                    }
+
                     categoryTableModel.deleteRow(modelRow);
                     counter++;
                 }
@@ -87,7 +90,13 @@ public final class DeleteAction extends AbstractAction {
                 for (int viewRow : selectedRows) {
                     int modelRow = currentTable.convertRowIndexToModel(viewRow);
                     TimeUnit timeUnitToDelete = timeUnitTableModel.getEntity(modelRow);
-                    Validator.validateTimeUnitDeletion(allTableModels, timeUnitToDelete);
+
+                    Validator<TimeUnit> validator = new TimeUnitValidator();
+                    ValidationResult result = validator.validateDelete(allTableModels, timeUnitToDelete);
+                    if (!result.isValid()) {
+                        throw new ValidationException(result.toString());
+                    }
+
                     timeUnitTableModel.deleteRow(modelRow);
                     counter++;
                 }
