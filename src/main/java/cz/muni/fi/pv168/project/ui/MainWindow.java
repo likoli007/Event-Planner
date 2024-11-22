@@ -230,8 +230,8 @@ public class MainWindow {
         int totalDoneLength = 0;
         int totalPlannedLength = 0;
 
-        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
 
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
 
 
         for (int i = 0; i < eventList.size(); i++) {
@@ -251,13 +251,21 @@ public class MainWindow {
         }
 
         statisticsArea.setText(
-              "Total no. of done events: " + doneEvents + "\n" +
-              "Total no. of planned events: " + plannedEvents + "\n" +
-              "Total length of done events: " + totalDoneLength + " min\n" +
-              "Total length of planned events: " + totalPlannedLength + " min\n" +
-              "Total number of events: " + totalEvents + "\n"
+              "Total events: " + computePadding(totalEvents) + totalEvents + " | " +
+              "Done events: " + computePadding(doneEvents) + doneEvents + " | " +
+              "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min | " +
+              "Planned events: " + computePadding(plannedEvents) + plannedEvents + " | " +
+              "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min\n"
         );
 
+    }
+
+    String computePadding(int number){
+        int maxDigits = 6;
+        int count = maxDigits - String.valueOf(number).length();
+        if (count > 0)
+            return " ".repeat(count);
+        return "";
     }
 
     public JPanel createStatisticsPanel(){
