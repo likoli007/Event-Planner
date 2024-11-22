@@ -2,17 +2,14 @@ package cz.muni.fi.pv168.project.business.service.export;
 
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.export.batch.*;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.business.service.export.batch.Batch;
-import cz.muni.fi.pv168.project.business.service.export.batch.BatchImporter;
-import cz.muni.fi.pv168.project.business.service.export.batch.BatchOperationException;
 import cz.muni.fi.pv168.project.business.service.export.format.Format;
 import cz.muni.fi.pv168.project.business.service.export.format.FormatMapping;
 import cz.muni.fi.pv168.project.ui.dialog.DuplicateCategoryDialog;
 import cz.muni.fi.pv168.project.ui.dialog.DuplicateDialog;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,6 +24,7 @@ public class GenericImportService implements ImportService {
     private final FormatMapping<BatchImporter> importers;
 
     private Batch importedBatch;
+    private BatchResult importedBatchResult;
 
     public GenericImportService(
             CrudService<Category> categoryCrudService,
@@ -414,12 +412,21 @@ public class GenericImportService implements ImportService {
         handleDuplicateEvents(importedBatch.events(), parentFrame, defaultHandling);
     }
     @Override
-    public void importData(String filePath, JFrame frame, DuplicateType defaultHandling) throws IOException {
-        var batch = getImporter(filePath).importBatch(filePath);
+    public boolean importData(String filePath, JFrame frame, DuplicateType defaultHandling) {
+        importedBatchResult = getImporter(filePath).importBatch(filePath);
 
-        if (batch != null) {
-            handleDuplicates(batch, frame, defaultHandling);
+        if (importedBatchResult.succeeded()) {
+            handleDuplicates(importedBatchResult.getBatch(), frame, defaultHandling);
+            return true;
         }
+        else{
+            return false;
+        }
+    }
+
+    @Override
+    public String getErrorMessage(){
+        return importedBatchResult.getMessage();
     }
 
     private void createCategory(Category category) {
