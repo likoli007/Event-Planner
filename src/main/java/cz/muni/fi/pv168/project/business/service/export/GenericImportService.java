@@ -95,7 +95,7 @@ public class GenericImportService implements ImportService {
     }
 
 
-    private void handleDuplicateCategories(Collection<Category> categories, JFrame parentFrame) {
+    private void handleDuplicateCategories(Collection<Category> categories, JFrame parentFrame, DuplicateType defaultHandling) {
         for (var category : categories) {
             Optional<Category> original = categoryCrudService.findDuplicate(category);
 
@@ -104,9 +104,15 @@ public class GenericImportService implements ImportService {
             }
             else if (original.get().isMeaningfullyDifferent(category)) {
                 Category crudCategory = original.get();
+                DuplicateType result;
+                if (defaultHandling == DuplicateType.UNDEFINED){
+                    DuplicateCategoryDialog dialog = new DuplicateCategoryDialog(parentFrame, crudCategory, category);
+                    result = dialog.getResult();
+                }
+                else{
+                    result = defaultHandling;
+                }
 
-                DuplicateCategoryDialog dialog = new DuplicateCategoryDialog(parentFrame, crudCategory, category);
-                DuplicateType result = dialog.getResult();
                 if (result == DuplicateType.OVERWRITE) {
                     crudCategory.setName(category.getName());
                     crudCategory.setColor(category.getColor());
@@ -123,7 +129,7 @@ public class GenericImportService implements ImportService {
         }
     }
 
-    private void handleDuplicateTimeUnits(Collection<TimeUnit> timeUnits, JFrame parentFrame) {
+    private void handleDuplicateTimeUnits(Collection<TimeUnit> timeUnits, JFrame parentFrame, DuplicateType defaultHandling) {
         for (var timeUnit : timeUnits) {
             Optional<TimeUnit> original = timeUnitCrudService.findDuplicate(timeUnit);
 
@@ -132,17 +138,24 @@ public class GenericImportService implements ImportService {
             }
             else if (original.get().isMeaningfullyDifferent(timeUnit)) {
                 TimeUnit crudTimeUnit = original.get();
-                String originalString =
-                        "Name: " + crudTimeUnit.getName() + "\n" +
-                                "Shortcut: " + crudTimeUnit.getShortcut() + "\n" +
-                                "Minutes: " + crudTimeUnit.getMinutes();
-                String duplicateString =
-                        "Name: " + timeUnit.getName() + "\n" +
-                                "Shortcut: " + timeUnit.getShortcut() + "\n" +
-                                "Minutes: " + timeUnit.getMinutes();
+                DuplicateType result;
+                if (defaultHandling == DuplicateType.UNDEFINED){
+                    String originalString =
+                            "Name: " + crudTimeUnit.getName() + "\n" +
+                                    "Shortcut: " + crudTimeUnit.getShortcut() + "\n" +
+                                    "Minutes: " + crudTimeUnit.getMinutes();
+                    String duplicateString =
+                            "Name: " + timeUnit.getName() + "\n" +
+                                    "Shortcut: " + timeUnit.getShortcut() + "\n" +
+                                    "Minutes: " + timeUnit.getMinutes();
 
-                DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Interval", originalString, duplicateString);
-                DuplicateType result = dialog.getResult();
+                    DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Interval", originalString, duplicateString);
+                    result = dialog.getResult();
+                }
+                else{
+                    result = defaultHandling;
+                }
+
                 if (result == DuplicateType.OVERWRITE) {
                     crudTimeUnit.setName(timeUnit.getName());
                     crudTimeUnit.setMinutes(timeUnit.getMinutes());
@@ -160,7 +173,7 @@ public class GenericImportService implements ImportService {
         }
     }
 
-    private void handleDuplicateTemplates(Collection<Template> templates, JFrame parentFrame) {
+    private void handleDuplicateTemplates(Collection<Template> templates, JFrame parentFrame, DuplicateType defaultHandling) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
         for (var template : templates) {
@@ -172,24 +185,32 @@ public class GenericImportService implements ImportService {
             else if (original.get().isMeaningfullyDifferent(template)) {
                 Template crudTemplate = original.get();
 
-                String originalString =
-                        "Name: " + crudTemplate.getName() + "\n" +
-                                "Details: " + crudTemplate.getDetails() + "\n" +
-                                "Start Time: " + crudTemplate.getStartTime().format(formatter) + "\n" +
-                                "Interval: " + crudTemplate.getInterval().getAmount() + " " +
-                                crudTemplate.getInterval().getTimeUnit().getName() + "\n" +
-                                "Categories: " + crudTemplate.getCategories().toString();
+                DuplicateType result;
+                if (defaultHandling == DuplicateType.UNDEFINED){
+                    String originalString =
+                            "Name: " + crudTemplate.getName() + "\n" +
+                                    "Details: " + crudTemplate.getDetails() + "\n" +
+                                    "Start Time: " + crudTemplate.getStartTime().format(formatter) + "\n" +
+                                    "Interval: " + crudTemplate.getInterval().getAmount() + " " +
+                                    crudTemplate.getInterval().getTimeUnit().getName() + "\n" +
+                                    "Categories: " + crudTemplate.getCategories().toString();
 
-                String duplicateString = "Name: " + template.getName() + "\n" +
-                        "Details: " + template.getDetails() + "\n" +
-                        "Start Time: " + template.getStartTime().format(formatter) + "\n" +
-                        "Interval: " + template.getInterval().getAmount() + " " +
-                        template.getInterval().getTimeUnit().getName() + "\n" +
-                        "Categories: " + template.getCategories().toString();
+                    String duplicateString = "Name: " + template.getName() + "\n" +
+                            "Details: " + template.getDetails() + "\n" +
+                            "Start Time: " + template.getStartTime().format(formatter) + "\n" +
+                            "Interval: " + template.getInterval().getAmount() + " " +
+                            template.getInterval().getTimeUnit().getName() + "\n" +
+                            "Categories: " + template.getCategories().toString();
 
 
-                DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Template", originalString, duplicateString);
-                DuplicateType result = dialog.getResult();
+                    DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Template", originalString, duplicateString);
+                    result = dialog.getResult();
+                }
+                else{
+                    result = defaultHandling;
+                }
+
+
                 if (result == DuplicateType.OVERWRITE) {
                     crudTemplate.setName(template.getName());
                     crudTemplate.setDetails(template.getDetails());
@@ -205,7 +226,7 @@ public class GenericImportService implements ImportService {
         }
     }
 
-    private void  handleDuplicateEvents(Collection<TodoEvent> events, JFrame parentFrame){
+    private void  handleDuplicateEvents(Collection<TodoEvent> events, JFrame parentFrame, DuplicateType defaultHandling){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy EEE");
 
         for (var event : events) {
@@ -216,26 +237,35 @@ public class GenericImportService implements ImportService {
             }
             else if (original.get().isMeaningfullyDifferent(event)){
                 TodoEvent crudEvent = original.get();
-                String originalLength = crudEvent.getInterval().getTimeUnit() == null ? "min" : crudEvent.getInterval().getTimeUnit().getShortcut();
-                String duplicateLength = event.getInterval().getTimeUnit() == null ? "min" : event.getInterval().getTimeUnit().getShortcut();
 
-                String originalString =
-                        "Name: " + crudEvent.getName() + "\n" +
-                                "Details: " + crudEvent.getDetails() + "\n" +
-                                "Start Time: " + crudEvent.getStart().format(formatter) + "\n" +
-                                "Interval: " + crudEvent.getInterval().getAmount() + " " +
-                                originalLength + "\n" +
-                                "Categories: " + crudEvent.getCategories().toString();
+                DuplicateType result;
+                if (defaultHandling == DuplicateType.UNDEFINED){
+                    String originalLength = crudEvent.getInterval().getTimeUnit() == null ? "min" : crudEvent.getInterval().getTimeUnit().getShortcut();
+                    String duplicateLength = event.getInterval().getTimeUnit() == null ? "min" : event.getInterval().getTimeUnit().getShortcut();
 
-                String duplicateString = "Name: " + event.getName() + "\n" +
-                        "Details: " + event.getDetails() + "\n" +
-                        "Start Time: " + event.getStart().format(formatter) + "\n" +
-                        "Interval: " + event.getInterval().getAmount() + " " +
-                        duplicateLength + "\n" +
-                        "Categories: " + event.getCategories().toString();
+                    String originalString =
+                            "Name: " + crudEvent.getName() + "\n" +
+                                    "Details: " + crudEvent.getDetails() + "\n" +
+                                    "Start Time: " + crudEvent.getStart().format(formatter) + "\n" +
+                                    "Interval: " + crudEvent.getInterval().getAmount() + " " +
+                                    originalLength + "\n" +
+                                    "Categories: " + crudEvent.getCategories().toString();
 
-                DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Event", originalString, duplicateString);
-                DuplicateType result = dialog.getResult();
+                    String duplicateString = "Name: " + event.getName() + "\n" +
+                            "Details: " + event.getDetails() + "\n" +
+                            "Start Time: " + event.getStart().format(formatter) + "\n" +
+                            "Interval: " + event.getInterval().getAmount() + " " +
+                            duplicateLength + "\n" +
+                            "Categories: " + event.getCategories().toString();
+
+                    DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Event", originalString, duplicateString);
+                    result = dialog.getResult();
+                }
+                else{
+                    result = defaultHandling;
+                }
+
+
                 if (result == DuplicateType.OVERWRITE) {
                     crudEvent.setName(event.getName());
                     crudEvent.setDetails(event.getDetails());
@@ -251,21 +281,21 @@ public class GenericImportService implements ImportService {
         }
     }
 
-    private void handleDuplicates(Batch batch, JFrame parentFrame) {
+    private void handleDuplicates(Batch batch, JFrame parentFrame, DuplicateType defaultHandling) {
         //TODO: templated function? but the different classes differ in multiple aspects
 
         importedBatch = batch;
-        handleDuplicateCategories(importedBatch.categories(), parentFrame);
-        handleDuplicateTimeUnits(importedBatch.timeUnits(), parentFrame);
-        handleDuplicateTemplates(importedBatch.templates(), parentFrame);
-        handleDuplicateEvents(importedBatch.events(), parentFrame);
+        handleDuplicateCategories(importedBatch.categories(), parentFrame, defaultHandling);
+        handleDuplicateTimeUnits(importedBatch.timeUnits(), parentFrame, defaultHandling);
+        handleDuplicateTemplates(importedBatch.templates(), parentFrame, defaultHandling);
+        handleDuplicateEvents(importedBatch.events(), parentFrame, defaultHandling);
     }
     @Override
-    public void importData(String filePath, JFrame frame) throws IOException {
+    public void importData(String filePath, JFrame frame, DuplicateType defaultHandling) throws IOException {
         var batch = getImporter(filePath).importBatch(filePath);
 
         if (batch != null) {
-            handleDuplicates(batch, frame);
+            handleDuplicates(batch, frame, defaultHandling);
         }
     }
 
