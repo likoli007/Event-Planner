@@ -206,10 +206,13 @@ public class JSONFileImporter implements BatchImporter {
             return result;
         }
 
+
         int minute = minutesResult.getData();
         int hour = hoursResult.getData();
 
+        System.out.println(minute + " " + hour);
         LocalTime startTime = LocalTime.of(hour,minute,0, 0);
+
         result.setSuccess(true);
         result.setData(startTime);
         return result;
