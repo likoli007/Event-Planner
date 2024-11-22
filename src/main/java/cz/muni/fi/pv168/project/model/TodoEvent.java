@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.project.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import cz.muni.fi.pv168.project.business.service.export.serialize.CategorySerializer;
 import cz.muni.fi.pv168.project.business.service.export.serialize.DateTimeSerializer;
@@ -8,6 +9,7 @@ import cz.muni.fi.pv168.project.business.service.export.serialize.IntervalSerial
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class TodoEvent extends Entity {
     private String name;
@@ -47,6 +49,13 @@ public class TodoEvent extends Entity {
         this.interval = todoEvent.interval;
         this.categories = todoEvent.categories;
         this.done = todoEvent.done;
+    }
+
+    //Done so that there is no 'ID' field in exported JSON file
+    @Override
+    @JsonIgnore
+    public UUID getId() {
+        return id;
     }
 
     @Override
