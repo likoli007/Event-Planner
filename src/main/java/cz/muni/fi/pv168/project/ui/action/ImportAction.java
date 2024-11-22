@@ -30,18 +30,17 @@ public class ImportAction extends AbstractAction {
     public void actionPerformed(ActionEvent actionEvent) {
         ImportDialog dialog = new ImportDialog(parentFrame);
         if (dialog.canImport()){
-            try {
-                String filePath = dialog.getResultFilePath();
-                DuplicateType defaultHandling = dialog.getDuplicateHandling();
-                if (filePath != null) {
-                    importService.importData(filePath, parentFrame, defaultHandling);
+            String filePath = dialog.getResultFilePath();
+            DuplicateType defaultHandling = dialog.getDuplicateHandling();
+            if (filePath != null) {
+                boolean importResult = importService.importData(filePath, parentFrame, defaultHandling);
+                if (importResult) {
                     JOptionPane.showMessageDialog(parentFrame, "Import Successful! ",
                             "Import", JOptionPane.INFORMATION_MESSAGE);
                     callback.run();
+                } else {
+                    JOptionPane.showMessageDialog(parentFrame, importService.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(parentFrame, "Error during import:\n" + e.getMessage(),
-                        "Import Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

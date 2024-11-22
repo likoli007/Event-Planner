@@ -144,7 +144,6 @@ public class ImportDialog{
     }
 
     private void getJSONStatistics(File file) throws IOException {
-
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(file);
 
@@ -166,7 +165,8 @@ public class ImportDialog{
                 getJSONStatistics(file);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog, "An error occured while importing!\n" +
-                                "Skipping import!\n" + "Please ensure there are no faulty fields in the file.",
+                                "This was likely caused by basic JSON syntax fault.\n" +
+                                "Please ensure the JSON file is intact",
                         "Alert", JOptionPane.ERROR_MESSAGE);
                 dialog.dispose();
             }
