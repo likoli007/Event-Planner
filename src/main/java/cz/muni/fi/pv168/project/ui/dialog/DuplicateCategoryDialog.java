@@ -68,8 +68,8 @@ public class DuplicateCategoryDialog {
         originalPanel.setBorder(BorderFactory.createTitledBorder("Original"));
 
         mainPanel.add(aboutPanel);
-        mainPanel.add(duplicatePanel);
         mainPanel.add(originalPanel);
+        mainPanel.add(duplicatePanel);
         mainPanel.add(buttonPanel);
 
         overwriteButton.addActionListener(e -> {
