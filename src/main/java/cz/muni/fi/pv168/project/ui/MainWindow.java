@@ -217,8 +217,7 @@ public class MainWindow {
         double percentage = ((double) categoryEventCount / (double) totalRows) * 100.0;
 
         catgoryStatisticsArea.setText(
-                "Total No. of Tasks With Selected Category(ies): " + categoryEventCount + "\n" +
-                "Percentage of Total Tasks With Selected Category: " + String.format("%.1f", percentage) + "%\n"
+                "Tasks With Selected Categories: " + categoryEventCount + " (" + String.format("%.1f", percentage) + "%)"
         );
 
     }
