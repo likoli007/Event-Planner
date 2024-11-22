@@ -119,8 +119,7 @@ public class GenericImportService implements ImportService {
                     changeImportedCategoryReferences(crudCategory);
                 }
                 else if (result == DuplicateType.DUPLICATE) {
-                    category.setName(category.getName() + " (copy)");
-                    createCategory(category);
+                    addDuplicateCategory(category);
                 }
                 else{
                     changeImportedCategoryReferences(crudCategory);
@@ -163,8 +162,7 @@ public class GenericImportService implements ImportService {
                     changeImportedTimeUnitReferences(crudTimeUnit);
                 }
                 else if (result == DuplicateType.DUPLICATE) {
-                    timeUnit.setName(timeUnit.getName() + " (copy)");
-                    createInterval(timeUnit);
+                    addDuplicateTimeUnit(timeUnit);
                 }
                 else{
                     changeImportedTimeUnitReferences(crudTimeUnit);
@@ -219,8 +217,7 @@ public class GenericImportService implements ImportService {
                     crudTemplate.setCategories(template.getCategories());
                 }
                 if (result == DuplicateType.DUPLICATE) {
-                    template.setName(template.getName() + " (copy)");
-                    createTemplate(template);
+                    addDuplicateTemplate(template);
                 }
             }
         }
@@ -274,12 +271,138 @@ public class GenericImportService implements ImportService {
                     crudEvent.setCategories(event.getCategories());
                 }
                 if (result == DuplicateType.DUPLICATE) {
-                    event.setName(event.getName() + " (copy)");
-                    createEvent(event);
+                    addDuplicateTodoEvent(event);
                 }
             }
         }
     }
+
+    //TODO: the 4 functions below could be templated provided we push some stuff into 'entity' base class
+    private void addDuplicateCategory(Category category){
+        int lastLeftIndex = category.getName().lastIndexOf("(");
+        int lastRightIndex = category.getName().lastIndexOf(")");
+        int number = 1;
+        boolean isValidNumber = false;
+        if (lastLeftIndex != -1 && lastRightIndex != -1 && lastRightIndex == category.getName().length() - 1) {
+            isValidNumber = true;
+            try{
+                number = Integer.parseInt(category.getName().substring(lastLeftIndex+1, lastRightIndex));
+                // Replace only the rightmost occurrence
+
+            } catch (NumberFormatException e) {
+                number = 1;
+                isValidNumber = false;
+            }
+        }
+        if (!isValidNumber){
+            lastLeftIndex = category.getName().length();
+        }
+
+        while (true){
+            category.setName(category.getName().substring(0, lastLeftIndex) + "(" + number + ")");
+            Optional<Category> original = categoryCrudService.findDuplicate(category);
+            if (original.isEmpty()) {
+                createCategory(category);
+                return;
+            }
+            number++;
+        }
+    }
+
+    private void addDuplicateTimeUnit(TimeUnit timeUnit){
+        int lastLeftIndex = timeUnit.getName().lastIndexOf("(");
+        int lastRightIndex = timeUnit.getName().lastIndexOf(")");
+        int number = 1;
+        boolean isValidNumber = false;
+        if (lastLeftIndex != -1 && lastRightIndex != -1 && lastRightIndex == timeUnit.getName().length() - 1) {
+            isValidNumber = true;
+            try{
+                number = Integer.parseInt(timeUnit.getName().substring(lastLeftIndex+1, lastRightIndex));
+                // Replace only the rightmost occurrence
+
+            } catch (NumberFormatException e) {
+                number = 1;
+                isValidNumber = false;
+            }
+        }
+        if (!isValidNumber){
+            lastLeftIndex = timeUnit.getName().length();
+        }
+
+        while (true){
+            timeUnit.setName(timeUnit.getName().substring(0, lastLeftIndex) + "(" + number + ")");
+            Optional<TimeUnit> original = timeUnitCrudService.findDuplicate(timeUnit);
+            if (original.isEmpty()) {
+                createInterval(timeUnit);
+                return;
+            }
+            number++;
+        }
+    }
+
+    private void addDuplicateTemplate(Template template){
+        int lastLeftIndex = template.getName().lastIndexOf("(");
+        int lastRightIndex = template.getName().lastIndexOf(")");
+        int number = 1;
+        boolean isValidNumber = false;
+        if (lastLeftIndex != -1 && lastRightIndex != -1 && lastRightIndex == template.getName().length() - 1) {
+            isValidNumber = true;
+            try{
+                number = Integer.parseInt(template.getName().substring(lastLeftIndex+1, lastRightIndex));
+                // Replace only the rightmost occurrence
+
+            } catch (NumberFormatException e) {
+                number = 1;
+                isValidNumber = false;
+            }
+        }
+        if (!isValidNumber){
+            lastLeftIndex = template.getName().length();
+        }
+
+        while (true){
+            template.setName(template.getName().substring(0, lastLeftIndex) + "(" + number + ")");
+            Optional<Template> original = templateCrudService.findDuplicate(template);
+            if (original.isEmpty()) {
+                createTemplate(template);
+                return;
+            }
+            number++;
+        }
+    }
+
+    private void addDuplicateTodoEvent(TodoEvent event){
+        int lastLeftIndex = event.getName().lastIndexOf("(");
+        int lastRightIndex = event.getName().lastIndexOf(")");
+        int number = 1;
+        boolean isValidNumber = false;
+        if (lastLeftIndex != -1 && lastRightIndex != -1 && lastRightIndex == event.getName().length() - 1) {
+            isValidNumber = true;
+            try{
+                number = Integer.parseInt(event.getName().substring(lastLeftIndex+1, lastRightIndex));
+                // Replace only the rightmost occurrence
+
+            } catch (NumberFormatException e) {
+                number = 1;
+                isValidNumber = false;
+            }
+        }
+        if (!isValidNumber){
+            lastLeftIndex = event.getName().length();
+        }
+
+        while (true){
+            event.setName(event.getName().substring(0, lastLeftIndex) + "(" + number + ")");
+            Optional<TodoEvent> original = todoEventFacade.findDuplicate(event);
+            if (original.isEmpty()) {
+                createEvent(event);
+                return;
+            }
+            number++;
+        }
+    }
+
+
 
     private void handleDuplicates(Batch batch, JFrame parentFrame, DuplicateType defaultHandling) {
         //TODO: templated function? but the different classes differ in multiple aspects
