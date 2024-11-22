@@ -616,7 +616,16 @@ public class MainWindow {
             allRadioButton.setSelected(true);
             categoryComboBox.setSelectedIndex(0);
             unitComboBox.setSelectedIndex(0);
-            filter.clear();
+
+            filter.setFromDate(null);
+            filter.setFromTime(null);
+            filter.setToDate(null);
+            filter.setToTime(null);
+            filter.setSelectedCategory(null);
+            filter.setSelectedUnit(null);
+            filter.setDone(null);
+
+            eventTableModel.refetch(filter);
         });
         filterPanel.add(clearButton, gbc);
 
