@@ -25,6 +25,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
     private final JTextField intervalField = new JTextField(5);
     private final JList<Category> categoryList;
+    private final JCheckBox doneCheckBox = new JCheckBox();
     private final ComboBoxModel<TimeUnit> timeUnitModel;
     private final DefaultListModel<Category> categoryModel;
     private final ComboBoxModel<Template> templateModel;
@@ -74,6 +75,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
                 categoryList.addSelectionInterval(index, index);
             }
         }
+        doneCheckBox.setSelected(todoEvent.isDone());
         timeUnitModel.setSelectedItem(todoEvent.getInterval().getTimeUnit());
     }
 
@@ -98,7 +100,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         JPanel templatePanel = new JPanel(new BorderLayout());
         templatePanel.add(templateComboBox, BorderLayout.CENTER);
-        templatePanel.add(createTemplateButton, BorderLayout.EAST);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(templatePanel, BorderLayout.NORTH);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(createTemplateButton);
 
         add("Template", templatePanel);
         add("Name:", nameField);
@@ -107,6 +113,8 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         add("Time:", timeField);
         add("Length:", intervalPanel);
         add("Categories:", categoryList);
+        add("Done:", doneCheckBox);
+        add("", bottomPanel);
     }
 
     private void onCreateTemplate() {
@@ -151,6 +159,8 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
         todoEvent.setCategories(selectedCategories);
+
+        todoEvent.setDone(doneCheckBox.isSelected());
 
         return todoEvent;
     }
