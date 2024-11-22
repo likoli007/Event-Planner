@@ -128,6 +128,30 @@ public class TodoEvent extends Entity {
         return Objects.equals(name, todoEvent.name) && Objects.equals(start, todoEvent.start);
     }
 
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e){
+        if (e == null || getClass() != e.getClass()) return true;
+        TodoEvent todoEvent = (TodoEvent) e;
+        if (Objects.equals(name, todoEvent.name) &&
+            Objects.equals(todoEvent.getStart().toString(), getStart().toString()) &&
+            Objects.equals(details, todoEvent.details) &&
+            !(getInterval().getTimeUnit().isMeaningfullyDifferent(todoEvent.getInterval().getTimeUnit())) &&
+            getInterval().getAmount() == todoEvent.getInterval().getAmount() && done == todoEvent.isDone()){
+                for (Category category : categories) {
+                    boolean isPresent = false;
+                    for (Category otherCategory : todoEvent.categories) {
+                        if (category.isDuplicate(otherCategory)) {
+                            isPresent = true;
+                        }
+                    }
+                    if (!isPresent) return true;
+                }
+                return false;
+        }
+
+        return true;
+    }
+
     public String formatInterval() {
         return interval.format();
     }

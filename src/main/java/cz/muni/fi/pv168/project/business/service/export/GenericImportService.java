@@ -102,8 +102,9 @@ public class GenericImportService implements ImportService {
             if (original.isEmpty()) {
                 createCategory(category);
             }
-            else {
+            else if (original.get().isMeaningfullyDifferent(category)) {
                 Category crudCategory = original.get();
+
                 DuplicateCategoryDialog dialog = new DuplicateCategoryDialog(parentFrame, crudCategory, category);
                 DuplicateType result = dialog.getResult();
                 if (result == DuplicateType.OVERWRITE) {
@@ -129,7 +130,7 @@ public class GenericImportService implements ImportService {
             if (original.isEmpty()) {
                 createInterval(timeUnit);
             }
-            else{
+            else if (original.get().isMeaningfullyDifferent(timeUnit)) {
                 TimeUnit crudTimeUnit = original.get();
                 String originalString =
                         "Name: " + crudTimeUnit.getName() + "\n" +
@@ -168,7 +169,7 @@ public class GenericImportService implements ImportService {
             if (original.isEmpty()) {
                 createTemplate(template);
             }
-            else{
+            else if (original.get().isMeaningfullyDifferent(template)) {
                 Template crudTemplate = original.get();
 
                 String originalString =
@@ -213,7 +214,7 @@ public class GenericImportService implements ImportService {
             if (original.isEmpty()) {
                 createEvent(event);
             }
-            else{
+            else if (original.get().isMeaningfullyDifferent(event)){
                 TodoEvent crudEvent = original.get();
                 String originalLength = crudEvent.getInterval().getTimeUnit() == null ? "min" : crudEvent.getInterval().getTimeUnit().getShortcut();
                 String duplicateLength = event.getInterval().getTimeUnit() == null ? "min" : event.getInterval().getTimeUnit().getShortcut();

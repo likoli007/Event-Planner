@@ -116,6 +116,29 @@ public class Template extends Entity {
     }
 
     @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        Template template = (Template) e;
+        if (Objects.equals(name, template.name) && Objects.equals(details, template.details) &&
+            Objects.equals(template.getStartTime().toString(), getStartTime().toString()) &&
+            !(getInterval().getTimeUnit().isMeaningfullyDifferent(template.getInterval().getTimeUnit())) &&
+            getInterval().getAmount() == template.getInterval().getAmount()) {
+                for (Category category : categories){
+                    boolean isPresent = false;
+                    for (Category otherCategory : template.categories) {
+                        if (category.isDuplicate(otherCategory)) {
+                            isPresent = true;
+                        }
+                    }
+                    if (!isPresent) return true;
+                }
+                return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name;
     }
