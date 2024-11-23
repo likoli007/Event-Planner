@@ -176,6 +176,8 @@ public class MainWindow {
         categoryTableModel.refresh();
         templateTableModel.refresh();
         timeUnitTableModel.refresh();
+
+        eventTableModel.refetch(filter);
     }
 
     public JPanel createEventsTab(){
