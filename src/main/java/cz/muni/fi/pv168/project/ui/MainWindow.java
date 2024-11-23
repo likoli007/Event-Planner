@@ -192,16 +192,18 @@ public class MainWindow {
 
     public void computeCategoryStatistics(){
         int categoryEventCount = 0;
+        int allCategoryEventCount = 0;
         int categoryColumnIndex = eventTableModel.getColumnIndexByName("Categories");
         int[] selectedRows = managerTabTable.getSelectedRows();
 
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
 
-        int totalRows = eventTable.getRowCount();
-        for (int i = 0; i < eventTable.getRowCount(); i++) {
-            for (int j = 0; j < selectedRows.length; j++) {
+        for (int i = 0; i < eventList.size(); i++) {
+            for (int j = 0;  j < selectedRows.length; j++) {
                 boolean categoryFound = false;
                 Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
-                for (Category eventCategory : (List<Category>) eventTable.getValueAt(i, categoryColumnIndex)) {
+                for (Category eventCategory : (List<Category>) eventList.get(i).getCategories()) {
                     if (eventCategory.equals(category)) {
                         categoryEventCount++;
                         categoryFound = true;
@@ -213,11 +215,39 @@ public class MainWindow {
                 }
             }
         }
+        if (eventList.size() != allEventList.size()) {
+            for (int i = 0; i < allEventList.size(); i++) {
+                for (int j = 0; j < selectedRows.length; j++) {
+                    boolean categoryFound = false;
+                    Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
+                    for (Category eventCategory : (List<Category>) allEventList.get(i).getCategories()) {
+                        if (eventCategory.equals(category)) {
+                            allCategoryEventCount++;
+                            categoryFound = true;
+                            break;
+                        }
+                    }
+                    if (categoryFound) {
+                        break;
+                    }
+                }
+            }
 
-        double percentage = ((double) categoryEventCount / (double) totalRows) * 100.0;
+            double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
+            double allPercentage = ((double) allCategoryEventCount / (double) allEventList.size()) * 100.0;
+
+            if (eventList.isEmpty()) percentage = 0;
+            catgoryStatisticsArea.setText(
+                    "Tasks With Selected Categories: " + allCategoryEventCount + " (all) / " + categoryEventCount + " (filtered) | " +
+                    "Percentage: " + String.format("%.1f", percentage) + "% (all) / " + String.format("%.1f", allPercentage) + "% (filtered)"
+            );
+            return;
+        }
+
+        double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
 
         catgoryStatisticsArea.setText(
-                "Tasks With Selected Categories: " + categoryEventCount + " (" + String.format("%.1f", percentage) + "%)"
+                "Tasks With Selected Categories: " + categoryEventCount + " | Percentage: " + String.format("%.1f", percentage)+ "%"
         );
 
     }
