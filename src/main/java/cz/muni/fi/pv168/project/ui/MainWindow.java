@@ -231,6 +231,7 @@ public class MainWindow {
 
 
         List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
 
 
         for (int i = 0; i < eventList.size(); i++) {
@@ -239,8 +240,7 @@ public class MainWindow {
                 Interval interval = eventList.get(i).getInterval();
                 TimeUnit timeUnit = interval.getTimeUnit();
                 totalDoneLength += interval.getAmount() * timeUnit.getMinutes();
-            }
-            else{
+            } else {
                 plannedEvents++;
                 Interval interval = eventList.get(i).getInterval();
                 TimeUnit timeUnit = interval.getTimeUnit();
@@ -249,14 +249,53 @@ public class MainWindow {
             totalEvents++;
         }
 
+        int allDoneEvents = 0;
+        int allPlannedEvents = 0;
+        int allTotalEvents = 0;
+        int allTotalDoneLength = 0;
+        int allTotalPlannedLength = 0;
+        if (eventList.size() != allEventList.size()) {
+            for (int i = 0; i < allEventList.size(); i++) {
+                if (allEventList.get(i).isDone()) {
+                    allDoneEvents++;
+                    Interval interval = allEventList.get(i).getInterval();
+                    TimeUnit timeUnit = interval.getTimeUnit();
+                    allTotalDoneLength += interval.getAmount() * timeUnit.getMinutes();
+                }
+                else{
+                    allPlannedEvents++;
+                    Interval interval = allEventList.get(i).getInterval();
+                    TimeUnit timeUnit = interval.getTimeUnit();
+                    allTotalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
+                }
+                allTotalEvents++;
+            }
+
+            statisticsArea.setText(
+                    "Total events: " + computePadding(allTotalEvents) + allTotalEvents + " (" + totalEvents + ") | " +
+                            "Done events: " + computePadding(allDoneEvents) + allDoneEvents + " (" + doneEvents +") | " +
+                            "Length of done events: " + computePadding(allTotalDoneLength) + allTotalDoneLength + " min ("
+                            + totalDoneLength + " min) | " +
+                            "Planned events: " + computePadding(allPlannedEvents) + allPlannedEvents + " (" + plannedEvents +") | " +
+                            "Length of planned events: " + computePadding(allTotalPlannedLength) + allTotalPlannedLength + " min" +
+                            " (" + totalPlannedLength + " min)\n"
+            );
+            return;
+        }
+
+
         statisticsArea.setText(
-              "Total events: " + computePadding(totalEvents) + totalEvents + " | " +
-              "Done events: " + computePadding(doneEvents) + doneEvents + " | " +
-              "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min | " +
-              "Planned events: " + computePadding(plannedEvents) + plannedEvents + " | " +
-              "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min\n"
+                "Total events: " + computePadding(totalEvents) + totalEvents + " | " +
+                        "Done events: " + computePadding(doneEvents) + doneEvents + " | " +
+                        "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min | " +
+                        "Planned events: " + computePadding(plannedEvents) + plannedEvents + " | " +
+                        "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min\n"
         );
 
+
+
+
+    
     }
 
     String computePadding(int number){
