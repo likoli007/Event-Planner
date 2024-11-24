@@ -28,25 +28,29 @@ public abstract class AddAction extends AbstractAction {
     protected abstract TableModel getTableModel();
 
     private void tryAddEvent(JTable currentTable, EventTableModel eventTableModel) {
-        TodoEvent newEvent = new TodoEvent(
-                "",
-                "",
-                LocalDateTime.now(),
-                1,
-                new ArrayList<>()
-        );
+        boolean success = false;
 
-        TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
-        dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
-            Validator<TodoEvent> validator = new TodoEventValidator();
-            ValidationResult result = validator.validateAdd(allTableModels, todoEvent);
-            if (!result.isValid()) {
-                throw new ValidationException(result.toString());
+        while (!success) {
+            TodoEvent newEvent = new TodoEvent("", "", LocalDateTime.now(), 1, new ArrayList<>());
+            TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
+
+            var result = dialog.show(currentTable, "Add New Event");
+            if (result.isEmpty()) {
+                break;
             }
 
-            eventTableModel.addRow(todoEvent);
-            SuccessDialog.show("Event created successfully!");
-        });
+            TodoEvent todoEvent = result.get();
+            Validator<TodoEvent> validator = new TodoEventValidator();
+            ValidationResult validationResult = validator.validateAdd(allTableModels, todoEvent);
+
+            if (validationResult.isValid()) {
+                eventTableModel.addRow(todoEvent);
+                SuccessDialog.show("Event created successfully!");
+                success = true;
+            } else {
+                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void tryAddTemplate(JTable currentTable, TemplateTableModel templateTableModel) {

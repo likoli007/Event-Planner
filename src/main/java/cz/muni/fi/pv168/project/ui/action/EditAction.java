@@ -31,18 +31,29 @@ public final class EditAction extends AbstractAction {
 
     private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
         TodoEvent originalEvent = eventTableModel.getEntity(modelRow);
-        TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
-        dialog.show(currentTable, "Edit Todo Event").ifPresent(todoEvent -> {
-            Validator<TodoEvent> validator = new TodoEventValidator();
-            ValidationResult result = validator.validateEdit(allTableModels, originalEvent, todoEvent);
-            if (!result.isValid()) {
-                throw new ValidationException(result.toString());
+        boolean success = false;
+
+        while (!success) {
+            TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
+
+            var result = dialog.show(currentTable, "Edit Todo Event");
+            if (result.isEmpty()) {
+                break;
             }
 
-            originalEvent.update(todoEvent);
-            eventTableModel.updateRow(originalEvent);
-            SuccessDialog.show("Event edited successfully!");
-        });
+            TodoEvent todoEvent = result.get();
+            Validator<TodoEvent> validator = new TodoEventValidator();
+            ValidationResult validationResult = validator.validateEdit(allTableModels, originalEvent, todoEvent);
+
+            if (validationResult.isValid()) {
+                originalEvent.update(todoEvent);
+                eventTableModel.updateRow(originalEvent);
+                SuccessDialog.show("Event edited successfully!");
+                success = true;
+            } else {
+                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void tryEditTemplate(JTable currentTable, TemplateTableModel templateTableModel, int modelRow) {
