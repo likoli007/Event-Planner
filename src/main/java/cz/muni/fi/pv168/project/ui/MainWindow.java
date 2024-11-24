@@ -302,13 +302,13 @@ public class MainWindow {
             }
 
             statisticsArea.setText(
-                    "Total events: " + computePadding(allTotalEvents) + allTotalEvents + " (" + totalEvents + ") | " +
-                            "Done events: " + computePadding(allDoneEvents) + allDoneEvents + " (" + doneEvents +") | " +
-                            "Length of done events: " + computePadding(allTotalDoneLength) + allTotalDoneLength + " min ("
-                            + totalDoneLength + " min) | " +
-                            "Planned events: " + computePadding(allPlannedEvents) + allPlannedEvents + " (" + plannedEvents +") | " +
-                            "Length of planned events: " + computePadding(allTotalPlannedLength) + allTotalPlannedLength + " min" +
-                            " (" + totalPlannedLength + " min)\n"
+                    "Total events: " + computePadding(totalEvents) + totalEvents + " (" + allTotalEvents + ") | " +
+                            "Done events: " + computePadding(doneEvents) + doneEvents + " (" + allDoneEvents +") | " +
+                            "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min ("
+                            + allTotalDoneLength + " min) | " +
+                            "Planned events: " + computePadding(plannedEvents) + plannedEvents + " (" + allPlannedEvents +") | " +
+                            "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min" +
+                            " (" + allTotalPlannedLength + " min)\n"
             );
             return;
         }
