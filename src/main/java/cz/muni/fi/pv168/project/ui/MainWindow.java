@@ -192,16 +192,18 @@ public class MainWindow {
 
     public void computeCategoryStatistics(){
         int categoryEventCount = 0;
+        int allCategoryEventCount = 0;
         int categoryColumnIndex = eventTableModel.getColumnIndexByName("Categories");
         int[] selectedRows = managerTabTable.getSelectedRows();
 
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
 
-        int totalRows = eventTable.getRowCount();
-        for (int i = 0; i < eventTable.getRowCount(); i++) {
-            for (int j = 0; j < selectedRows.length; j++) {
+        for (int i = 0; i < eventList.size(); i++) {
+            for (int j = 0;  j < selectedRows.length; j++) {
                 boolean categoryFound = false;
                 Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
-                for (Category eventCategory : (List<Category>) eventTable.getValueAt(i, categoryColumnIndex)) {
+                for (Category eventCategory : (List<Category>) eventList.get(i).getCategories()) {
                     if (eventCategory.equals(category)) {
                         categoryEventCount++;
                         categoryFound = true;
@@ -213,12 +215,39 @@ public class MainWindow {
                 }
             }
         }
+        if (eventList.size() != allEventList.size()) {
+            for (int i = 0; i < allEventList.size(); i++) {
+                for (int j = 0; j < selectedRows.length; j++) {
+                    boolean categoryFound = false;
+                    Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
+                    for (Category eventCategory : (List<Category>) allEventList.get(i).getCategories()) {
+                        if (eventCategory.equals(category)) {
+                            allCategoryEventCount++;
+                            categoryFound = true;
+                            break;
+                        }
+                    }
+                    if (categoryFound) {
+                        break;
+                    }
+                }
+            }
 
-        double percentage = ((double) categoryEventCount / (double) totalRows) * 100.0;
+            double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
+            double allPercentage = ((double) allCategoryEventCount / (double) allEventList.size()) * 100.0;
+
+            if (eventList.isEmpty()) percentage = 0;
+            catgoryStatisticsArea.setText(
+                    "Tasks With Selected Categories: " + allCategoryEventCount + " (all) / " + categoryEventCount + " (filtered) | " +
+                    "Percentage: " + String.format("%.1f", percentage) + "% (all) / " + String.format("%.1f", allPercentage) + "% (filtered)"
+            );
+            return;
+        }
+
+        double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
 
         catgoryStatisticsArea.setText(
-                "Total No. of Tasks With Selected Category(ies): " + categoryEventCount + "\n" +
-                "Percentage of Total Tasks With Selected Category: " + String.format("%.1f", percentage) + "%\n"
+                "Tasks With Selected Categories: " + categoryEventCount + " | Percentage: " + String.format("%.1f", percentage)+ "%"
         );
 
     }
@@ -230,8 +259,9 @@ public class MainWindow {
         int totalDoneLength = 0;
         int totalPlannedLength = 0;
 
-        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
 
+        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
 
 
         for (int i = 0; i < eventList.size(); i++) {
@@ -240,8 +270,7 @@ public class MainWindow {
                 Interval interval = eventList.get(i).getInterval();
                 TimeUnit timeUnit = interval.getTimeUnit();
                 totalDoneLength += interval.getAmount() * timeUnit.getMinutes();
-            }
-            else{
+            } else {
                 plannedEvents++;
                 Interval interval = eventList.get(i).getInterval();
                 TimeUnit timeUnit = interval.getTimeUnit();
@@ -250,14 +279,61 @@ public class MainWindow {
             totalEvents++;
         }
 
+        int allDoneEvents = 0;
+        int allPlannedEvents = 0;
+        int allTotalEvents = 0;
+        int allTotalDoneLength = 0;
+        int allTotalPlannedLength = 0;
+        if (eventList.size() != allEventList.size()) {
+            for (int i = 0; i < allEventList.size(); i++) {
+                if (allEventList.get(i).isDone()) {
+                    allDoneEvents++;
+                    Interval interval = allEventList.get(i).getInterval();
+                    TimeUnit timeUnit = interval.getTimeUnit();
+                    allTotalDoneLength += interval.getAmount() * timeUnit.getMinutes();
+                }
+                else{
+                    allPlannedEvents++;
+                    Interval interval = allEventList.get(i).getInterval();
+                    TimeUnit timeUnit = interval.getTimeUnit();
+                    allTotalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
+                }
+                allTotalEvents++;
+            }
+
+            statisticsArea.setText(
+                    "Total events: " + computePadding(totalEvents) + totalEvents + " (" + allTotalEvents + ") | " +
+                            "Done events: " + computePadding(doneEvents) + doneEvents + " (" + allDoneEvents +") | " +
+                            "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min ("
+                            + allTotalDoneLength + " min) | " +
+                            "Planned events: " + computePadding(plannedEvents) + plannedEvents + " (" + allPlannedEvents +") | " +
+                            "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min" +
+                            " (" + allTotalPlannedLength + " min)\n"
+            );
+            return;
+        }
+
+
         statisticsArea.setText(
-              "Total no. of done events: " + doneEvents + "\n" +
-              "Total no. of planned events: " + plannedEvents + "\n" +
-              "Total length of done events: " + totalDoneLength + " min\n" +
-              "Total length of planned events: " + totalPlannedLength + " min\n" +
-              "Total number of events: " + totalEvents + "\n"
+                "Total events: " + computePadding(totalEvents) + totalEvents + " | " +
+                        "Done events: " + computePadding(doneEvents) + doneEvents + " | " +
+                        "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min | " +
+                        "Planned events: " + computePadding(plannedEvents) + plannedEvents + " | " +
+                        "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min\n"
         );
 
+
+
+
+    
+    }
+
+    String computePadding(int number){
+        int maxDigits = 6;
+        int count = maxDigits - String.valueOf(number).length();
+        if (count > 0)
+            return " ".repeat(count);
+        return "";
     }
 
     public JPanel createStatisticsPanel(){
