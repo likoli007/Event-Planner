@@ -54,57 +54,81 @@ public abstract class AddAction extends AbstractAction {
     }
 
     private void tryAddTemplate(JTable currentTable, TemplateTableModel templateTableModel) {
-        Template newTemplate = new Template(
-                "",
-                "",
-                LocalTime.now(),
-                1,
-                new ArrayList<>()
-        );
+        boolean success = false;
 
-        TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
-        dialog.show(currentTable, "Add New Template").ifPresent(template -> {
-            Validator<Template> validator = new TemplateValidator();
-            ValidationResult result = validator.validateAdd(allTableModels, template);
-            if (!result.isValid()) {
-                throw new ValidationException(result.toString());
+        while (!success) {
+            Template newTemplate = new Template("", "", LocalTime.now(), 1, new ArrayList<>());
+            TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
+
+            var result = dialog.show(currentTable, "Add New Template");
+            if (result.isEmpty()) {
+                break;
             }
 
-            templateTableModel.addRow(template);
-            SuccessDialog.show("Template created successfully!");
-        });
+            Template template = result.get();
+            Validator<Template> validator = new TemplateValidator();
+            ValidationResult validationResult = validator.validateAdd(allTableModels, template);
+
+            if (validationResult.isValid()) {
+                templateTableModel.addRow(template);
+                SuccessDialog.show("Template created successfully!");
+                success = true;
+            } else {
+                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void tryAddCategory(JTable currentTable, CategoryTableModel categoryTableModel) {
-        Category newCategory = new Category("", Color.BLUE);
+        boolean success = false;
 
-        CategoryDialog dialog = new CategoryDialog(newCategory);
-        dialog.show(currentTable, "Add New Category").ifPresent(category -> {
-            Validator<Category> validator = new CategoryValidator();
-            ValidationResult result = validator.validateAdd(allTableModels, category);
-            if (!result.isValid()) {
-                throw new ValidationException(result.toString());
+        while (!success) {
+            Category newCategory = new Category("", Color.BLUE);
+            CategoryDialog dialog = new CategoryDialog(newCategory);
+
+            var result = dialog.show(currentTable, "Add New Category");
+            if (result.isEmpty()) {
+                break;
             }
 
-            categoryTableModel.addRow(category);
-            SuccessDialog.show("Category created successfully!");
-        });
+            Category category = result.get();
+            Validator<Category> validator = new CategoryValidator();
+            ValidationResult validationResult = validator.validateAdd(allTableModels, category);
+
+            if (validationResult.isValid()) {
+                categoryTableModel.addRow(category);
+                SuccessDialog.show("Category created successfully!");
+                success = true;
+            } else {
+                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void tryAddTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel) {
-        TimeUnit newTimeUnit = new TimeUnit("", "", 0);
+        boolean success = false;
 
-        IntervalDialog dialog = new IntervalDialog(newTimeUnit);
-        dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnit -> {
-            Validator<TimeUnit> validator = new TimeUnitValidator();
-            ValidationResult result = validator.validateAdd(allTableModels, timeUnit);
-            if (!result.isValid()) {
-                throw new ValidationException(result.toString());
+        while (!success) {
+            TimeUnit newTimeUnit = new TimeUnit("", "", 0);
+            IntervalDialog dialog = new IntervalDialog(newTimeUnit);
+
+            var result = dialog.show(currentTable, "Add New Time Unit");
+            if (result.isEmpty()) {
+                break;
             }
 
-            timeUnitTableModel.addRow(timeUnit);
-            SuccessDialog.show("Time unit created successfully!");
-        });
+            TimeUnit timeUnit = result.get();
+            Validator<TimeUnit> validator = new TimeUnitValidator();
+            ValidationResult validationResult = validator.validateAdd(allTableModels, timeUnit);
+
+            if (validationResult.isValid()) {
+                timeUnitTableModel.addRow(timeUnit);
+                SuccessDialog.show("Time unit created successfully!");
+                success = true;
+            } else {
+                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     @Override
