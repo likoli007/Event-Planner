@@ -28,105 +28,132 @@ public abstract class AddAction extends AbstractAction {
     protected abstract TableModel getTableModel();
 
     private void tryAddEvent(JTable currentTable, EventTableModel eventTableModel) {
-        boolean success = false;
+        TodoEvent newEvent = new TodoEvent(
+                "",
+                "",
+                LocalDateTime.now(),
+                1,
+                new ArrayList<>()
+        );
 
-        while (!success) {
-            TodoEvent newEvent = new TodoEvent("", "", LocalDateTime.now(), 1, new ArrayList<>());
-            TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
+        TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
 
-            var result = dialog.show(currentTable, "Add New Event");
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Add New Event");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            TodoEvent todoEvent = result.get();
+            TodoEvent todoEvent = dialogResult.get();
             Validator<TodoEvent> validator = new TodoEventValidator();
-            ValidationResult validationResult = validator.validateAdd(allTableModels, todoEvent);
+            ValidationResult result = validator.validateAdd(allTableModels, todoEvent);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 eventTableModel.addRow(todoEvent);
                 SuccessDialog.show("Event created successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void tryAddTemplate(JTable currentTable, TemplateTableModel templateTableModel) {
-        boolean success = false;
+        Template newTemplate = new Template(
+                "",
+                "",
+                LocalTime.now(),
+                1,
+                new ArrayList<>()
+        );
 
-        while (!success) {
-            Template newTemplate = new Template("", "", LocalTime.now(), 1, new ArrayList<>());
-            TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
+        TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
 
-            var result = dialog.show(currentTable, "Add New Template");
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Add New Template");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            Template template = result.get();
+            Template template = dialogResult.get();
             Validator<Template> validator = new TemplateValidator();
-            ValidationResult validationResult = validator.validateAdd(allTableModels, template);
+            ValidationResult result = validator.validateAdd(allTableModels, template);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 templateTableModel.addRow(template);
                 SuccessDialog.show("Template created successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
 
+
     private void tryAddCategory(JTable currentTable, CategoryTableModel categoryTableModel) {
-        boolean success = false;
+        Category newCategory = new Category("", Color.BLUE);
 
-        while (!success) {
-            Category newCategory = new Category("", Color.BLUE);
-            CategoryDialog dialog = new CategoryDialog(newCategory);
+        CategoryDialog dialog = new CategoryDialog(newCategory);
 
-            var result = dialog.show(currentTable, "Add New Category");
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Add New Category");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            Category category = result.get();
+            Category category = dialogResult.get();
             Validator<Category> validator = new CategoryValidator();
-            ValidationResult validationResult = validator.validateAdd(allTableModels, category);
+            ValidationResult result = validator.validateAdd(allTableModels, category);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 categoryTableModel.addRow(category);
                 SuccessDialog.show("Category created successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
 
     private void tryAddTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel) {
-        boolean success = false;
+        TimeUnit newTimeUnit = new TimeUnit("", "", 0);
 
-        while (!success) {
-            TimeUnit newTimeUnit = new TimeUnit("", "", 0);
-            IntervalDialog dialog = new IntervalDialog(newTimeUnit);
+        IntervalDialog dialog = new IntervalDialog(newTimeUnit);
 
-            var result = dialog.show(currentTable, "Add New Time Unit");
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Add New Time Unit");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            TimeUnit timeUnit = result.get();
+            TimeUnit timeUnit = dialogResult.get();
             Validator<TimeUnit> validator = new TimeUnitValidator();
-            ValidationResult validationResult = validator.validateAdd(allTableModels, timeUnit);
+            ValidationResult result = validator.validateAdd(allTableModels, timeUnit);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 timeUnitTableModel.addRow(timeUnit);
                 SuccessDialog.show("Time unit created successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }

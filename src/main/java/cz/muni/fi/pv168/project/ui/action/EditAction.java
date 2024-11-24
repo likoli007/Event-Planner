@@ -31,108 +31,120 @@ public final class EditAction extends AbstractAction {
 
     private void tryEditEvent(JTable currentTable, EventTableModel eventTableModel, int modelRow) {
         TodoEvent originalEvent = eventTableModel.getEntity(modelRow);
-        boolean success = false;
+        TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
 
-        while (!success) {
-            TodoEventDialog dialog = new TodoEventDialog(originalEvent, allTableModels);
-
-            var result = dialog.show(currentTable, "Edit Todo Event");
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Edit Todo Event");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            TodoEvent todoEvent = result.get();
+            TodoEvent todoEvent = dialogResult.get();
             Validator<TodoEvent> validator = new TodoEventValidator();
-            ValidationResult validationResult = validator.validateEdit(allTableModels, originalEvent, todoEvent);
+            ValidationResult result = validator.validateEdit(allTableModels, originalEvent, todoEvent);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 originalEvent.update(todoEvent);
                 eventTableModel.updateRow(originalEvent);
                 SuccessDialog.show("Event edited successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
 
     private void tryEditTemplate(JTable currentTable, TemplateTableModel templateTableModel, int modelRow) {
         Template originalTemplate = templateTableModel.getEntity(modelRow);
-        boolean success = false;
+        TemplateDialog dialog = new TemplateDialog(originalTemplate, allTableModels);
 
-        while (!success) {
-            TemplateDialog dialog = new TemplateDialog(originalTemplate, allTableModels);
-            var result = dialog.show(currentTable, "Edit Template");
-
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Edit Template");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            Template template = result.get();
+            Template template = dialogResult.get();
             Validator<Template> validator = new TemplateValidator();
-            ValidationResult validationResult = validator.validateEdit(allTableModels, originalTemplate, template);
+            ValidationResult result = validator.validateEdit(allTableModels, originalTemplate, template);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 originalTemplate.update(template);
                 templateTableModel.updateRow(originalTemplate);
                 SuccessDialog.show("Template edited successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
 
     private void tryEditCategory(JTable currentTable, CategoryTableModel categoryTableModel, int modelRow) {
         Category originalCategory = categoryTableModel.getEntity(modelRow);
-        boolean success = false;
+        CategoryDialog dialog = new CategoryDialog(originalCategory);
 
-        while (!success) {
-            CategoryDialog dialog = new CategoryDialog(originalCategory);
-            var result = dialog.show(currentTable, "Edit Category");
-
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Edit Category");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            Category category = result.get();
+            Category category = dialogResult.get();
             Validator<Category> validator = new CategoryValidator();
-            ValidationResult validationResult = validator.validateEdit(allTableModels, originalCategory, category);
+            ValidationResult result = validator.validateEdit(allTableModels, originalCategory, category);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 originalCategory.update(category);
                 categoryTableModel.updateRow(originalCategory);
                 SuccessDialog.show("Category edited successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
 
     private void tryEditTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel, int modelRow) {
         TimeUnit originalTimeUnit = timeUnitTableModel.getEntity(modelRow);
-        boolean success = false;
+        IntervalDialog dialog = new IntervalDialog(originalTimeUnit);
 
-        while (!success) {
-            IntervalDialog dialog = new IntervalDialog(originalTimeUnit);
-            var result = dialog.show(currentTable, "Edit Time Unit");
-
-            if (result.isEmpty()) {
+        while (true) {
+            var dialogResult = dialog.show(currentTable, "Edit Time Unit");
+            if (dialogResult.isEmpty()) {
                 break;
             }
 
-            TimeUnit timeUnit = result.get();
+            TimeUnit timeUnit = dialogResult.get();
             Validator<TimeUnit> validator = new TimeUnitValidator();
-            ValidationResult validationResult = validator.validateEdit(allTableModels, originalTimeUnit, timeUnit);
+            ValidationResult result = validator.validateEdit(allTableModels, originalTimeUnit, timeUnit);
 
-            if (validationResult.isValid()) {
+            if (result.isValid()) {
                 originalTimeUnit.update(timeUnit);
                 timeUnitTableModel.updateRow(originalTimeUnit);
                 SuccessDialog.show("Time unit edited successfully!");
-                success = true;
+                break;
             } else {
-                JOptionPane.showMessageDialog(currentTable, validationResult.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        currentTable,
+                        result.toString(),
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
