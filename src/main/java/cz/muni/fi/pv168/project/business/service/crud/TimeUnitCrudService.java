@@ -1,9 +1,10 @@
-package cz.muni.fi.pv168.project.service.crud;
+package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -14,6 +15,16 @@ public class TimeUnitCrudService implements CrudService<TimeUnit> {
 
     public TimeUnitCrudService(Repository<TimeUnit> timeUnitRepository) {
         this.timeUnitRepository = timeUnitRepository;
+    }
+
+    @Override
+    public Optional<TimeUnit> findById(UUID id) {
+        return timeUnitRepository.findById(id);
+    }
+
+    @Override
+    public Optional<TimeUnit> findDuplicate(TimeUnit entity) {
+        return timeUnitRepository.findDuplicate(entity);
     }
 
     @Override

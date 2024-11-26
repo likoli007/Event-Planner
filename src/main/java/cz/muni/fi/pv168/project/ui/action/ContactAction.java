@@ -16,10 +16,10 @@ public class ContactAction extends AbstractAction {
         JOptionPane.showMessageDialog(
                 parentFrame,
                 """
-                        Tereza Hrbková - XYZ
-                        Šimon Brauner -  ABC
-                        Alojz Holúbek - 瞎写的
-                        Josef Žižka - 123
+                        Tereza Hrbková - 492946@mail.muni.cz
+                        Šimon Brauner - 525160@mail.muni.cz
+                        Alojz Holúbek - 514416@mail.muni.cz
+                        Josef Žižka - jzizka@mail.muni.cz
                         """,
                 "Contact Information",
                 JOptionPane.INFORMATION_MESSAGE

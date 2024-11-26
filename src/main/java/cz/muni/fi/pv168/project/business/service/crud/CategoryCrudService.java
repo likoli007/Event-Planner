@@ -1,9 +1,10 @@
-package cz.muni.fi.pv168.project.service.crud;
+package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,16 @@ public class CategoryCrudService implements CrudService<Category> {
     @Override
     public List<Category> findAll() {
         return categoryRepository.findAll();
+    }
+
+    @Override
+    public Optional<Category> findById(UUID id) {
+        return categoryRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Category> findDuplicate(Category entity) {
+        return categoryRepository.findDuplicate(entity);
     }
 
     @Override

@@ -1,39 +1,55 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
 
 import javax.swing.*;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
+import java.awt.*;
 
 public final class CategoryDialog extends EntityDialog<Category> {
 
     private final JTextField nameField = new JTextField();
-    private final JComboBox<Color> colorComboBox = new JComboBox<>(Color.values());
+
+    private static final JColorChooser colorChooser = new JColorChooser();
 
     private final Category category;
     private Color selectedColor;
 
     public CategoryDialog(Category category) {
-        this.category = category;
+        this.category = new Category(category);
+
+        setupColorChooser();
         setValues();
         addFields();
+
+
+    }
+
+    private void setupColorChooser(){
+        AbstractColorChooserPanel[] panels = colorChooser.getChooserPanels();
+        for (int i = 1; i < panels.length; i++) {
+            colorChooser.removeChooserPanel(panels[i]);
+        }
+        colorChooser.setPreviewPanel(new JPanel());
     }
 
     private void setValues() {
         nameField.setText(category.getName());
         selectedColor = category.getColor();
-        colorComboBox.setSelectedItem(selectedColor);
+
     }
 
     private void addFields() {
         add("Name:", nameField);
-        add("Color:", colorComboBox);
+        add("Color:", colorChooser);
     }
 
     @Override
     Category getEntity() {
-        category.setName(nameField.getText());
-        selectedColor = (Color) colorComboBox.getSelectedItem();
+        String name = nameField.getText();
+        category.setName(name);
+
+        selectedColor = (Color) colorChooser.getColor();
         category.setColor(selectedColor);
         return category;
     }

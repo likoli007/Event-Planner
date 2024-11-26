@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Template;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalTime;
@@ -60,9 +60,30 @@ public class TemplateTableModel extends AbstractTableModel {
         return templates.get(rowIndex);
     }
 
-    public void addTemplate(Template template) {
+    public void addRow(Template template) {
+        templateCrudService.create(template);
         templates.add(template);
         int rowIndex = templates.size() - 1;
         fireTableRowsInserted(rowIndex, rowIndex);
+    }
+
+    public void updateRow(Template template) {
+        templateCrudService.update(template);
+        int rowIndex = templates.indexOf(template);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int modelRow) {
+        var template = getEntity(modelRow);
+        templateCrudService.deleteById(template.getId());
+        templates.remove(template);
+        fireTableRowsDeleted(modelRow, modelRow);
+    }
+    public void refresh() {
+        this.templates = new ArrayList<>(templateCrudService.findAll());
+        fireTableDataChanged();
+    }
+    public CrudService<Template> getTemplateCrudService() {
+        return templateCrudService;
     }
 }

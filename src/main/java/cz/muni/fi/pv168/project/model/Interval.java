@@ -1,6 +1,6 @@
 package cz.muni.fi.pv168.project.model;
 
-public class Interval {
+public class Interval  {
     private TimeUnit timeUnit;
     private int amount;
 

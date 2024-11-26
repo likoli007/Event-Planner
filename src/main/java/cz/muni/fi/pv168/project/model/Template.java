@@ -1,16 +1,24 @@
 package cz.muni.fi.pv168.project.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import cz.muni.fi.pv168.project.business.service.export.serialize.CategorySerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.IntervalSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.LocalTimeSerializer;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Template extends Entity {
     private String name;
     private String details;
+
+    @JsonSerialize(using = LocalTimeSerializer.class)
     private LocalTime startTime;
+    @JsonSerialize(using = IntervalSerializer.class)
     private Interval interval;
+    @JsonSerialize(contentUsing = CategorySerializer.class)
     private List<Category> categories;
 
     public Template(String name, String details, LocalTime startTime, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
@@ -27,6 +35,29 @@ public class Template extends Entity {
         this.startTime = startTime;
         this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
+    }
+
+    public Template(Template template) {
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
+    }
+
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof Template template)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
     }
 
     public String getName() {
@@ -62,7 +93,7 @@ public class Template extends Entity {
     }
 
     public List<Category> getCategories() {
-        return Collections.unmodifiableList(categories);
+        return categories;
     }
 
     public void setCategories(List<Category> categories) {
@@ -75,6 +106,13 @@ public class Template extends Entity {
 
     public TodoEvent toTodoEvent(){
             return new TodoEvent(name,details, startTime.atDate(LocalDate.now()), getInterval().getTimeUnit(), getInterval().getAmount(), categories );
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        Template template = (Template) e;
+        return Objects.equals(name, template.name);
     }
 
     @Override

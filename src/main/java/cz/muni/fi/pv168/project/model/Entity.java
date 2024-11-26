@@ -8,4 +8,8 @@ public abstract class Entity {
     public UUID getId() {
         return id;
     }
+
+    public abstract boolean isDuplicate(Entity e);
+
+    public abstract void update(Entity e);
 }

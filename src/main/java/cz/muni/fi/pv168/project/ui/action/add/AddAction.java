@@ -1,73 +1,131 @@
 package cz.muni.fi.pv168.project.ui.action.add;
 
+import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.ui.dialog.CategoryDialog;
-import cz.muni.fi.pv168.project.ui.dialog.IntervalDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TemplateDialog;
-import cz.muni.fi.pv168.project.ui.dialog.TodoEventDialog;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.dialog.*;
+import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public abstract class AddAction extends AbstractAction {
     protected final Supplier<JTable> tableSupplier;
+    protected final AllTableModels allTableModels;
 
-    public AddAction(String name, Supplier<JTable> tableSupplier) {
+    public AddAction(String name, Supplier<JTable> tableSupplier, AllTableModels allTableModels) {
         super(name, Icons.ADD_ICON);
         this.tableSupplier = tableSupplier;
+        this.allTableModels = allTableModels;
     }
 
     protected abstract TableModel getTableModel();
+
+    private void tryAddEvent(JTable currentTable, EventTableModel eventTableModel) {
+        TodoEvent newEvent = new TodoEvent(
+                "",
+                "",
+                LocalDateTime.now(),
+                1,
+                new ArrayList<>()
+        );
+
+        TodoEventDialog dialog = new TodoEventDialog(newEvent, allTableModels);
+        dialog.show(currentTable, "Add New Event").ifPresent(todoEvent -> {
+            Validator<TodoEvent> validator = new TodoEventValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, todoEvent);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
+
+            eventTableModel.addRow(todoEvent);
+            SuccessDialog.show("Event created successfully!");
+        });
+    }
+
+    private void tryAddTemplate(JTable currentTable, TemplateTableModel templateTableModel) {
+        Template newTemplate = new Template(
+                "",
+                "",
+                LocalTime.now(),
+                1,
+                new ArrayList<>()
+        );
+
+        TemplateDialog dialog = new TemplateDialog(newTemplate, allTableModels);
+        dialog.show(currentTable, "Add New Template").ifPresent(template -> {
+            Validator<Template> validator = new TemplateValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, template);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
+
+            templateTableModel.addRow(template);
+            SuccessDialog.show("Template created successfully!");
+        });
+    }
+
+    private void tryAddCategory(JTable currentTable, CategoryTableModel categoryTableModel) {
+        Category newCategory = new Category("", Color.BLUE);
+
+        CategoryDialog dialog = new CategoryDialog(newCategory);
+        dialog.show(currentTable, "Add New Category").ifPresent(category -> {
+            Validator<Category> validator = new CategoryValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, category);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
+
+            categoryTableModel.addRow(category);
+            SuccessDialog.show("Category created successfully!");
+        });
+    }
+
+    private void tryAddTimeUnit(JTable currentTable, TimeUnitTableModel timeUnitTableModel) {
+        TimeUnit newTimeUnit = new TimeUnit("", "", 0);
+
+        IntervalDialog dialog = new IntervalDialog(newTimeUnit);
+        dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnit -> {
+            Validator<TimeUnit> validator = new TimeUnitValidator();
+            ValidationResult result = validator.validateAdd(allTableModels, timeUnit);
+            if (!result.isValid()) {
+                throw new ValidationException(result.toString());
+            }
+
+            timeUnitTableModel.addRow(timeUnit);
+            SuccessDialog.show("Time unit created successfully!");
+        });
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JTable currentTable = tableSupplier.get();
         TableModel model = getTableModel();
 
-        if (model instanceof EventTableModel eventTableModel) {
-            TodoEvent newEvent = new TodoEvent(
-                    "",
-                    "",
-                    LocalDateTime.now(),
-                    1,
-                    List.of(new Category("Work", Color.BLUE))
-            );
-            TodoEventDialog dialog = new TodoEventDialog(newEvent);
-            Optional<TodoEvent> result = dialog.show(currentTable, "Add New Event");
-        } else if (model instanceof CategoryTableModel categoryTableModel) {
-            Category newCategory = new Category("", Color.BLUE);
-            CategoryDialog dialog = new CategoryDialog(newCategory);
-            dialog.show(currentTable, "Add New Category").ifPresent(categoryTableModel::addRow);
-
-        } else if (model instanceof TemplateTableModel) {
-            Template newTemplate = new Template(
-                    "",
-                    "",
-                    LocalTime.now(),
-                    1,
-                    List.of(new Category("Work", Color.BLUE))
-            );
-            TemplateDialog dialog = new TemplateDialog(newTemplate);
-            Optional<Template> result = dialog.show(currentTable, "Add New Template");
-        } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
-            TimeUnit newTimeUnit = new TimeUnit("", "", 0);
-            IntervalDialog dialog = new IntervalDialog(newTimeUnit);
-            dialog.show(currentTable, "Add New Time Unit").ifPresent(timeUnitTableModel::addRow);
-        } else {
-            JOptionPane.showMessageDialog(currentTable,
-                    "Unsupported table model for adding.",
+        try {
+            if (model instanceof EventTableModel eventTableModel) {
+                tryAddEvent(currentTable, eventTableModel);
+            } else if (model instanceof TemplateTableModel templateTableModel) {
+                tryAddTemplate(currentTable, templateTableModel);
+            } else if (model instanceof CategoryTableModel categoryTableModel) {
+                tryAddCategory(currentTable, categoryTableModel);
+            } else if (model instanceof TimeUnitTableModel timeUnitTableModel) {
+                tryAddTimeUnit(currentTable, timeUnitTableModel);
+            } else {
+                JOptionPane.showMessageDialog(currentTable,
+                        "Unsupported table model for adding.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (ValidationException ex) {
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }

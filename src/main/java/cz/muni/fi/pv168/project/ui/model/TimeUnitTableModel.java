@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -74,5 +74,21 @@ public class TimeUnitTableModel extends AbstractTableModel {
         timeUnitCrudService.deleteById(timeUnit.getId());
         timeUnits.remove(modelRow);
         fireTableRowsDeleted(modelRow, modelRow);
+    }
+    public void refresh() {
+        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
+        fireTableDataChanged();
+    }
+    public CrudService<TimeUnit> getTimeUnitCrudService() {
+        return timeUnitCrudService;
+    }
+
+    public int getColumnIndexByName(String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).getName().equals(columnName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
