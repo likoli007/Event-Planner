@@ -15,10 +15,20 @@ public class EventTableCellRenderer extends DefaultTableCellRenderer {
         EventTableModel model = (EventTableModel) table.getModel();
         TodoEvent event = model.getEntity(table.convertRowIndexToModel(row));
 
-        if (event.isDone()) {
-            component.setForeground(Color.GRAY);
+        if (isSelected) {
+            component.setBackground(table.getSelectionBackground());
         } else {
-            component.setForeground(Color.BLACK);
+            component.setBackground(table.getBackground());
+        }
+
+        if (isSelected) {
+            component.setForeground(Color.WHITE);
+        } else {
+            if (event.isDone()) {
+                component.setForeground(Color.GRAY);
+            } else {
+                component.setForeground(Color.BLACK);
+            }
         }
 
         return component;
