@@ -62,6 +62,15 @@ public class Category extends Entity {
         return Objects.equals(name, category.name);
     }
 
+    //if both the color RGB and name matches, the entity is not meaningfully different
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        Category category = (Category) e;
+        if (Objects.equals(name, category.name) && color.getRGB() == ((Category) e).getColor().getRGB()) return false;
+        return true;
+    }
+
     @Override
     public String toString() {
         return name;

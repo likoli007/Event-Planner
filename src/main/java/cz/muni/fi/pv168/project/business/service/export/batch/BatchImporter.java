@@ -5,5 +5,5 @@ import cz.muni.fi.pv168.project.business.service.export.format.FileFormat;
 import java.io.IOException;
 
 public interface BatchImporter extends FileFormat {
-    Batch importBatch(String filePath) throws IOException;
+    BatchResult importBatch(String filePath);
 }

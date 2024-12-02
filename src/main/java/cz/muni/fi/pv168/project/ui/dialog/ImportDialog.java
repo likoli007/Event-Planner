@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.muni.fi.pv168.project.model.DuplicateType;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,7 +36,16 @@ public class ImportDialog{
 
     private boolean importAllowed = false;
 
+    private DuplicateType duplicateHandling = DuplicateType.UNDEFINED;
 
+    JLabel overwriteOptionsLabel = new JLabel("Default overwrite behaviour:");
+    JRadioButton noneRadioButton = new JRadioButton("Ask for each");
+    JRadioButton overwriteRadio = new JRadioButton("Overwrite");
+    JRadioButton skipRadio = new JRadioButton("Skip");
+    JRadioButton duplicateRadio = new JRadioButton("Duplicate");
+    ButtonGroup overwriteOptionsGroup = new ButtonGroup();
+    JPanel overwriteOptionsPanel = new JPanel();
+    JPanel overwriteOptionsButtonPanel = new JPanel();
 
     public ImportDialog(JFrame parentFrame) {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -63,6 +73,33 @@ public class ImportDialog{
         mainPanel.add(importPanel);
         mainPanel.add(fileInfoTextArea);
 
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        labelPanel.add(overwriteOptionsLabel);
+        mainPanel.add(labelPanel);
+        //overwriteOptionsPanel.setLayout(new BoxLayout(overwriteOptionsPanel, BoxLayout.Y_AXIS));
+        overwriteOptionsButtonPanel.setLayout(new FlowLayout());
+
+        noneRadioButton.addActionListener(e -> duplicateHandling = DuplicateType.UNDEFINED);
+        overwriteRadio.addActionListener(e -> duplicateHandling = DuplicateType.OVERWRITE);
+        skipRadio.addActionListener(e -> duplicateHandling = DuplicateType.CANCEL);
+        duplicateRadio.addActionListener(e -> duplicateHandling = DuplicateType.DUPLICATE);
+        overwriteOptionsLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        overwriteOptionsGroup.add(noneRadioButton);
+        overwriteOptionsGroup.add(overwriteRadio);
+        overwriteOptionsGroup.add(skipRadio);
+        overwriteOptionsGroup.add(duplicateRadio);
+        noneRadioButton.setSelected(true);
+
+        overwriteOptionsButtonPanel.add(noneRadioButton);
+        overwriteOptionsButtonPanel.add(overwriteRadio);
+        overwriteOptionsButtonPanel.add(skipRadio);
+        overwriteOptionsButtonPanel.add(duplicateRadio);
+
+        //overwriteOptionsPanel.add(overwriteOptionsButtonPanel);
+
+
+        mainPanel.add(overwriteOptionsButtonPanel);
         //mainPanel.add(importButton);
 
         buttonPanel.setLayout(new FlowLayout());
@@ -86,6 +123,10 @@ public class ImportDialog{
         dialog.dispose();
     }
 
+    public DuplicateType getDuplicateHandling(){
+        return duplicateHandling;
+    }
+
     public String getResultFilePath(){
         return resultFilePath;
     }
@@ -103,15 +144,14 @@ public class ImportDialog{
     }
 
     private void getJSONStatistics(File file) throws IOException {
-
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(file);
 
         fileInfoTextArea.setText(
-                "Total No. of events: " + getArrayLength(rootNode, "events") + "\n" +
-                "Total No. of categories: " + getArrayLength(rootNode, "categories") + "\n" +
-                "Total No. of templates: " + getArrayLength(rootNode, "templates") + "\n" +
-                "Total No. of intervals: " + getArrayLength(rootNode, "timeUnits") + "\n"
+                "Events: " + getArrayLength(rootNode, "events") + "\n" +
+                "Categories: " + getArrayLength(rootNode, "categories") + "\n" +
+                "Templates: " + getArrayLength(rootNode, "templates") + "\n" +
+                "Intervals: " + getArrayLength(rootNode, "timeUnits") + "\n"
         );
     }
 
@@ -125,7 +165,8 @@ public class ImportDialog{
                 getJSONStatistics(file);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog, "An error occured while importing!\n" +
-                                "Skipping import!\n" + "Please ensure there are no faulty fields in the file.",
+                                "This was likely caused by basic JSON syntax fault.\n" +
+                                "Please ensure the JSON file is intact",
                         "Alert", JOptionPane.ERROR_MESSAGE);
                 dialog.dispose();
             }
