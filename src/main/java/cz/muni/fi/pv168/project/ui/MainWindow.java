@@ -470,13 +470,18 @@ public class MainWindow {
             doneColumn.setPreferredWidth(50);
             doneColumn.setMaxWidth(50);
             doneColumn.setMinWidth(50);
+
+            model.addTableModelListener(e -> {
+                if (e.getColumn() == doneColumnIndex) {
+                    eventTableModel.refetch(filter);
+                }
+            });
         }
 
         int categoryColumnIndex = model.getColumnIndexByName("Categories");
         if (categoryColumnIndex != -1) {
             table.getColumnModel().getColumn(categoryColumnIndex).setCellRenderer(new CategoryListRenderer());
         }
-
 
         return table;
     }
