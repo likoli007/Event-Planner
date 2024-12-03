@@ -6,24 +6,23 @@ public class SingleResult <T> {
     String message;
     T data;
 
-    public SingleResult() {}
-
-    public T getData() {
-        return data;
-    }
-    public void setData(T data) {
-        this.data = data;
-    }
     public boolean isSuccess() {
         return success;
     }
-    public void setSuccess(boolean sucess) {
-        this.success = sucess;
+    public T getData() {
+        return data;
+    }
+    public SingleResult<T> setData(T data) {
+        this.success = true;
+        this.data = data;
+        return this;
     }
     public String getMessage() {
         return message;
     }
-    public void setMessage(String message) {
+    public SingleResult<T> setMessage(String message) {
+        this.success = false;
         this.message = message;
+        return this;
     }
 }
