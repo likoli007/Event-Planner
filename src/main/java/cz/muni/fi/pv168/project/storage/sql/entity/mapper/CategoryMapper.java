@@ -15,7 +15,7 @@ public final class CategoryMapper implements EntityMapper<CategoryEntity, Catego
         return new Category (
                 categoryEntity.id(),
                 categoryEntity.name(),
-                Color.GREEN // TODO deserialize color
+                (new ColorMapper()).mapToBusiness(categoryEntity.color())
         );
     }
 
@@ -24,7 +24,7 @@ public final class CategoryMapper implements EntityMapper<CategoryEntity, Catego
         return new CategoryEntity(
                 entity.getId(),
                 entity.getName(),
-                "#00FF00" // TODO serialize color
+                (new ColorMapper()).mapEntityToDatabase(entity.getColor())
         );
     }
 }
