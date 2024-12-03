@@ -169,6 +169,8 @@ public class MainWindow {
         setupKeyBindings(frame.getRootPane());
         setupSelectAllShortcut(eventTable);
         setupSelectAllShortcut(managerTabTable);
+
+        frame.setMinimumSize(frame.getSize());
     }
 
     private void refresh() {
