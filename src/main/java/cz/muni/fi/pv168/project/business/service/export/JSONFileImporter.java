@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,38 +35,45 @@ public class JSONFileImporter implements BatchImporter {
         });
     }
 
+    private SingleResult<Integer> validateColorPart(JsonNode parentNode, String colorPart) {
+        SingleResult<Integer> result = new SingleResult<>();
+
+        JsonNode node = parentNode.get(colorPart);
+        if (node == null) {
+            return result.setMessage("Missing a color value of '" + colorPart + "'.");
+        }
+
+        int value = node.asInt();
+        if (value < 0 || value > 255) {
+            return result.setMessage("Color value '" + value + "' of '" + colorPart + "' is not in interval <0;255>.");
+        }
+
+        return result.setData(value);
+    }
+
     private SingleResult<Color> validateColor(JsonNode node) {
         SingleResult<Color> result = new SingleResult<>();
+
         JsonNode colorNode = node.get("color");
         if (colorNode == null) {
-            result.setMessage("Category node has no color.");
-            return result;
-        }
-        JsonNode redNode = colorNode.get("r");
-        JsonNode greenNode = colorNode.get("g");
-        JsonNode blueNode = colorNode.get("b");
-
-        if (redNode == null || greenNode == null || blueNode == null) {
-            result.setMessage("Category color is missing a color value.");
-            return result;
+            return result.setMessage("Category node has no color.");
         }
 
-        if (!redNode.isInt() || !blueNode.isInt() || !greenNode.isInt()){
-            result.setMessage("Category color is not an integer.");
-            return result;
+        List<String> colorParts = Arrays.asList("r", "g", "b");
+        List<Integer> colorValues = new ArrayList<>(); 
+        for (String colorPart : colorParts) {
+            SingleResult<Integer> colorPartResult = validateColorPart(colorNode, colorPart);
+
+            if (!colorPartResult.isSuccess()) {
+                return result.setMessage("Category color node has corrupted data. " + colorPartResult.getMessage());
+            }
+
+            colorValues.add(colorPartResult.getData());
         }
 
-        int red = redNode.asInt();
-        int green = greenNode.asInt();
-        int blue = blueNode.asInt();
-
-        if (red < 0 || green < 0 || blue < 0 || red > 255 || green > 255 || blue > 255){
-            result.setMessage("Category color is invalid.");
-        }
-        Color color = new Color(red, green, blue);
-        result.setData(color);
-        return result;
+        return result.setData(new Color(colorValues.get(0), colorValues.get(1), colorValues.get(2)));
     }
+
 
     private SingleResult<String> validateStringField(String fieldName, JsonNode node) {
         SingleResult<String> result = new SingleResult<>();
