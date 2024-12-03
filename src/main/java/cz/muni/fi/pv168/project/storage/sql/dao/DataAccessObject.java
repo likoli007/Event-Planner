@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.storage.sql.dao;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Generic interface for CRUD operations on entities.
@@ -35,7 +36,7 @@ public interface DataAccessObject<E> {
      * @param id entity id
      * @return either empty if not found or the entity instance
      */
-    Optional<E> findById(Long id);
+    Optional<E> findById(UUID id);
 
     /**
      * Updates an entity using the underlying data source.
@@ -52,7 +53,7 @@ public interface DataAccessObject<E> {
      * @param id of entity to be deleted
      * @throws DataStorageException when anything goes wrong with the underlying data source
      */
-    void deleteById(Long id);
+    void deleteById(UUID id);
 
     /**
      * Deletes all entities from the underlying data source.

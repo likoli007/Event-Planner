@@ -9,14 +9,15 @@ import java.util.Objects;
 /**
  * Transaction handler
  */
-class TransactionHandlerImpl implements TransactionHandler {
+public class TransactionImpl implements Transaction {
     private final ConnectionHandler connectionHandler;
+    private boolean closed = false;
 
     /**
      * Creates new transaction over given connection
      * @param connection database connection
      */
-    TransactionHandlerImpl(Connection connection) throws SQLException {
+    public TransactionImpl(Connection connection) throws SQLException {
         Objects.requireNonNull(connection, "Missing connection object");
         connection.setAutoCommit(false);
         this.connectionHandler = new ConnectionHandlerImpl(connection);
@@ -40,9 +41,14 @@ class TransactionHandlerImpl implements TransactionHandler {
     public void close() {
         try {
             connectionHandler.use().close();
+            closed = true;
         } catch (SQLException e) {
             throw new DataStorageException("Unable close database connection", e);
         }
     }
 
+    @Override
+    public boolean isClosed() {
+        return closed;
+    }
 }

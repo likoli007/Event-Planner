@@ -21,10 +21,10 @@ import java.util.function.Supplier;
  */
 final class SqlFileExecutor {
     private final Class<?> resourceRoot;
-    private final Supplier<TransactionHandler> transactions;
+    private final Supplier<Transaction> transactions;
 
     SqlFileExecutor(
-            Supplier<TransactionHandler> transactions,
+            Supplier<Transaction> transactions,
             Class<?> resourceRoot
     ) {
         this.transactions = transactions;

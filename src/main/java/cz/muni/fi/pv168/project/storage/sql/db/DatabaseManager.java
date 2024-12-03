@@ -29,22 +29,6 @@ public final class DatabaseManager {
         this.sqlFileExecutor = new SqlFileExecutor(this::getTransactionHandler, DatabaseManager.class);
     }
 
-    public ConnectionHandler getConnectionHandler() {
-        try {
-            return new ConnectionHandlerImpl(dataSource.getConnection());
-        } catch (SQLException e) {
-            throw new DataStorageException("Unable to get a new connection", e);
-        }
-    }
-
-    public TransactionHandler getTransactionHandler() {
-        try {
-            return new TransactionHandlerImpl(dataSource.getConnection());
-        } catch (SQLException e) {
-            throw new DataStorageException("Unable to get a new connection", e);
-        }
-    }
-
     public static DatabaseManager createProductionInstance() {
         String connectionString = "jdbc:h2:%s;%s".formatted(createDbFileSystemPath(), DB_PROPERTIES_STRING);
         return new DatabaseManager(connectionString);
@@ -59,8 +43,20 @@ public final class DatabaseManager {
         return databaseManager;
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
+    public ConnectionHandler getConnectionHandler() {
+        try {
+            return new ConnectionHandlerImpl(dataSource.getConnection());
+        } catch (SQLException e) {
+            throw new DataStorageException("Unable to get a new connection", e);
+        }
+    }
+
+    public Transaction getTransactionHandler() {
+        try {
+            return new TransactionImpl(dataSource.getConnection());
+        } catch (SQLException e) {
+            throw new DataStorageException("Unable to get a new connection", e);
+        }
     }
 
     public String getDatabaseConnectionString() {
@@ -86,11 +82,6 @@ public final class DatabaseManager {
         File parentDir = projectDbPath.getParent().toFile();
 
         parentDir.mkdirs();
-//        if (parentDir.mkdirs()) {
-//            Logger.debug("Created a new root directory for the database: {}", projectDbPath.getParent());
-//        } else {
-//            Logger.debug("Root directory for the database already exists: {}", projectDbPath.getParent());
-//        }
 
         if (!parentDir.exists()) {
             throw new DataStorageException("Unable to create database root directory");

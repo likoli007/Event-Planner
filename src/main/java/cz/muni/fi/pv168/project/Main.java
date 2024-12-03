@@ -12,6 +12,10 @@ import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileExporter;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileImporter;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
+import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
+import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
+import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
+import cz.muni.fi.pv168.project.storage.sql.db.TransactionManagerImpl;
 import cz.muni.fi.pv168.project.ui.MainWindow;
 
 import javax.swing.UIManager;
@@ -27,6 +31,13 @@ public class Main {
 
     public static void main(String[] args) {
         var testDataGenerator = new TestDataGenerator();
+
+        DatabaseManager databaseManager = DatabaseManager.createProductionInstance();
+        databaseManager.initSchema();
+
+        var transactionManager = new TransactionManagerImpl(databaseManager);
+        var transactionExecutor = new TransactionExecutorImpl(transactionManager::beginTransaction);
+        var transactionConnectionSupplier = new TransactionConnectionSupplier(transactionManager, databaseManager);
 
         var categoryRepository = new InMemoryRepository<>(testDataGenerator.createCategories());
         var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
