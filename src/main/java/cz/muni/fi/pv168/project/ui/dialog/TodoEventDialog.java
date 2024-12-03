@@ -3,8 +3,9 @@ package cz.muni.fi.pv168.project.ui.dialog;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.ui.documentFilters.NumericNonEmptyDocumentFilter;
+import cz.muni.fi.pv168.project.ui.documentFilters.NumericDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
+import cz.muni.fi.pv168.project.ui.utils.NumericInputValue;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
@@ -49,7 +50,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         this.templateModel = new DefaultComboBoxModel<>(templates.toArray(new Template[0]));
 
-        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericNonEmptyDocumentFilter());
+        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericDocumentFilter());
 
         setValues();
         addFields();
@@ -121,7 +122,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         String name = nameField.getText();
         String details = detailsField.getText();
         LocalTime time = timeField.getTime();
-        int intervalAmount = Integer.parseInt(intervalField.getText());
+        int intervalAmount = NumericInputValue.get(intervalField.getText(), "length");
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
 
@@ -154,7 +155,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
 
-        todoEvent.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        todoEvent.getInterval().setAmount(NumericInputValue.get(intervalField.getText(), "length"));
         todoEvent.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
