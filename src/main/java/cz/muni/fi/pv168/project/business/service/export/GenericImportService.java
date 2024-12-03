@@ -146,7 +146,7 @@ public class GenericImportService implements ImportService {
                                     "Shortcut: " + timeUnit.getShortcut() + "\n" +
                                     "Minutes: " + timeUnit.getMinutes();
 
-                    DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Interval", originalString, duplicateString);
+                    DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Time Unit", originalString, duplicateString);
                     result = dialog.getResult();
                 }
                 else{
@@ -187,14 +187,14 @@ public class GenericImportService implements ImportService {
                             "Name: " + crudTemplate.getName() + "\n" +
                                     "Details: " + crudTemplate.getDetails() + "\n" +
                                     "Start Time: " + crudTemplate.getStartTime().format(formatter) + "\n" +
-                                    "Interval: " + crudTemplate.getInterval().getAmount() + " " +
+                                    "Time Unit: " + crudTemplate.getInterval().getAmount() + " " +
                                     crudTemplate.getInterval().getTimeUnit().getName() + "\n" +
                                     "Categories: " + crudTemplate.getCategories().toString();
 
                     String duplicateString = "Name: " + template.getName() + "\n" +
                             "Details: " + template.getDetails() + "\n" +
                             "Start Time: " + template.getStartTime().format(formatter) + "\n" +
-                            "Interval: " + template.getInterval().getAmount() + " " +
+                            "Time Unit: " + template.getInterval().getAmount() + " " +
                             template.getInterval().getTimeUnit().getName() + "\n" +
                             "Categories: " + template.getCategories().toString();
 
@@ -242,14 +242,14 @@ public class GenericImportService implements ImportService {
                             "Name: " + crudEvent.getName() + "\n" +
                                     "Details: " + crudEvent.getDetails() + "\n" +
                                     "Start Time: " + crudEvent.getStart().format(formatter) + "\n" +
-                                    "Interval: " + crudEvent.getInterval().getAmount() + " " +
+                                    "Time Unit: " + crudEvent.getInterval().getAmount() + " " +
                                     originalLength + "\n" +
                                     "Categories: " + crudEvent.getCategories().toString();
 
                     String duplicateString = "Name: " + event.getName() + "\n" +
                             "Details: " + event.getDetails() + "\n" +
                             "Start Time: " + event.getStart().format(formatter) + "\n" +
-                            "Interval: " + event.getInterval().getAmount() + " " +
+                            "Time Unit: " + event.getInterval().getAmount() + " " +
                             duplicateLength + "\n" +
                             "Categories: " + event.getCategories().toString();
 
