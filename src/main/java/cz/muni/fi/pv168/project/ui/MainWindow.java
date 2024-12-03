@@ -27,7 +27,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static cz.muni.fi.pv168.project.ui.format.StatisticsFormatter.*;
 
 public class MainWindow {
     private final JFrame frame;
@@ -193,19 +196,41 @@ public class MainWindow {
 
 
     public void computeCategoryStatistics(){
+        List<TodoEvent> filteredEvents = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEvents = todoEventsServiceFacade.findAll();
+
+        HashMap<String, Integer> allStats = computeCategoryStatisticsForList(allEvents);
+
+        HashMap<String, Integer> filteredStats = null;
+        double filteredStatsPercentage = -1.0;
+
+        if (filteredEvents.size() != allEvents.size()) {
+            filteredStats = computeCategoryStatisticsForList(filteredEvents);
+            filteredStatsPercentage = (double) filteredStats.get("total") / allEvents.size() * 100.0;
+        }
+        double allStatsPercentage = (double) allStats.get("total") / allEvents.size() * 100.0;
+
+        List<String> stats = List.of(
+                formatCategoryText(allStats, filteredStats, "total", "Tasks with selected categories"),
+                formatPercentageText(allStatsPercentage, filteredStatsPercentage, "Percentage")
+
+        );
+
+        catgoryStatisticsArea.setText(String.join(" | ", stats));
+    }
+
+
+    private HashMap<String, Integer> computeCategoryStatisticsForList(List<TodoEvent> events) {
+        HashMap<String, Integer> result = new HashMap<>();
+
         int categoryEventCount = 0;
-        int allCategoryEventCount = 0;
-        int categoryColumnIndex = eventTableModel.getColumnIndexByName("Categories");
         int[] selectedRows = managerTabTable.getSelectedRows();
 
-        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
-        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
-
-        for (int i = 0; i < eventList.size(); i++) {
+        for (int i = 0; i < events.size(); i++) {
             for (int j = 0;  j < selectedRows.length; j++) {
                 boolean categoryFound = false;
                 Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
-                for (Category eventCategory : (List<Category>) eventList.get(i).getCategories()) {
+                for (Category eventCategory : events.get(i).getCategories()) {
                     if (eventCategory.equals(category)) {
                         categoryEventCount++;
                         categoryFound = true;
@@ -217,125 +242,60 @@ public class MainWindow {
                 }
             }
         }
-        if (eventList.size() != allEventList.size()) {
-            for (int i = 0; i < allEventList.size(); i++) {
-                for (int j = 0; j < selectedRows.length; j++) {
-                    boolean categoryFound = false;
-                    Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
-                    for (Category eventCategory : (List<Category>) allEventList.get(i).getCategories()) {
-                        if (eventCategory.equals(category)) {
-                            allCategoryEventCount++;
-                            categoryFound = true;
-                            break;
-                        }
-                    }
-                    if (categoryFound) {
-                        break;
-                    }
-                }
-            }
-
-            double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
-            double allPercentage = ((double) allCategoryEventCount / (double) allEventList.size()) * 100.0;
-
-            if (eventList.isEmpty()) percentage = 0;
-            catgoryStatisticsArea.setText(
-                    "Tasks With Selected Categories: " + allCategoryEventCount + " (all) / " + categoryEventCount + " (filtered) | " +
-                    "Percentage: " + String.format("%.1f", percentage) + "% (all) / " + String.format("%.1f", allPercentage) + "% (filtered)"
-            );
-            return;
-        }
-
-        double percentage = ((double) categoryEventCount / (double) eventList.size()) * 100.0;
-
-        catgoryStatisticsArea.setText(
-                "Tasks With Selected Categories: " + categoryEventCount + " | Percentage: " + String.format("%.1f", percentage)+ "%"
-        );
-
+        result.put("total", categoryEventCount);
+        return result;
     }
 
-    public void computeEventStatistics(){
+    public void computeEventStatistics() {
+        List<TodoEvent> filteredEvents = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEvents = todoEventsServiceFacade.findAll();
+
+        HashMap<String, Integer> allStats = computeEventStatisticsForList(allEvents);
+
+        HashMap<String, Integer> filteredStats = null;
+        if (filteredEvents.size() != allEvents.size()) {
+            filteredStats = computeEventStatisticsForList(filteredEvents);
+        }
+
+        List<String> stats = List.of(
+                formatText(allStats, filteredStats, "totalEvents", "Total events"),
+                formatText(allStats, filteredStats, "doneEvents", "Done events"),
+                formatText(allStats, filteredStats, "totalDoneLength", "Length of done events", "min"),
+                formatText(allStats, filteredStats, "plannedEvents", "Planned events"),
+                formatText(allStats, filteredStats, "totalPlannedLength", "Length of planned events", "min")
+        );
+
+        // Set the formatted statistics text
+        statisticsArea.setText(String.join(" | ", stats));
+    }
+
+    private HashMap<String, Integer> computeEventStatisticsForList(List<TodoEvent> eventList) {
         int doneEvents = 0;
-        int plannedEvents = 0;
-        int totalEvents = 0;
         int totalDoneLength = 0;
-        int totalPlannedLength = 0;
+        int totalLength = 0;
+        int totalEvents = eventList.size();
 
+        for (TodoEvent event : eventList) {
+            Interval interval = event.getInterval();
+            TimeUnit timeUnit = interval.getTimeUnit();
+            int eventLength = interval.getAmount() * timeUnit.getMinutes();
 
-        List<TodoEvent> eventList = todoEventsServiceFacade.getFilteredEvents();
-        List<TodoEvent> allEventList = todoEventsServiceFacade.findAll();
+            totalLength += eventLength;
 
-
-        for (int i = 0; i < eventList.size(); i++) {
-            if (eventList.get(i).isDone()) {
+            if (event.isDone()) {
                 doneEvents++;
-                Interval interval = eventList.get(i).getInterval();
-                TimeUnit timeUnit = interval.getTimeUnit();
-                totalDoneLength += interval.getAmount() * timeUnit.getMinutes();
-            } else {
-                plannedEvents++;
-                Interval interval = eventList.get(i).getInterval();
-                TimeUnit timeUnit = interval.getTimeUnit();
-                totalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
+                totalDoneLength += eventLength;
             }
-            totalEvents++;
         }
 
-        int allDoneEvents = 0;
-        int allPlannedEvents = 0;
-        int allTotalEvents = 0;
-        int allTotalDoneLength = 0;
-        int allTotalPlannedLength = 0;
-        if (eventList.size() != allEventList.size()) {
-            for (int i = 0; i < allEventList.size(); i++) {
-                if (allEventList.get(i).isDone()) {
-                    allDoneEvents++;
-                    Interval interval = allEventList.get(i).getInterval();
-                    TimeUnit timeUnit = interval.getTimeUnit();
-                    allTotalDoneLength += interval.getAmount() * timeUnit.getMinutes();
-                }
-                else{
-                    allPlannedEvents++;
-                    Interval interval = allEventList.get(i).getInterval();
-                    TimeUnit timeUnit = interval.getTimeUnit();
-                    allTotalPlannedLength += interval.getAmount() * timeUnit.getMinutes();
-                }
-                allTotalEvents++;
-            }
+        HashMap<String, Integer> stats = new HashMap<>();
+        stats.put("totalEvents", totalEvents);
+        stats.put("doneEvents", doneEvents);
+        stats.put("totalDoneLength", totalDoneLength);
+        stats.put("plannedEvents", totalEvents - doneEvents);
+        stats.put("totalPlannedLength", totalLength - totalDoneLength);
 
-            statisticsArea.setText(
-                    "Total events: " + computePadding(totalEvents) + totalEvents + " (" + allTotalEvents + ") | " +
-                            "Done events: " + computePadding(doneEvents) + doneEvents + " (" + allDoneEvents +") | " +
-                            "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min ("
-                            + allTotalDoneLength + " min) | " +
-                            "Planned events: " + computePadding(plannedEvents) + plannedEvents + " (" + allPlannedEvents +") | " +
-                            "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min" +
-                            " (" + allTotalPlannedLength + " min)\n"
-            );
-            return;
-        }
-
-
-        statisticsArea.setText(
-                "Total events: " + computePadding(totalEvents) + totalEvents + " | " +
-                        "Done events: " + computePadding(doneEvents) + doneEvents + " | " +
-                        "Length of done events: " + computePadding(totalDoneLength) + totalDoneLength + " min | " +
-                        "Planned events: " + computePadding(plannedEvents) + plannedEvents + " | " +
-                        "Length of planned events: " + computePadding(totalPlannedLength) + totalPlannedLength + " min\n"
-        );
-
-
-
-
-    
-    }
-
-    String computePadding(int number){
-        int maxDigits = 6;
-        int count = maxDigits - String.valueOf(number).length();
-        if (count > 0)
-            return " ".repeat(count);
-        return "";
+        return stats;
     }
 
     public JPanel createStatisticsPanel(){
