@@ -68,6 +68,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
             dateField.setDate(LocalDate.now());
             timeField.setTime(LocalTime.now());
         }
+        dateField.getComponentDateTextField().setEditable(false);
 
         intervalField.setText(String.valueOf(todoEvent.getInterval().getAmount()));
         for (Category category : todoEvent.getCategories()) {
