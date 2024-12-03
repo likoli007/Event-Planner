@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.pv168.project.business.service.export.batch.BatchResult;
 import cz.muni.fi.pv168.project.business.service.export.batch.SingleResult;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.business.service.export.batch.Batch;
@@ -22,10 +21,10 @@ import cz.muni.fi.pv168.project.business.service.export.format.Format;
 
 
 public class JSONFileImporter implements BatchImporter {
-    ArrayList<Category> categories = new ArrayList<>();
-    ArrayList<TimeUnit> intervals = new ArrayList<>();
-    ArrayList<Template> templates = new ArrayList<>();
-    ArrayList<TodoEvent> events = new ArrayList<>();
+    ArrayList<Category> _categories = new ArrayList<>();
+    ArrayList<TimeUnit> _intervals = new ArrayList<>();
+    ArrayList<Template> _templates = new ArrayList<>();
+    ArrayList<TodoEvent> _events = new ArrayList<>();
     ArrayList<UUID> intervalUUIDs = new ArrayList<>();
     ArrayList<UUID> categoryUUIDs = new ArrayList<>();
 
@@ -56,7 +55,7 @@ public class JSONFileImporter implements BatchImporter {
 
         JsonNode colorNode = node.get("color");
         if (colorNode == null) {
-            return result.setMessage("Category node has no color.");
+            return result.setMessage("Missing field: 'color'.");
         }
 
         List<String> colorParts = Arrays.asList("r", "g", "b");
@@ -65,7 +64,7 @@ public class JSONFileImporter implements BatchImporter {
             SingleResult<Integer> colorPartResult = validateColorPart(colorNode, colorPart);
 
             if (!colorPartResult.isSuccess()) {
-                return result.setMessage("Category color node has corrupted data. " + colorPartResult.getMessage());
+                return result.setMessage("Color node has corrupted data. " + colorPartResult.getMessage());
             }
 
             colorValues.add(colorPartResult.getData());
@@ -79,12 +78,15 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<String> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
         if (nameNode == null) {
-            return result.setMessage("Missing field: \"" + fieldName + "\"");
+            return result.setMessage("Missing field: '" + fieldName + "'.");
 
         }
         String data = nameNode.asText();
-        if (data == null || data.isEmpty()) {
-            return result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
+        if (data == null ) {
+            return result.setMessage("Field \"" + fieldName + "\" has an invalid value: 'null'.");
+        }
+        if (data.isEmpty()){
+            return result.setMessage("Field \"" + fieldName + "\" has an empty string value.");
         }
 
         return result.setData(data);
@@ -94,37 +96,40 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<Integer> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
         if (nameNode == null) {
-            return result.setMessage("Missing field: \"" + fieldName + "\"");
+            return result.setMessage("Missing field: '" + fieldName + "'.");
         }
 
         if (!nameNode.isInt()) {
-            return result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
+            return result.setMessage("Field '" + fieldName + "' has a non-integer value: '" + nameNode.asText() + "'.");
         }
 
         int data = nameNode.asInt();
         return result.setData(data);
     }
 
-    public boolean importCategories(BatchResult result, JsonNode rootNode) {
+    public SingleResult<ArrayList<Category>> importCategories( JsonNode rootNode) {
+        SingleResult<ArrayList<Category>> result = new SingleResult<>();
+        String errorPrepend = "Error in Category importing: ";
+        ArrayList<Category> categories = new ArrayList<>();
+
+
         JsonNode categoriesNode = rootNode.get("categories");
         if (categoriesNode == null) {
-            result.setSuccess(false);
-            result.setMessage("Root node has no categories.");
-            return false;
+            return result.setMessage(errorPrepend + "No node named 'categories' exists.");
         }
         for (JsonNode c : categoriesNode) {
             SingleResult<Color> colorResult = validateColor(c);
             if (!colorResult.isSuccess()) {
-                return propagateFault(colorResult, result);
+                return result.setMessage(errorPrepend + colorResult.getMessage());
             }
             SingleResult<String> nameResult = validateStringField("name", c);
             SingleResult<String> idResult = validateStringField("id", c);
 
             if (!nameResult.isSuccess()) {
-                return propagateFault(nameResult, result);
+                return result.setMessage(errorPrepend + nameResult.getMessage());
             }
             if(!idResult.isSuccess()){
-                return propagateFault(idResult, result);
+                return result.setMessage(errorPrepend + idResult.getMessage());
             }
 
             String name = nameResult.getData();
@@ -135,35 +140,36 @@ public class JSONFileImporter implements BatchImporter {
             categoryUUIDs.add(UUID.fromString(uuid));
             categories.add(category);
         }
-        return true;
+        return result.setData(categories);
     }
 
-    public boolean importTimeUnits(BatchResult result, JsonNode rootNode) {
+    public SingleResult<ArrayList<TimeUnit>> importTimeUnits( JsonNode rootNode) {
+        SingleResult<ArrayList<TimeUnit>> result = new SingleResult<>();
+        ArrayList<TimeUnit> intervals = new ArrayList<>();
+        String errorPrepend = "Error in TimeUnit importing: ";
+
         JsonNode timeUnitsNode = rootNode.get("timeUnits");
         if (timeUnitsNode == null) {
-            result.setSuccess(false);
-            result.setMessage("Root node has no timeUnits.");
-            return false;
+            return result.setMessage(errorPrepend + "No node named 'timeUnits' exists.");
         }
 
         for (JsonNode t : timeUnitsNode) {
-
             SingleResult<String> nameResult = validateStringField("name", t);
             SingleResult<String> shortcutResult = validateStringField("shortcut", t);
             SingleResult<Integer> minutesResult = validateIntField("minutes", t);
             SingleResult<String> idResult = validateStringField("id", t);
 
             if (!nameResult.isSuccess()) {
-                return propagateFault(nameResult, result);
+                return result.setMessage(errorPrepend + nameResult.getMessage());
             }
             if (!shortcutResult.isSuccess()) {
-                return propagateFault(shortcutResult, result);
+                return result.setMessage(errorPrepend + shortcutResult.getMessage());
             }
             if (!minutesResult.isSuccess()) {
-                return propagateFault(minutesResult, result);
+                return result.setMessage(errorPrepend + minutesResult.getMessage());
             }
             if (!idResult.isSuccess()) {
-                return propagateFault(idResult, result);
+                return result.setMessage(errorPrepend + idResult.getMessage());
             }
 
             String name = nameResult.getData();
@@ -176,7 +182,8 @@ public class JSONFileImporter implements BatchImporter {
             intervalUUIDs.add(UUID.fromString(uuid));
             intervals.add(timeUnit);
         }
-        return true;
+
+        return result.setData(intervals);
     }
 
     private SingleResult<LocalTime> validateLocalTimeField(String fieldName, JsonNode node) {
@@ -188,8 +195,11 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<Integer> minutesResult = validateIntField("minute", nameNode);
         SingleResult<Integer> hoursResult = validateIntField("hour", nameNode);
 
-        if (!minutesResult.isSuccess() || !hoursResult.isSuccess()) {
-            return result.setMessage("Minute and Hour fields are invalid.");
+        if (!minutesResult.isSuccess() ) {
+            return result.setMessage("Local Time Minute field is invalid. " + minutesResult.getMessage());
+        }
+        if (!hoursResult.isSuccess()) {
+            return result.setMessage("Local Time Hour field is invalid. " + hoursResult.getMessage());
         }
 
         int minute = minutesResult.getData();
@@ -216,8 +226,9 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<ArrayList<Category>> result = new SingleResult<>();
         ArrayList<Category> categoriesList = new ArrayList<>();
         JsonNode categoriesNode = rootNode.get("categories");
+
         if (categoriesNode == null) {
-            return result.setMessage("Root node has no categories.");
+            return result.setMessage("Missing field: 'categories'");
         }
 
         for (JsonNode c : categoriesNode) {
@@ -233,7 +244,7 @@ public class JSONFileImporter implements BatchImporter {
             if (idIndex == -1) {
                 return result.setMessage("Category ID of a template not found.");
             }
-            categoriesList.add(categories.get(idIndex));
+            categoriesList.add(_categories.get(idIndex));
         }
 
         if (categoriesList.isEmpty()) {
@@ -243,12 +254,15 @@ public class JSONFileImporter implements BatchImporter {
         return result.setData(categoriesList);
     }
 
-    private boolean importTemplates(BatchResult result, JsonNode rootNode) {
+    private SingleResult<ArrayList<Template>> importTemplates( JsonNode rootNode) {
+        SingleResult<ArrayList<Template>> result = new SingleResult<>();
+
+        ArrayList<Template> templates = new ArrayList<>();
+        String errorPrepend =  "Error in TimeUnit importing: ";
+
         JsonNode templateNode = rootNode.get("templates");
         if (templateNode == null) {
-            result.setSuccess(false);
-            result.setMessage("Root node has no templates.");
-            return false;
+            return result.setMessage(errorPrepend + "No node named 'templates' exists.");
         }
         for (JsonNode t : templateNode) {
             SingleResult<String> nameResult = validateStringField("name", t);
@@ -256,13 +270,13 @@ public class JSONFileImporter implements BatchImporter {
             SingleResult<LocalTime> timeResult = validateLocalTimeField("startTime", t);
 
             if (!nameResult.isSuccess()){
-                return propagateFault(nameResult, result);
+                return result.setMessage(errorPrepend + nameResult.getMessage());
             }
             if (!detailsResult.isSuccess()){
-                return propagateFault(detailsResult, result);
+                return result.setMessage(errorPrepend + detailsResult.getMessage());
             }
             if (!timeResult.isSuccess()){
-                return propagateFault(timeResult, result);
+                return result.setMessage(errorPrepend + timeResult.getMessage());
             }
 
             ArrayList<String> idPath = new ArrayList<>();
@@ -271,8 +285,9 @@ public class JSONFileImporter implements BatchImporter {
             SingleResult<JsonNode> idPathResult = validateNestedNodeExistence(idPath, t);
 
             if (!idPathResult.isSuccess()) {
-                return propagateFault(idPathResult, result);
+                return result.setMessage(errorPrepend + idPathResult.getMessage());
             }
+
             JsonNode idNode = idPathResult.getData();
             SingleResult<String> idResult = validateStringField("id", idNode);
 
@@ -289,12 +304,12 @@ public class JSONFileImporter implements BatchImporter {
                 desiredTimeUnit = null;
             }
             else {
-                desiredTimeUnit = intervals.get(idIndex);
+                desiredTimeUnit = _intervals.get(idIndex);
             }
 
             SingleResult<ArrayList<Category>> categoriesResult = validateCategoriesList(t);
             if (!categoriesResult.isSuccess()) {
-                return propagateFault(categoriesResult, result);
+                return result.setMessage(errorPrepend + categoriesResult.getMessage());
             }
 
             ArrayList<Category> categoriesList = new ArrayList<>(categoriesResult.getData());
@@ -303,13 +318,13 @@ public class JSONFileImporter implements BatchImporter {
             intervalPath.add("interval");
             SingleResult<JsonNode> amountPathResult = validateNestedNodeExistence(intervalPath, t);
             if (!amountPathResult.isSuccess()) {
-                return propagateFault(amountPathResult, result);
+                return result.setMessage(errorPrepend + amountPathResult.getMessage());
             }
             JsonNode amountNode = amountPathResult.getData();
             SingleResult<Integer> amountResult = validateIntField("amount", amountNode);
 
             if (!amountResult.isSuccess()) {
-                return propagateFault(amountResult, result);
+                return result.setMessage(errorPrepend + amountResult.getMessage());
             }
             int amount = amountResult.getData();
 
@@ -334,14 +349,14 @@ public class JSONFileImporter implements BatchImporter {
             }
             templates.add(template);
         }
-        return true;
+        return result.setData(templates);
     }
 
     private SingleResult<LocalDateTime> validateLocalDateTimeField(String fieldName, JsonNode rootNode) {
         SingleResult<LocalDateTime> result = new SingleResult<>();
         rootNode = rootNode.get(fieldName);
         if (rootNode == null) {
-            return result.setMessage("Root node has no field: " + fieldName);
+            return result.setMessage("Missing field: " + fieldName);
         }
         SingleResult<Integer> yearResult = validateIntField("year", rootNode);
         SingleResult<Integer> monthResult = validateIntField("month", rootNode);
@@ -349,9 +364,20 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<Integer> hourResult = validateIntField("hour", rootNode);
         SingleResult<Integer> minuteResult = validateIntField("minute", rootNode);
 
-        if (!(yearResult.isSuccess() && monthResult.isSuccess() && dayResult.isSuccess()
-                && hourResult.isSuccess() && minuteResult.isSuccess())) {
-            return result.setMessage("Invalid start date for event.");
+        if (!yearResult.isSuccess()){
+            return  result.setMessage("Invalid year. " + yearResult.getMessage());
+        }
+        if (!monthResult.isSuccess()){
+            return  result.setMessage("Invalid month. " + monthResult.getMessage());
+        }
+        if (!dayResult.isSuccess()){
+            return  result.setMessage("Invalid day. " + dayResult.getMessage());
+        }
+        if (!hourResult.isSuccess()){
+            return  result.setMessage("Invalid hour. " + hourResult.getMessage());
+        }
+        if (!minuteResult.isSuccess()){
+            return  result.setMessage("Invalid minute. " + minuteResult.getMessage());
         }
 
         int year = yearResult.getData();
@@ -364,12 +390,15 @@ public class JSONFileImporter implements BatchImporter {
         return result.setData(startDate);
     }
 
-    private boolean importTodoEvents(BatchResult result, JsonNode rootNode){
+    private SingleResult<ArrayList<TodoEvent>> importTodoEvents(JsonNode rootNode){
         JsonNode eventsNode = rootNode.get("events");
+
+        ArrayList<TodoEvent> events = new ArrayList<>();
+        String errorPrepend = "Error during event import: ";
+        SingleResult<ArrayList<TodoEvent>> result = new SingleResult<>();
+
         if (eventsNode == null) {
-            result.setSuccess(false);
-            result.setMessage("Root node has no events.");
-            return false;
+            return result.setMessage(errorPrepend + "No node named 'events' exists.");
         }
 
         for (JsonNode e : eventsNode) {
@@ -377,14 +406,14 @@ public class JSONFileImporter implements BatchImporter {
             SingleResult<String> detailsResult = validateStringField("details", e);
             SingleResult<LocalDateTime> startTimeResult = validateLocalDateTimeField("start", e);
             if (!nameResult.isSuccess()) {
-                return propagateFault(nameResult, result);
+                return result.setMessage(errorPrepend + nameResult.getMessage());
             }
 
             if(!detailsResult.isSuccess()) {
-                return propagateFault(detailsResult, result);
+                return result.setMessage(errorPrepend + detailsResult.getMessage());
             }
             if(!startTimeResult.isSuccess()) {
-                return propagateFault(startTimeResult, result);
+                return result.setMessage(errorPrepend + startTimeResult.getMessage());
             }
 
             String name = nameResult.getData();
@@ -396,13 +425,13 @@ public class JSONFileImporter implements BatchImporter {
             idPath.add("timeUnit");
             SingleResult<JsonNode> idPathResult = validateNestedNodeExistence(idPath, e);
             if (!idPathResult.isSuccess()) {
-                return propagateFault(idPathResult, result);
+                return result.setMessage(errorPrepend + idPathResult.getMessage());
             }
             JsonNode idNode = idPathResult.getData();
             SingleResult<String> idResult = validateStringField("id", idNode);
 
             if (!idResult.isSuccess()) {
-                return propagateFault(idResult, result);
+                return result.setMessage(errorPrepend + idResult.getMessage());
             }
             String id = idResult.getData();
             UUID targetUUID = UUID.fromString(id);
@@ -413,13 +442,13 @@ public class JSONFileImporter implements BatchImporter {
             intervalPath.add("interval");
             SingleResult<JsonNode> amountPathResult = validateNestedNodeExistence(intervalPath, e);
             if (!amountPathResult.isSuccess()) {
-                return propagateFault(amountPathResult, result);
+                return result.setMessage(errorPrepend + amountPathResult.getMessage());
             }
             JsonNode amountNode = amountPathResult.getData();
             SingleResult<Integer> amountResult = validateIntField("amount", amountNode);
 
             if (!amountResult.isSuccess()) {
-                return propagateFault(amountResult, result);
+                return result.setMessage(errorPrepend + amountResult.getMessage());
             }
             int amount = amountResult.getData();
 
@@ -428,13 +457,13 @@ public class JSONFileImporter implements BatchImporter {
                 desiredTimeUnit = null;
             }
             else {
-                desiredTimeUnit = intervals.get(interval);
+                desiredTimeUnit = _intervals.get(interval);
             }
 
             SingleResult<ArrayList<Category>> categoriesResult = validateCategoriesList(e);
 
             if (!categoriesResult.isSuccess()) {
-                return propagateFault(categoriesResult, result);
+                return result.setMessage(errorPrepend + categoriesResult.getMessage());
             }
 
             ArrayList<Category> categoriesList = new ArrayList<>(categoriesResult.getData());
@@ -453,69 +482,65 @@ public class JSONFileImporter implements BatchImporter {
             }
             events.add(event);
         }
-        return true;
-    }
-
-    private <T> boolean propagateFault(SingleResult<T> fault, BatchResult result) {
-        result.setSuccess(false);
-        result.setMessage(fault.getMessage());
-        return false;
+        return result.setData(events);
     }
 
     @Override
-    public BatchResult importBatch(String filePath){
-            categories = new ArrayList<>();
-            intervals = new ArrayList<>();
-            templates = new ArrayList<>();
-            events = new ArrayList<>();
+    public SingleResult<Batch> importBatch(String filePath){
+            _categories = new ArrayList<>();
+            _intervals = new ArrayList<>();
+            _templates = new ArrayList<>();
+            _events = new ArrayList<>();
             intervalUUIDs = new ArrayList<>();
             categoryUUIDs = new ArrayList<>();
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = null;
-            BatchResult result = new BatchResult();
+            SingleResult<Batch> result = new SingleResult<>();
 
             try{
                 File file = new File(filePath);
                 rootNode = objectMapper.readTree(file);
             }
             catch (IOException e){
-                result.setSuccess(false);
-                result.setMessage(e.getMessage());
-                return result;
+                return result.setMessage(e.getMessage());
             }
 
             if (rootNode == null) {
-                result.setSuccess(false);
-                result.setMessage("Root node is null.");
-                return result;
+                return result.setMessage("Root node is null.");
             }
 
-            boolean importResult;
+            SingleResult<ArrayList<Category>> categoryImportResult;
+            SingleResult<ArrayList<TimeUnit>> timeImportResult;
+            SingleResult<ArrayList<Template>> templateImportResult;
+            SingleResult<ArrayList<TodoEvent>> eventImportResult;
 
-            importResult = importCategories(result, rootNode);
-            if (!importResult) {
-                return result;
+            categoryImportResult = importCategories(rootNode);
+            if (!categoryImportResult.isSuccess()) {
+                return result.setMessage(categoryImportResult.getMessage());
             }
+            _categories = categoryImportResult.getData();
 
-            importResult = importTimeUnits(result, rootNode);
-            if (!importResult) {
-                return result;
+            timeImportResult = importTimeUnits(rootNode);
+            if (!timeImportResult.isSuccess()) {
+                return result.setMessage(timeImportResult.getMessage());
             }
+            _intervals = timeImportResult.getData();
 
-            importResult = importTemplates(result, rootNode);
-            if (!importResult) {
-                return result;
+            templateImportResult = importTemplates(rootNode);
+            if (!templateImportResult.isSuccess()) {
+                return result.setMessage(templateImportResult.getMessage());
             }
+            _templates = templateImportResult.getData();
 
-            importResult = importTodoEvents(result, rootNode);
-            if (!importResult) {
-                return result;
+            eventImportResult = importTodoEvents(rootNode);
+            if (!eventImportResult.isSuccess()) {
+                return result.setMessage(eventImportResult.getMessage());
             }
+            _events = eventImportResult.getData();
 
-            result.setSuccess(true);
-            Batch resultBatch = new Batch(categories, intervals, templates, events);
-            result.setBatch(resultBatch);
+            Batch resultBatch = new Batch(_categories, _intervals, _templates, _events);
+            result.setData(resultBatch);
             return result;
     }
 }
