@@ -60,7 +60,7 @@ public class JSONFileImporter implements BatchImporter {
         }
 
         List<String> colorParts = Arrays.asList("r", "g", "b");
-        List<Integer> colorValues = new ArrayList<>(); 
+        List<Integer> colorValues = new ArrayList<>();
         for (String colorPart : colorParts) {
             SingleResult<Integer> colorPartResult = validateColorPart(colorNode, colorPart);
 
@@ -79,37 +79,30 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<String> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
         if (nameNode == null) {
-            result.setMessage("Missing field: \"" + fieldName + "\"");
-            return result;
+            return result.setMessage("Missing field: \"" + fieldName + "\"");
+
         }
         String data = nameNode.asText();
         if (data == null || data.isEmpty()) {
-            result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
-            return result;
+            return result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
         }
 
-        result.setData(data);
-
-        return result;
+        return result.setData(data);
     }
 
     private SingleResult<Integer> validateIntField(String fieldName, JsonNode node){
         SingleResult<Integer> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
         if (nameNode == null) {
-            result.setMessage("Missing field: \"" + fieldName + "\"");
-            return result;
+            return result.setMessage("Missing field: \"" + fieldName + "\"");
         }
 
         if (!nameNode.isInt()) {
-            result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
-            return result;
+            return result.setMessage("Field \"" + fieldName + "\" has an invalid value.");
         }
 
         int data = nameNode.asInt();
-        result.setData(data);
-
-        return result;
+        return result.setData(data);
     }
 
     public boolean importCategories(BatchResult result, JsonNode rootNode) {
@@ -190,25 +183,21 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<LocalTime> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
         if (nameNode == null) {
-            result.setMessage("Missing field: \"" + fieldName + "\"");
-            return result;
+            return result.setMessage("Missing field: \"" + fieldName + "\"");
         }
         SingleResult<Integer> minutesResult = validateIntField("minute", nameNode);
         SingleResult<Integer> hoursResult = validateIntField("hour", nameNode);
 
         if (!minutesResult.isSuccess() || !hoursResult.isSuccess()) {
-            result.setMessage("Minute and Hour fields are invalid.");
-            return result;
+            return result.setMessage("Minute and Hour fields are invalid.");
         }
-
 
         int minute = minutesResult.getData();
         int hour = hoursResult.getData();
 
         LocalTime startTime = LocalTime.of(hour,minute,0, 0);
 
-        result.setData(startTime);
-        return result;
+        return result.setData(startTime);
     }
 
     private SingleResult<JsonNode> validateNestedNodeExistence(ArrayList<String> fields, JsonNode node) {
@@ -217,12 +206,10 @@ public class JSONFileImporter implements BatchImporter {
         for (String field : fields) {
             node = node.get(field);
             if (node == null) {
-                result.setMessage("Missing field: \"" + field + "\"");
-                return result;
+                return result.setMessage("Missing field: \"" + field + "\"");
             }
         }
-        result.setData(node);
-        return result;
+        return result.setData(node);
     }
 
     private SingleResult<ArrayList<Category>> validateCategoriesList(JsonNode rootNode) {
@@ -230,15 +217,13 @@ public class JSONFileImporter implements BatchImporter {
         ArrayList<Category> categoriesList = new ArrayList<>();
         JsonNode categoriesNode = rootNode.get("categories");
         if (categoriesNode == null) {
-            result.setMessage("Root node has no categories.");
-            return result;
+            return result.setMessage("Root node has no categories.");
         }
 
         for (JsonNode c : categoriesNode) {
             SingleResult<String> idResult = validateStringField("id", c);
             if (!idResult.isSuccess()) {
-                result.setMessage(idResult.getMessage());
-                return result;
+                return result.setMessage(idResult.getMessage());
             }
 
             String id = idResult.getData();
@@ -246,19 +231,16 @@ public class JSONFileImporter implements BatchImporter {
 
             int idIndex = categoryUUIDs.indexOf(categoryUUID);
             if (idIndex == -1) {
-                result.setMessage("Category ID of a template not found.");
-                return result;
+                return result.setMessage("Category ID of a template not found.");
             }
             categoriesList.add(categories.get(idIndex));
         }
 
         if (categoriesList.isEmpty()) {
-            result.setMessage("Template has no categories.");
-            return result;
+            return result.setMessage("Template has no categories.");
         }
 
-        result.setData(categoriesList);
-        return result;
+        return result.setData(categoriesList);
     }
 
     private boolean importTemplates(BatchResult result, JsonNode rootNode) {
@@ -359,8 +341,7 @@ public class JSONFileImporter implements BatchImporter {
         SingleResult<LocalDateTime> result = new SingleResult<>();
         rootNode = rootNode.get(fieldName);
         if (rootNode == null) {
-            result.setMessage("Root node has no field: " + fieldName);
-            return result;
+            return result.setMessage("Root node has no field: " + fieldName);
         }
         SingleResult<Integer> yearResult = validateIntField("year", rootNode);
         SingleResult<Integer> monthResult = validateIntField("month", rootNode);
@@ -370,8 +351,7 @@ public class JSONFileImporter implements BatchImporter {
 
         if (!(yearResult.isSuccess() && monthResult.isSuccess() && dayResult.isSuccess()
                 && hourResult.isSuccess() && minuteResult.isSuccess())) {
-            result.setMessage("Invalid start date for event.");
-            return result;
+            return result.setMessage("Invalid start date for event.");
         }
 
         int year = yearResult.getData();
@@ -381,8 +361,7 @@ public class JSONFileImporter implements BatchImporter {
         int minute = minuteResult.getData();
 
         LocalDateTime startDate = LocalDateTime.of(year, month, day, hour, minute);
-        result.setData(startDate);
-        return result;
+        return result.setData(startDate);
     }
 
     private boolean importTodoEvents(BatchResult result, JsonNode rootNode){
