@@ -129,6 +129,9 @@ public class ExportDialog {
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        if (!resultFilePath.toLowerCase().endsWith(".json")) {
+            resultFilePath += ".json";
+        }
         exportAllowed = true;
         exportFiltered = filterRadioButton.isSelected();
         dialog.dispose();
