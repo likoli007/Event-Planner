@@ -56,7 +56,7 @@ public class ImportDialog{
         dialog.setLocationRelativeTo(parentFrame);
         dialog.setResizable(false);
 
-        textField.setEditable(true);
+        textField.setEditable(false);
         textField.setSize(200, 20);
         textField.setPreferredSize(new Dimension(200, 20));
         fileInfoTextArea.setEditable(false);
@@ -76,7 +76,6 @@ public class ImportDialog{
         JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         labelPanel.add(overwriteOptionsLabel);
         mainPanel.add(labelPanel);
-        //overwriteOptionsPanel.setLayout(new BoxLayout(overwriteOptionsPanel, BoxLayout.Y_AXIS));
         overwriteOptionsButtonPanel.setLayout(new FlowLayout());
 
         noneRadioButton.addActionListener(e -> duplicateHandling = DuplicateType.UNDEFINED);
