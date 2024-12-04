@@ -32,7 +32,7 @@ public abstract class AddAction extends AbstractAction {
                 "",
                 "",
                 LocalDateTime.now(),
-                1,
+                0,
                 new ArrayList<>()
         );
 
@@ -66,7 +66,7 @@ public abstract class AddAction extends AbstractAction {
                 "",
                 "",
                 LocalTime.now(),
-                1,
+                0,
                 new ArrayList<>()
         );
 

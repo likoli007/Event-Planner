@@ -26,7 +26,11 @@ public final class IntervalDialog extends EntityDialog<TimeUnit> {
     private void setValues() {
         nameField.setText(timeUnit.getName());
         shortcutField.setText(timeUnit.getShortcut());
-        minutesField.setText(String.valueOf(timeUnit.getMinutes()));
+
+        int minutesValue = timeUnit.getMinutes();
+        if (minutesValue != 0) {
+            minutesField.setText(String.valueOf(minutesValue));
+        }
     }
 
     private void addFields() {

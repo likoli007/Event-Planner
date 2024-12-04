@@ -70,7 +70,11 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         }
         dateField.getComponentDateTextField().setEditable(false);
 
-        intervalField.setText(String.valueOf(todoEvent.getInterval().getAmount()));
+        int intervalValue = todoEvent.getInterval().getAmount();
+        if (intervalValue != 0) {
+            intervalField.setText(String.valueOf(intervalValue));
+        }
+
         for (Category category : todoEvent.getCategories()) {
             int index = categoryList.getNextMatch(category.toString(), 0, Position.Bias.Forward);
             if (index != -1) {

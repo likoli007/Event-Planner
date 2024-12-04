@@ -49,7 +49,11 @@ public final class TemplateDialog extends EntityDialog<Template> {
         LocalTime startTime = template.getStartTime();
         timeField.setTime(Objects.requireNonNullElseGet(startTime, LocalTime::now));
 
-        intervalField.setText(String.valueOf(template.getInterval().getAmount()));
+        int intervalValue = template.getInterval().getAmount();
+        if (intervalValue != 0) {
+            intervalField.setText(String.valueOf(intervalValue));
+        }
+
         for (Category category : template.getCategories()) {
             int index = categoryList.getNextMatch(category.toString(), 0, Position.Bias.Forward);
             if (index != -1) {
