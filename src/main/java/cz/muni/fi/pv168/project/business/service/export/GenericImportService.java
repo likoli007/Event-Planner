@@ -24,7 +24,7 @@ public class GenericImportService implements ImportService {
     private final FormatMapping<BatchImporter> importers;
 
     private Batch importedBatch;
-    private BatchResult importedBatchResult;
+    private SingleResult<Batch> importedBatchResult;
 
     public GenericImportService(
             CrudService<Category> categoryCrudService,
@@ -415,8 +415,8 @@ public class GenericImportService implements ImportService {
     public boolean importData(String filePath, JFrame frame, DuplicateType defaultHandling) {
         importedBatchResult = getImporter(filePath).importBatch(filePath);
 
-        if (importedBatchResult.succeeded()) {
-            handleDuplicates(importedBatchResult.getBatch(), frame, defaultHandling);
+        if (importedBatchResult.isSuccess()) {
+            handleDuplicates(importedBatchResult.getData(), frame, defaultHandling);
             return true;
         }
         else{
