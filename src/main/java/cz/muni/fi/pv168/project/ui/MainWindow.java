@@ -169,6 +169,8 @@ public class MainWindow {
         setupKeyBindings(frame.getRootPane());
         setupSelectAllShortcut(eventTable);
         setupSelectAllShortcut(managerTabTable);
+
+        frame.setMinimumSize(frame.getSize());
     }
 
     private void refresh() {
@@ -354,7 +356,7 @@ public class MainWindow {
 
         JButton templateButton = new JButton("Templates");
         JButton categoryButton = new JButton("Categories");
-        JButton intervalButton = new JButton("Intervals");
+        JButton intervalButton = new JButton("Time Units");
 
 
         catgoryStatisticsArea = new JTextArea();
@@ -453,7 +455,7 @@ public class MainWindow {
             startColumn.setMinWidth(200);
         }
 
-        int intervalColumnIndex = model.getColumnIndexByName("Interval");
+        int intervalColumnIndex = model.getColumnIndexByName("Time Unit");
         if (intervalColumnIndex != -1) {
             TableColumn intervalColumn = table.getColumnModel().getColumn(intervalColumnIndex);
             intervalColumn.setPreferredWidth(150);

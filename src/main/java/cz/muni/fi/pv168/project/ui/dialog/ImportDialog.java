@@ -151,7 +151,7 @@ public class ImportDialog{
                 "Events: " + getArrayLength(rootNode, "events") + "\n" +
                 "Categories: " + getArrayLength(rootNode, "categories") + "\n" +
                 "Templates: " + getArrayLength(rootNode, "templates") + "\n" +
-                "Intervals: " + getArrayLength(rootNode, "timeUnits") + "\n"
+                "Time Units: " + getArrayLength(rootNode, "timeUnits") + "\n"
         );
     }
 
