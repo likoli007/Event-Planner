@@ -5,6 +5,7 @@ import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -50,7 +51,7 @@ public abstract class AddAction extends AbstractAction {
 
             if (result.isValid()) {
                 eventTableModel.addRow(todoEvent);
-                SuccessDialog.show("Event created successfully!");
+                ToastNotification.getInstance().show("Event created successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(currentTable,
@@ -84,7 +85,7 @@ public abstract class AddAction extends AbstractAction {
 
             if (result.isValid()) {
                 templateTableModel.addRow(template);
-                SuccessDialog.show("Template created successfully!");
+                ToastNotification.getInstance().show("Template created successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(
@@ -115,7 +116,7 @@ public abstract class AddAction extends AbstractAction {
 
             if (result.isValid()) {
                 categoryTableModel.addRow(category);
-                SuccessDialog.show("Category created successfully!");
+                ToastNotification.getInstance().show("Category created successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(
@@ -145,7 +146,7 @@ public abstract class AddAction extends AbstractAction {
 
             if (result.isValid()) {
                 timeUnitTableModel.addRow(timeUnit);
-                SuccessDialog.show("Time unit created successfully!");
+                ToastNotification.getInstance().show("Time unit created successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(

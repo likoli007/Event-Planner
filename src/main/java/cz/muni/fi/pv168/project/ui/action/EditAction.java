@@ -8,6 +8,7 @@ import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -46,7 +47,7 @@ public final class EditAction extends AbstractAction {
             if (result.isValid()) {
                 originalEvent.update(todoEvent);
                 eventTableModel.updateRow(originalEvent);
-                SuccessDialog.show("Event edited successfully!");
+                ToastNotification.getInstance().show("Event edited successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(
@@ -76,7 +77,7 @@ public final class EditAction extends AbstractAction {
             if (result.isValid()) {
                 originalTemplate.update(template);
                 templateTableModel.updateRow(originalTemplate);
-                SuccessDialog.show("Template edited successfully!");
+                ToastNotification.getInstance().show("Template edited successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(
@@ -106,7 +107,7 @@ public final class EditAction extends AbstractAction {
             if (result.isValid()) {
                 originalCategory.update(category);
                 categoryTableModel.updateRow(originalCategory);
-                SuccessDialog.show("Category edited successfully!");
+                ToastNotification.getInstance().show("Category edited successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(
@@ -136,7 +137,7 @@ public final class EditAction extends AbstractAction {
             if (result.isValid()) {
                 originalTimeUnit.update(timeUnit);
                 timeUnitTableModel.updateRow(originalTimeUnit);
-                SuccessDialog.show("Time unit edited successfully!");
+                ToastNotification.getInstance().show("Time unit edited successfully!");
                 break;
             } else {
                 JOptionPane.showMessageDialog(

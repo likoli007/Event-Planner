@@ -6,6 +6,7 @@ import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.ui.dialog.SuccessDialog;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -113,7 +114,7 @@ public final class DeleteAction extends AbstractAction {
                     JOptionPane.ERROR_MESSAGE);
         } finally {
             if (counter > 0) {
-                SuccessDialog.show("Number of successfully deleted entities: " + counter);
+                ToastNotification.getInstance().show("Number of successfully deleted entities: " + counter);
             }
         }
     }
