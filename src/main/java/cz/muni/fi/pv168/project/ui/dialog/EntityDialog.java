@@ -1,6 +1,5 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
-import cz.muni.fi.pv168.project.ui.window.GenericToastWindow;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
