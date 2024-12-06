@@ -19,7 +19,12 @@ public class ToastNotification {
     public void show( String message) {
         show(message, 2000);
     }
+    
     public void show( String message, int duration) {
+        if (parent == null) {
+            throw new IllegalStateException("Parent JFrame must not be null.");
+        }
+
         // Create a JWindow (borderless and undecorated)
         JWindow toastWindow = new JWindow(parent);
         toastWindow.setAlwaysOnTop(true);
@@ -29,8 +34,8 @@ public class ToastNotification {
         toastLabel.setOpaque(true);
         toastLabel.setBackground(new Color(0, 0, 0, 170)); // Transparent black background
         toastLabel.setForeground(Color.WHITE); // White text
-        toastLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        toastLabel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        toastLabel.setFont(new Font("Arial", Font.BOLD, 20)); // Larger font size
+        toastLabel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40)); // Larger padding
 
         // Add the label to the window
         toastWindow.add(toastLabel);
