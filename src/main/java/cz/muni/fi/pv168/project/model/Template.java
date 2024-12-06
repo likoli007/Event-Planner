@@ -7,6 +7,7 @@ import cz.muni.fi.pv168.project.business.service.export.serialize.LocalTimeSeria
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -113,6 +114,35 @@ public class Template extends Entity {
         if (e == null || getClass() != e.getClass()) return false;
         Template template = (Template) e;
         return Objects.equals(name, template.name);
+    }
+
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        Template template = (Template) e;
+
+        //since inside the system datetime is granular all the way to nanoseconds, need to only take hours and minutes
+        //i.e. a template is meaningfully different when the hour and minute of its start time differs, not nanoseconds
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String timeString = getStartTime().format(timeFormatter);
+
+        if (Objects.equals(name, template.name) && Objects.equals(details, template.details) &&
+            Objects.equals(template.getStartTime().toString(), timeString) &&
+            !(getInterval().getTimeUnit().isMeaningfullyDifferent(template.getInterval().getTimeUnit())) &&
+            getInterval().getAmount() == template.getInterval().getAmount()) {
+                for (Category category : categories){
+                    boolean isPresent = false;
+                    for (Category otherCategory : template.categories) {
+                        if (category.isDuplicate(otherCategory)) {
+                            isPresent = true;
+                        }
+                    }
+                    if (!isPresent) return true;
+                }
+                return false;
+        }
+
+        return true;
     }
 
     @Override

@@ -70,6 +70,15 @@ public class TimeUnit extends Entity {
     }
 
     @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        TimeUnit timeUnit = (TimeUnit) e;
+        if (Objects.equals(name, timeUnit.name) && Objects.equals(shortcut, timeUnit.shortcut) &&
+            minutes == timeUnit.getMinutes()) return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name;
     }

@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.ui.action;
 
 import cz.muni.fi.pv168.project.business.service.export.ImportService;
+import cz.muni.fi.pv168.project.model.DuplicateType;
 import cz.muni.fi.pv168.project.ui.dialog.ImportDialog;
 
 import javax.swing.*;
@@ -29,17 +30,17 @@ public class ImportAction extends AbstractAction {
     public void actionPerformed(ActionEvent actionEvent) {
         ImportDialog dialog = new ImportDialog(parentFrame);
         if (dialog.canImport()){
-            try {
-                String filePath = dialog.getResultFilePath();
-                if (filePath != null) {
-                    importService.importData(filePath, parentFrame);
+            String filePath = dialog.getResultFilePath();
+            DuplicateType defaultHandling = dialog.getDuplicateHandling();
+            if (filePath != null) {
+                boolean importResult = importService.importData(filePath, parentFrame, defaultHandling);
+                if (importResult) {
                     JOptionPane.showMessageDialog(parentFrame, "Import Successful! ",
                             "Import", JOptionPane.INFORMATION_MESSAGE);
                     callback.run();
+                } else {
+                    JOptionPane.showMessageDialog(parentFrame, importService.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(parentFrame, "Error during import:\n" + e.getMessage(),
-                        "Import Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

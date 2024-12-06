@@ -2,8 +2,9 @@ package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
-import cz.muni.fi.pv168.project.ui.documentFilters.NumericNonEmptyDocumentFilter;
+import cz.muni.fi.pv168.project.ui.documentFilters.NumericDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
+import cz.muni.fi.pv168.project.ui.utils.NumericInputValue;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
@@ -35,7 +36,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         this.timeUnitModel = new DefaultComboBoxModel<>(allTableModels.getTimeUnitTableModel().getTimeUnitCrudService().findAll().toArray(new TimeUnit[0]));
 
-        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericNonEmptyDocumentFilter());
+        ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericDocumentFilter());
 
         setValues();
         addFields();
@@ -48,7 +49,11 @@ public final class TemplateDialog extends EntityDialog<Template> {
         LocalTime startTime = template.getStartTime();
         timeField.setTime(Objects.requireNonNullElseGet(startTime, LocalTime::now));
 
-        intervalField.setText(String.valueOf(template.getInterval().getAmount()));
+        int intervalValue = template.getInterval().getAmount();
+        if (intervalValue != 0) {
+            intervalField.setText(String.valueOf(intervalValue));
+        }
+
         for (Category category : template.getCategories()) {
             int index = categoryList.getNextMatch(category.toString(), 0, Position.Bias.Forward);
             if (index != -1) {
@@ -83,7 +88,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
             template.setStartTime(time);
         }
 
-        template.getInterval().setAmount(Integer.parseInt(intervalField.getText()));
+        template.getInterval().setAmount(NumericInputValue.get(intervalField.getText(), "length"));
         template.getInterval().setTimeUnit((TimeUnit) timeUnitModel.getSelectedItem());
 
         List<Category> selectedCategories = categoryList.getSelectedValuesList();

@@ -23,10 +23,16 @@ public class CategoryRenderer extends JPanel implements TableCellRenderer {
             this.setBackground(table.getBackground());
         }
 
-        if (value instanceof Category) {
-            CategoryColorRectangle categoryColorRectangle = new CategoryColorRectangle( ((Category) value).getColor());
+        if (value instanceof Category category) {
+            CategoryColorRectangle categoryColorRectangle = new CategoryColorRectangle( category.getColor());
             add(categoryColorRectangle);
-            add( new JLabel(((Category) value).getName()));
+            JLabel nameLabel = new JLabel(category.getName());
+            if (isSelected) {
+                nameLabel.setForeground(Color.WHITE);
+            } else {
+                nameLabel.setForeground(table.getForeground());
+            }
+            add(nameLabel);
         }
 
         revalidate();
