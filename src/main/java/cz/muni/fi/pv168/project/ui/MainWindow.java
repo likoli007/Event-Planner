@@ -12,6 +12,7 @@ import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.*;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -174,6 +175,8 @@ public class MainWindow {
         setupSelectAllShortcut(managerTabTable);
 
         frame.setMinimumSize(frame.getSize());
+
+        ToastNotification.getInstance().setParent(frame);
     }
 
     private void refresh() {
