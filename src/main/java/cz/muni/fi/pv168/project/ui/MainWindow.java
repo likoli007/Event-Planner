@@ -12,6 +12,8 @@ import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.*;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
+import cz.muni.fi.pv168.project.ui.window.ToastWindowContainer;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -67,6 +69,8 @@ public class MainWindow {
     JTextArea catgoryStatisticsArea;
     private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
+
+    ToastWindowContainer higherPanel;
 
     public MainWindow( TodoEventsServiceFacade todoEventsServiceFacade,
                       CrudService<Category> categoryCrudService,
@@ -169,6 +173,24 @@ public class MainWindow {
         setupKeyBindings(frame.getRootPane());
         setupSelectAllShortcut(eventTable);
         setupSelectAllShortcut(managerTabTable);
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setLayout(new OverlayLayout(layeredPane));
+        layeredPane.add(tabPanel, JLayeredPane.DEFAULT_LAYER);
+        higherPanel = new ToastWindowContainer();
+        higherPanel.setOpaque(false);
+        layeredPane.add(higherPanel, JLayeredPane.POPUP_LAYER);
+
+        frame.add(layeredPane, BorderLayout.CENTER);
+        //frame.add(tabPanel, BorderLayout.CENTER);
+        frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
+        frame.setJMenuBar(createMenuBar());
+        frame.pack();
+        changeActionsState(0);
+        // Example toasts for testing
+//        higherPanel.addToast("Cannot create event, The Name cannot be empty");
+        ToastNotification.getInstance().setParent(frame);
+        SwingUtilities.invokeLater(() -> ToastNotification.getInstance().show( "This is a toast notification!", 3000));
     }
 
     private void refresh() {

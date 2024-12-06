@@ -8,6 +8,7 @@ import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
 import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -73,7 +74,7 @@ public final class EditAction extends AbstractAction {
 
             originalCategory.update(category);
             categoryTableModel.updateRow(originalCategory);
-            SuccessDialog.show("Category edited successfully!");
+            ToastNotification.getInstance().show("Category edited successfully!");
         });
     }
 
