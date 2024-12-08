@@ -241,13 +241,16 @@ public class GenericImportService implements ImportService {
                     String originalString =
                             "Name: " + crudEvent.getName() + "\n" +
                                     "Details: " + crudEvent.getDetails() + "\n" +
+                                    "Done Status: " + crudEvent.isDone() + "\n" +
                                     "Start Time: " + crudEvent.getStart().format(formatter) + "\n" +
                                     "Time Unit: " + crudEvent.getInterval().getAmount() + " " +
                                     originalLength + "\n" +
                                     "Categories: " + crudEvent.getCategories().toString();
 
+
                     String duplicateString = "Name: " + event.getName() + "\n" +
                             "Details: " + event.getDetails() + "\n" +
+                            "Done Status: " + event.isDone() + "\n" +
                             "Start Time: " + event.getStart().format(formatter) + "\n" +
                             "Time Unit: " + event.getInterval().getAmount() + " " +
                             duplicateLength + "\n" +
