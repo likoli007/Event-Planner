@@ -17,6 +17,7 @@ public class DuplicateDialog {
     JButton overwriteButton = new JButton("Overwrite");
     JButton cancelButton = new JButton("Don't import");
     JButton duplicateButton = new JButton("Duplicate");
+    JCheckBox defaultHandlingCheckBox;
 
     DuplicateType result = DuplicateType.UNDEFINED;
 
@@ -25,6 +26,7 @@ public class DuplicateDialog {
         dialog.setLocationRelativeTo(parentFrame);
         dialog.setResizable(false);
 
+        defaultHandlingCheckBox = new JCheckBox("Set as default handling for all " + objectType + "s");
 
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -46,6 +48,9 @@ public class DuplicateDialog {
         originalTextArea.setEditable(false);
         originalTextArea.setBackground(null);
 
+        JPanel defaultHandlingPanel = new JPanel();
+        defaultHandlingPanel.add(defaultHandlingCheckBox);
+
         duplicatePanel.setLayout(new BoxLayout(duplicatePanel, BoxLayout.Y_AXIS));
         originalPanel.setLayout(new BoxLayout(originalPanel, BoxLayout.Y_AXIS));
         duplicatePanel.add(duplicateTextArea);
@@ -56,6 +61,7 @@ public class DuplicateDialog {
         mainPanel.add(aboutPanel);
         mainPanel.add(originalPanel);
         mainPanel.add(duplicatePanel);
+        mainPanel.add(defaultHandlingPanel);
         mainPanel.add(buttonPanel);
 
         overwriteButton.addActionListener(e -> {
@@ -76,6 +82,7 @@ public class DuplicateDialog {
         dialog.setVisible(true);
     }
 
+    public boolean getDefaultHandling() {return defaultHandlingCheckBox.isSelected();}
     public DuplicateType getResult() {
         return result;
     }

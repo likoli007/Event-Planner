@@ -106,6 +106,10 @@ public class GenericImportService implements ImportService {
                 if (defaultHandling == DuplicateType.UNDEFINED){
                     DuplicateCategoryDialog dialog = new DuplicateCategoryDialog(parentFrame, crudCategory, category);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -148,6 +152,10 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Time Unit", originalString, duplicateString);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -201,6 +209,10 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Template", originalString, duplicateString);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -258,6 +270,11 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Event", originalString, duplicateString);
                     result = dialog.getResult();
+
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
