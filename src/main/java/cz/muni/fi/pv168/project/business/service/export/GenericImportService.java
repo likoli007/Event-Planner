@@ -287,6 +287,7 @@ public class GenericImportService implements ImportService {
                     crudEvent.setStart(event.getStart());
                     crudEvent.setInterval(event.getInterval());
                     crudEvent.setCategories(event.getCategories());
+                    crudEvent.setDone(event.isDone());
                 }
                 if (result == DuplicateType.DUPLICATE) {
                     addDuplicateTodoEvent(event);
