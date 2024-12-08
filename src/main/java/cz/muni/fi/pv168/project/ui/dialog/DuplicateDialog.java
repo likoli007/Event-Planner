@@ -16,7 +16,7 @@ public class DuplicateDialog {
     JPanel buttonPanel = new JPanel();
     JButton overwriteButton = new JButton("Overwrite");
     JButton cancelButton = new JButton("Don't import");
-    JButton duplicateButton = new JButton("Duplicate");
+    JButton duplicateButton = new JButton("Keep both");
     JCheckBox defaultHandlingCheckBox;
 
     DuplicateType result = DuplicateType.UNDEFINED;
