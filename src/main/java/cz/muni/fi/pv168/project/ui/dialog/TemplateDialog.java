@@ -1,6 +1,5 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
-import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.documentFilters.NumericDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
@@ -8,6 +7,7 @@ import cz.muni.fi.pv168.project.ui.utils.NumericInputValue;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.DateFormatter;
 import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalTime;
@@ -18,7 +18,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
     private final JTextField nameField = new JTextField();
     private final JTextField detailsField = new JTextField();
-    private final TimePicker timeField = new TimePicker();
+    private final JSpinner timeSpinner;
 
     private final JTextField intervalField = new JTextField(5);
     private final JList<Category> categoryList;
@@ -38,6 +38,8 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericDocumentFilter());
 
+        this.timeSpinner = createTimeSpinner();
+
         setValues();
         addFields();
     }
@@ -47,7 +49,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
         detailsField.setText(template.getDetails());
 
         LocalTime startTime = template.getStartTime();
-        timeField.setTime(Objects.requireNonNullElseGet(startTime, LocalTime::now));
+        timeSpinner.setValue(java.sql.Time.valueOf(Objects.requireNonNullElseGet(startTime, LocalTime::now)));
 
         int intervalValue = template.getInterval().getAmount();
         if (intervalValue != 0) {
@@ -71,7 +73,7 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         add("Name:", nameField);
         add("Details:", detailsField);
-        add("Time:", timeField);
+        add("Time:", timeSpinner);
         add("Length:", intervalPanel);
         add("Categories:", categoryList);
     }
@@ -83,7 +85,10 @@ public final class TemplateDialog extends EntityDialog<Template> {
 
         template.setDetails(detailsField.getText());
 
-        LocalTime time = timeField.getTime();
+        LocalTime time = ((java.util.Date) timeSpinner.getValue()).toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalTime();
+
         if (time != null) {
             template.setStartTime(time);
         }
@@ -95,5 +100,18 @@ public final class TemplateDialog extends EntityDialog<Template> {
         template.setCategories(selectedCategories);
 
         return template;
+    }
+
+    private JSpinner createTimeSpinner() {
+        SpinnerDateModel timeModel = new SpinnerDateModel();
+        JSpinner spinner = new JSpinner(timeModel);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
+
+        DateFormatter timeFormatter = (DateFormatter) editor.getTextField().getFormatter();
+        timeFormatter.setAllowsInvalid(false);
+        timeFormatter.setOverwriteMode(true);
+
+        spinner.setEditor(editor);
+        return spinner;
     }
 }
