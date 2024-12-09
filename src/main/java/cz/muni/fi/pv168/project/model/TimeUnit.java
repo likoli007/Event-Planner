@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.project.model;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class TimeUnit extends Entity {
     private String name;
@@ -10,6 +11,13 @@ public class TimeUnit extends Entity {
     private static final TimeUnit MINUTE = new TimeUnit("Minute", "min", 1);
 
     public TimeUnit(String name, String shortcut, int minutes) {
+        this.name = name;
+        this.shortcut = shortcut;
+        this.minutes = minutes;
+    }
+
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes) {
+        this.id = uuid;
         this.name = name;
         this.shortcut = shortcut;
         this.minutes = minutes;
