@@ -197,7 +197,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public void deleteById(UUID id) {
         var sql = """
-                DELETE FROM TimeUnit
+                DELETE FROM Template
                 WHERE id = ?;
                 """;
 
