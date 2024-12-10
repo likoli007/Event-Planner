@@ -143,7 +143,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
     public void deleteById(UUID id) {
         var sql = """
                 DELETE FROM TimeUnit
-                WHERE id = ?;
+                WHERE id = ? AND isSystemDefined = FALSE;
                 """;
         try (
                 var connection = connections.get();
@@ -152,7 +152,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
             statement.setString(1, String.valueOf(id));
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated == 0) {
-                throw new DataStorageException("Time unit not found, id: " + id);
+                throw new DataStorageException("Time unit not found or is System defined, id: " + id);
             }
             if (rowsUpdated > 1) {
                 throw new DataStorageException("More then 1 time unit (rows=%d) has been deleted: %s"
@@ -165,7 +165,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
 
     @Override
     public void deleteAll() {
-        var sql = "DELETE FROM TimeUnit;";
+        var sql = "DELETE FROM TimeUnit WHERE isSystemDefined = FALSE;";
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql)
