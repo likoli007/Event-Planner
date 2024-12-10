@@ -12,9 +12,9 @@ public class TimeUnitTableModel extends AbstractTableModel {
     private List<TimeUnit> timeUnits;
 
     private final List<Column<TimeUnit, ?>> columns = List.of(
-            Column.editable("Name", String.class, TimeUnit::getName, TimeUnit::setName),
-            Column.editable("Shortcut", String.class, TimeUnit::getShortcut, TimeUnit::setShortcut),
-            Column.editable("Minutes", Integer.class, TimeUnit::getMinutes, TimeUnit::setMinutes)
+            Column.readonly("Name", String.class, TimeUnit::getName),
+            Column.readonly("Shortcut", String.class, TimeUnit::getShortcut),
+            Column.readonly("Minutes", Integer.class, TimeUnit::getMinutes)
     );
 
     public TimeUnitTableModel(CrudService<TimeUnit> timeUnitCrudService) {

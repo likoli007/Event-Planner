@@ -13,12 +13,15 @@ import cz.muni.fi.pv168.project.business.service.export.JSONFileExporter;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileImporter;
 import cz.muni.fi.pv168.project.storage.InMemoryRepository;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
+import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionManagerImpl;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.CategoryMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TimeUnitMapper;
 import cz.muni.fi.pv168.project.ui.MainWindow;
 
 import javax.swing.UIManager;
@@ -46,8 +49,11 @@ public class Main {
         var categoryMapper = new CategoryMapper();
         var categoryRepository = new CategorySqlRepository(categoryDao, categoryMapper);
 
+        var timeUnitDao = new TimeUnitDao(transactionConnectionSupplier);
+        var timeUnitMapper = new TimeUnitMapper();
+        var timeUnitRepository = new TimeUnitSqlRepository(timeUnitDao, timeUnitMapper);
+
         var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
-        var timeUnitRepository = new InMemoryRepository<>(testDataGenerator.createTimeUnits());
         var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
 
         var categoryCrudService = new CategoryCrudService(categoryRepository);
