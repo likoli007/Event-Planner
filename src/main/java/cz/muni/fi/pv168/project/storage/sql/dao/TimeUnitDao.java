@@ -21,7 +21,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
 
     @Override
     public TimeUnitEntity create(TimeUnitEntity newTimeUnit) {
-        var sql = "INSERT INTO TimeUnit (id, name, shortcut, minutes) VALUES (?, ?, ?, ?);";
+        var sql = "INSERT INTO TimeUnit (id, name, shortcut, minutes, isSystemDefined) VALUES (?, ?, ?, ?,?);";
 
         try (
                 var connection = connections.get();
@@ -31,6 +31,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
             statement.setString(2, newTimeUnit.name());
             statement.setString(3, newTimeUnit.shortcut());
             statement.setInt(4, newTimeUnit.minutes());
+            statement.setBoolean(5, newTimeUnit.isSystemDefined());
             statement.executeUpdate();
 
             try (ResultSet keyResultSet = statement.getGeneratedKeys()) {
@@ -58,7 +59,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 SELECT id,
                        name,
                        shortcut,
-                       minutes
+                       minutes,
+                      isSystemDefined
                 FROM TimeUnit;
                 """;
         try (
@@ -85,7 +87,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 SELECT id,
                        name,
                        shortcut,
-                       minutes
+                       minutes,
+                       isSystemDefined
                 FROM TimeUnit
                 WHERE id = ?;
                 """;
@@ -178,7 +181,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 UUID.fromString(resultSet.getString("id")),
                 resultSet.getString("name"),
                 resultSet.getString("shortcut"),
-                resultSet.getInt("minutes")
+                resultSet.getInt("minutes"),
+                resultSet.getBoolean("isSystemDefined")
         );
     }
 }

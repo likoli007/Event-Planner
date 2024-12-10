@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS TimeUnit (
     id UUID PRIMARY KEY,
     name VARCHAR(25) NOT NULL,
     shortcut VARCHAR(4) NOT NULL,
-    minutes INT NOT NULL
+    minutes         INT                   NOT NULL,
+    isSystemDefined BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Template (
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Template (
     name VARCHAR(25) NOT NULL,
     details VARCHAR(36),
     startTime TIME NOT NULL,
-    timeUnit UUID NOT NULL,
+    timeUnit UUID NULL,
     timeUnitAmount INT NOT NULL,
     FOREIGN KEY (timeUnit) REFERENCES TimeUnit(id)
 );
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS TodoEvent (
     name VARCHAR(25) NOT NULL,
     details VARCHAR(36),
     start TIMESTAMP NOT NULL,
-    timeUnit UUID NOT NULL,
+    timeUnit UUID NULL,
     done BOOLEAN DEFAULT FALSE NOT NULL,
     FOREIGN KEY (timeUnit) REFERENCES TimeUnit(id)
 );

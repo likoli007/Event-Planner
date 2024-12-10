@@ -8,11 +8,12 @@ import java.util.UUID;
 /**
  * Representation of {@link TimeUnit} entity in a SQL database.
  */
-public record TimeUnitEntity(UUID id, String name, String shortcut, int minutes) {
-    public TimeUnitEntity(UUID id, String name, String shortcut, int minutes) {
+public record TimeUnitEntity(UUID id, String name, String shortcut, int minutes, boolean isSystemDefined) {
+    public TimeUnitEntity(UUID id, String name, String shortcut, int minutes, boolean isSystemDefined) {
         this.id = id;
         this.name = Objects.requireNonNull(name, "name must not be null");
         this.shortcut = Objects.requireNonNull(shortcut, "shortcut must not be null");
         this.minutes = Objects.requireNonNull(minutes, "minutes must not be null");
+        this.isSystemDefined = isSystemDefined;
     }
 }

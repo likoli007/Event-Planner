@@ -7,8 +7,10 @@ public class TimeUnit extends Entity {
     private String name;
     private String shortcut;
     private int minutes;
+    private boolean isSystemDefined;
 
-    private static final TimeUnit MINUTE = new TimeUnit("Minute", "min", 1);
+    private static final TimeUnit MINUTE = new TimeUnit(UUID.fromString("fce37f43-01d1-43b2-9099-094b0eaf56bd"),
+            "Minute", "min", 1, true);
 
     public TimeUnit(String name, String shortcut, int minutes) {
         this.name = name;
@@ -16,11 +18,19 @@ public class TimeUnit extends Entity {
         this.minutes = minutes;
     }
 
-    public TimeUnit(UUID uuid, String name, String shortcut, int minutes) {
+    public TimeUnit(String name, String shortcut, int minutes, boolean isSystemDefined) {
+        this(name, shortcut, minutes);
+        this.isSystemDefined = isSystemDefined;
+
+    }
+
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes, boolean isSystemDefined) {
+        this(name, shortcut, minutes, isSystemDefined);
         this.id = uuid;
-        this.name = name;
-        this.shortcut = shortcut;
-        this.minutes = minutes;
+    }
+
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes) {
+        this(uuid, name, shortcut, minutes, false);
     }
 
     public TimeUnit(TimeUnit timeUnit) {
@@ -28,7 +38,9 @@ public class TimeUnit extends Entity {
         this.name = timeUnit.name;
         this.shortcut = timeUnit.shortcut;
         this.minutes = timeUnit.minutes;
+        this.isSystemDefined = timeUnit.isSystemDefined;
     }
+
 
     @Override
     public void update(Entity e) {
@@ -89,5 +101,22 @@ public class TimeUnit extends Entity {
     @Override
     public String toString() {
         return name;
+    }
+
+    public boolean isSystemDefined() {
+        return isSystemDefined;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        TimeUnit timeUnit = (TimeUnit) obj;
+        return Objects.equals(id, timeUnit.id);
     }
 }
