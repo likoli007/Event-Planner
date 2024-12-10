@@ -58,7 +58,7 @@ public final class TestDataGenerator {
     }
 
     public List<Template> createTemplates() {
-        List<Template> sampleTemplates = List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30, List.of(healthCategory, hobbyCategory)));
+        List<Template> sampleTemplates = List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), teachingHour, 1, List.of(healthCategory, hobbyCategory)));
 
         for (Template template : sampleTemplates) {
             var validator = new TemplateValidator();

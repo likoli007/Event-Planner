@@ -2,15 +2,18 @@ package cz.muni.fi.pv168.project.storage.sql.db.actions;
 
 import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
+import cz.muni.fi.pv168.project.storage.sql.TemplateSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionManagerImpl;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.CategoryMapper;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TimeUnitMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TemplateMapper;
 
 public class InsertTestData {
     public static void main(String[] args) {
@@ -32,9 +35,13 @@ public class InsertTestData {
         var timeUnitMapper = new TimeUnitMapper();
         var timeUnitRepository = new TimeUnitSqlRepository(timeUnitDao, timeUnitMapper);
 
+        var templateDao = new TemplateDao(transactionConnectionSupplier);
+        var templateMapper = new TemplateMapper(timeUnitRepository, categoryRepository);
+        var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
+
         testDataGenerator.createCategories().forEach(categoryRepository::create);
         testDataGenerator.createTimeUnits().forEach(timeUnitRepository::create);
-        // testDataGenerator.createTemplates().forEach(templateRepository::create);
+        testDataGenerator.createTemplates().forEach(templateRepository::create);
         // testDataGenerator.createTodoEvents().forEach(todoEventRepository::create);
 
         System.out.println("Test data inserted...");
