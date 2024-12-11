@@ -56,7 +56,7 @@ public class TemplateMapper implements EntityMapper<TemplateEntity, Template> {
                 entity.getDetails(),
                 entity.getStartTime(),
                 entity.getInterval().getTimeUnit().getId(),
-                entity.getInterval().getTimeUnit().getMinutes(),
+                entity.getInterval().getAmount(),
                 entity.getCategories().stream().map(Category::getId).toList()
         );
     }
