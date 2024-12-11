@@ -32,7 +32,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 var categoryStatement = connection.use().prepareStatement(categorySQL);
         ) {
             connection.use().setAutoCommit(false);
-
+            System.out.println(entity.timeUnitAmount());
             statement.setString(1, String.valueOf(entity.id()));
             statement.setString(2, entity.name());
             statement.setString(3, entity.details());
@@ -246,6 +246,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             statement.setString(1, String.valueOf(id));
             categoryResetStatement.setString(1, String.valueOf(id));
 
+            categoryResetStatement.executeUpdate();
             int rowsUpdated = statement.executeUpdate();
 
             if (rowsUpdated == 0) {
@@ -255,7 +256,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 throw new DataStorageException("More then 1 template (rows=%d) has been deleted: %s"
                         .formatted(rowsUpdated, id));
             }
-            categoryResetStatement.executeUpdate();
+
             connection.use().commit();
         } catch (SQLException ex) {
             try {
@@ -275,7 +276,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
 
     @Override
     public void deleteAll() {
-        var sql = "DELETE FROM TimeUnit;";
+        var sql = "DELETE FROM Template;";
         var categoryResetSQL = "DELETE FROM Template_Category;";
         var connection = connections.get();
         try (
@@ -283,8 +284,8 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
             connection.use().setAutoCommit(false);
-            statement.executeUpdate();
             categoryResetStatement.executeUpdate();
+            statement.executeUpdate();
             connection.use().commit();
         } catch (SQLException ex) {
             try {
