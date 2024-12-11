@@ -75,6 +75,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             try {
                 if (connection != null) {
                     connection.use().setAutoCommit(true);
+                    connection.close();
                 }
             } catch (SQLException closeEx) {
                 closeEx.printStackTrace();
@@ -219,6 +220,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
         }finally {
             try{
                 connection.use().setAutoCommit(true);
+                connection.close();
             }catch(SQLException closeEx){
                 throw new DataStorageException("Failed to revert autocommit.", closeEx);
             }
@@ -268,6 +270,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
         } finally {
             try{
                 connection.use().setAutoCommit(true);
+                connection.close();
             } catch (SQLException closeEx){
                 throw new DataStorageException("Failed to revert to autocommit.", closeEx);
             }
@@ -297,6 +300,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
         } finally {
             try{
                 connection.use().setAutoCommit(true);
+                connection.close();
             } catch (SQLException closeEx){
                 throw new DataStorageException("Failed to revert to autocommit.", closeEx);
             }
