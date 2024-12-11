@@ -22,14 +22,17 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public TemplateEntity create(TemplateEntity entity) {
 
+
         var sql = "INSERT INTO Template (id, name, details, startTime, timeUnit, timeUnitAmount) VALUES (?, ?, ?, ?, ?, ?);";
         var categorySQL = "INSERT INTO Template_Category (template_id, category_id) VALUES (?, ?);";
-
+        var connection = connections.get();
         try (
-                var connection = connections.get();
+
                 var statement = connection.use().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 var categoryStatement = connection.use().prepareStatement(categorySQL);
         ) {
+            connection.use().setAutoCommit(false);
+
             statement.setString(1, String.valueOf(entity.id()));
             statement.setString(2, entity.name());
             statement.setString(3, entity.details());
@@ -56,13 +59,27 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 if (keyResultSet.next()) {
                     throw new DataStorageException("Multiple keys returned for: " + entity);
                 }
-
+                connection.use().commit();
                 return findById(templateId).orElseThrow();
             }
         } catch (SQLException ex) {
-            throw new DataStorageException("Failed to store: " + entity, ex);
+            // Rollback if an error occurs
+            try {
+                connection.use().rollback();
+                System.out.println("Transaction rolled back.");
+                throw new DataStorageException("Failed to store: " + entity, ex);
+            } catch (SQLException rollbackEx) {
+                throw new DataStorageException("Failed to rollback: " + entity, rollbackEx);
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.use().setAutoCommit(true);
+                }
+            } catch (SQLException closeEx) {
+                closeEx.printStackTrace();
+            }
         }
-
     }
 
     @Override
@@ -158,12 +175,13 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 WHERE template_id = ?;
                 """;
         var categorySQL = "INSERT INTO Template_Category (template_id, category_id) VALUES (?, ?)";
+        var connection = connections.get();
         try (
-                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
                 var categoryStatement = connection.use().prepareStatement(categorySQL);
                 var categoryDeleteStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
+            connection.use().setAutoCommit(false);
             statement.setString(1, entity.name());
             statement.setString(2, entity.details());
             statement.setTime(3, Time.valueOf(entity.startTime()));
@@ -187,12 +205,26 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                     categoryStatement.setString(2, entity.categoryIds().get(i).toString());
                     categoryStatement.executeUpdate();
                 }
+                connection.use().commit();
             }
             return entity;
         } catch (SQLException ex) {
-            throw new DataStorageException("Failed to update template: " + entity, ex);
+            try {
+                connection.use().rollback();
+                throw new DataStorageException("Failed to update template: " + entity, ex);
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+                throw new DataStorageException("Failed to rollback: " + entity, rollbackEx);
+            }
+        }finally {
+            try{
+                connection.use().setAutoCommit(true);
+            }catch(SQLException closeEx){
+                throw new DataStorageException("Failed to revert autocommit.", closeEx);
+            }
         }
     }
+
 
     @Override
     public void deleteById(UUID id) {
@@ -205,12 +237,12 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 DELETE FROM Template_Category
                 WHERE template_id = ?;
                 """;
-
+        var connection = connections.get();
         try (
-                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
                 var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
+            connection.use().setAutoCommit(false);
             statement.setString(1, String.valueOf(id));
             categoryResetStatement.setString(1, String.valueOf(id));
 
@@ -224,8 +256,20 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                         .formatted(rowsUpdated, id));
             }
             categoryResetStatement.executeUpdate();
+            connection.use().commit();
         } catch (SQLException ex) {
-            throw new DataStorageException("Failed to delete template, id: " + id, ex);
+            try {
+                connection.use().rollback();
+                throw new DataStorageException("Failed to delete template, id: " + id, ex);
+            } catch (SQLException rollbackEx) {
+                throw new DataStorageException("Failed to rollback: " + id, rollbackEx);
+            }
+        } finally {
+            try{
+                connection.use().setAutoCommit(true);
+            } catch (SQLException closeEx){
+                throw new DataStorageException("Failed to revert to autocommit.", closeEx);
+            }
         }
     }
 
@@ -233,15 +277,28 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     public void deleteAll() {
         var sql = "DELETE FROM TimeUnit;";
         var categoryResetSQL = "DELETE FROM Template_Category;";
+        var connection = connections.get();
         try (
-                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
                 var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
+            connection.use().setAutoCommit(false);
             statement.executeUpdate();
             categoryResetStatement.executeUpdate();
+            connection.use().commit();
         } catch (SQLException ex) {
-            throw new DataStorageException("Failed to delete all templates", ex);
+            try {
+                connection.use().rollback();
+                throw new DataStorageException("Failed to delete all templates", ex);
+            } catch (SQLException rollbackEx) {
+                throw new DataStorageException("Failed to rollback deletion of all templates" , rollbackEx);
+            }
+        } finally {
+            try{
+                connection.use().setAutoCommit(true);
+            } catch (SQLException closeEx){
+                throw new DataStorageException("Failed to revert to autocommit.", closeEx);
+            }
         }
     }
 
