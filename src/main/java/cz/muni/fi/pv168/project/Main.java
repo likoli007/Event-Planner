@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacadeImpl;
+import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.business.service.crud.CategoryCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TemplateCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TimeUnitCrudService;
@@ -18,6 +19,7 @@ import cz.muni.fi.pv168.project.storage.sql.TodoEventsSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
+import cz.muni.fi.pv168.project.business.service.crud.TransactionalTemplateCrudService;
 import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
@@ -68,7 +70,7 @@ public class Main {
         var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
 
         var categoryCrudService = new CategoryCrudService(categoryRepository);
-        var templateCrudService = new TemplateCrudService(templateRepository);
+        var templateCrudService = new TransactionalTemplateCrudService(transactionExecutor, templateRepository);//TemplateCrudService(templateRepository);
         var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
 
         var eventCrudService = new TodoEventCrudService(todoEventRepository);
