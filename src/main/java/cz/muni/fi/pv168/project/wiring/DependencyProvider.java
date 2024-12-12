@@ -1,7 +1,10 @@
 package cz.muni.fi.pv168.project.wiring;
 
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
@@ -16,8 +19,8 @@ public interface DependencyProvider {
 
     DatabaseManager getDatabaseManager();
 
-//    TodoEventSqlRepository getTimeUnitRepository();
-
+//    TodoEventSqlRepository getTodoEventRepository();
+//
 //    TemplateSqlRepository getTemplateRepository();
 
     CategorySqlRepository getCategoryRepository();
@@ -26,7 +29,7 @@ public interface DependencyProvider {
 
     TransactionExecutor getTransactionExecutor();
 
-//    CrudService<TodoEvent> getTimeUnitCrudService();
+//    CrudService<TodoEvent> getTodoEventCrudService();
 
 //    CrudService<Template> getTemplateCrudService();
 
@@ -39,10 +42,12 @@ public interface DependencyProvider {
     ExportService getExportService();
 
 //    Validator<TodoEvent> getTodoEventValidator();
-
+//
 //    Validator<Template> getTemplateValidator();
 
     Validator<Category> getCategoryValidator();
 
     Validator<TimeUnit> getTimeUnitValidator();
+
+    TodoEventsServiceFacade getTodoEventsServiceFacade();
 }

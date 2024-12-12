@@ -5,14 +5,13 @@ import com.github.lgooddatepicker.components.TimePicker;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
-import cz.muni.fi.pv168.project.business.service.export.GenericExportService;
-import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.action.*;
 import cz.muni.fi.pv168.project.ui.action.add.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.renderer.*;
 import cz.muni.fi.pv168.project.ui.window.ToastNotification;
+import cz.muni.fi.pv168.project.wiring.DependencyProvider;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -38,10 +37,6 @@ public class MainWindow {
     private final JTable eventTable;
     private final JTable managerTabTable;
     private JTable currentTable;
-
-    private final GenericImportService importService;
-    private final GenericExportService exportService;
-
 
     private final CrudService<Category> categoryCrudService;
     private final CrudService<Template> templateCrudService;
@@ -72,24 +67,13 @@ public class MainWindow {
     private boolean categoryTableShown = true;
     private final TodoEventFilter filter = new TodoEventFilter();
 
-    public MainWindow( TodoEventsServiceFacade todoEventsServiceFacade,
-                      CrudService<Category> categoryCrudService,
-                      CrudService<Template> templateCrudService,
-                      CrudService<TimeUnit> timeUnitCrudService,
-                      GenericImportService importService,
-                      GenericExportService exportService) {
-
-
+    public MainWindow(DependencyProvider dependencyProvider) {
         frame = createFrame();
 
-        this.todoEventsServiceFacade = todoEventsServiceFacade;
-        this.categoryCrudService = categoryCrudService;
-        this.templateCrudService = templateCrudService;
-        this.timeUnitCrudService = timeUnitCrudService;
-
-        this.importService = importService;
-        this.exportService = exportService;
-
+        this.todoEventsServiceFacade = dependencyProvider.getTodoEventsServiceFacade();
+        this.categoryCrudService = dependencyProvider.getCategoryCrudService();
+        this.templateCrudService = dependencyProvider.getTemplateCrudService();
+        this.timeUnitCrudService = dependencyProvider.getTimeUnitCrudService();
 
         eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
         categoryTableModel = new CategoryTableModel(categoryCrudService);
@@ -107,13 +91,10 @@ public class MainWindow {
         deleteAction = new DeleteAction(() -> currentTable, allTableModels);
         editAction = new EditAction(() -> currentTable, allTableModels);
 
-        importAction = new ImportAction(frame, importService, this::refresh);
-
-
-        exportAction = new ExportAction(frame, exportService,todoEventsServiceFacade::getFilteredEvents,
-                this.todoEventsServiceFacade::findAll
-                );
-
+        importAction = new ImportAction(frame, dependencyProvider.getImportService(), this::refresh);
+        exportAction = new ExportAction(frame, dependencyProvider.getExportService(),todoEventsServiceFacade::getFilteredEvents,
+                todoEventsServiceFacade::findAll
+        );
 
         aboutAction = new AboutAction(frame);
         keybindsAction = new KeybindsAction(frame);
