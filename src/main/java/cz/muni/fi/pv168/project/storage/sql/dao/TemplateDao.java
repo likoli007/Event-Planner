@@ -18,11 +18,9 @@ import java.util.function.Supplier;
 public class TemplateDao implements DataAccessObject<TemplateEntity> {
     private final Supplier<ConnectionHandler> connections;
 
-    TransactionExecutor transactionExecutor;
 
-    public TemplateDao(Supplier<ConnectionHandler> connections, TransactionExecutor transactionExecutor) {
+    public TemplateDao(Supplier<ConnectionHandler> connections) {
         this.connections = connections;
-        this.transactionExecutor = transactionExecutor;
     }
 
 
@@ -33,7 +31,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
 
 
         AtomicReference<TemplateEntity> templateEntity = new AtomicReference<>();
-        transactionExecutor.executeInTransaction(() -> {
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -71,7 +68,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 System.out.println("Transaction rolled back.");
                 throw new DataStorageException("Failed to store: " + entity, ex);
             }
-        });
 
         return templateEntity.get();
     }
@@ -172,7 +168,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
 
         AtomicReference<TemplateEntity> templateEntity = new AtomicReference<>();
 
-        transactionExecutor.executeInTransaction(() -> {
+
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
@@ -207,7 +203,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             } catch (SQLException ex) {
                 throw new DataStorageException("Failed to update template: " + entity, ex);
             }
-        });
+
         return templateEntity.get();
     }
 
@@ -224,7 +220,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 WHERE template_id = ?;
                 """;
 
-        transactionExecutor.executeInTransaction(() -> {
+
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
@@ -245,7 +241,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             } catch (SQLException ex) {
                 throw new DataStorageException("Failed to delete template, id: " + id, ex);
             }
-        });
+
     }
 
     @Override
@@ -253,7 +249,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
         var sql = "DELETE FROM Template;";
         var categoryResetSQL = "DELETE FROM Template_Category;";
 
-        transactionExecutor.executeInTransaction(() -> {
+
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
@@ -264,6 +260,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             } catch (SQLException ex) {
                 throw new DataStorageException("Failed to delete all templates", ex);
             }
-        });
+
     }
 }
