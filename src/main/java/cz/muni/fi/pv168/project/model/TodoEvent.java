@@ -25,6 +25,10 @@ public class TodoEvent extends Entity {
     private List<Category> categories;
     private boolean done = false;
 
+    public TodoEvent(String name, String details, LocalDateTime start, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories, boolean done) {
+        this(name, details, start, timeUnit, timeUnitAmount, categories);
+        this.done = done;
+    }
     public TodoEvent(String name, String details, LocalDateTime start, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
@@ -34,11 +38,7 @@ public class TodoEvent extends Entity {
     }
 
     public TodoEvent(String name, String details, LocalDateTime start, int minutes, List<Category> categories) {
-        this.name = name;
-        this.details = details;
-        this.start = start;
-        this.interval = new Interval(TimeUnit.minute(), minutes);
-        this.categories = categories;
+        this(name, details, start, TimeUnit.minute(), minutes, categories);
     }
 
     public TodoEvent(TodoEvent todoEvent) {
@@ -49,6 +49,11 @@ public class TodoEvent extends Entity {
         this.interval = todoEvent.interval;
         this.categories = todoEvent.categories;
         this.done = todoEvent.done;
+    }
+
+    public TodoEvent(UUID id, String name, String details, LocalDateTime start, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories, boolean done) {
+        this(name, details, start, timeUnit, timeUnitAmount, categories, done);
+        this.id = id;
     }
 
     //Done so that there is no 'ID' field in exported JSON file

@@ -2,7 +2,6 @@ package cz.muni.fi.pv168.project;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacadeImpl;
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.business.service.crud.CategoryCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TemplateCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TimeUnitCrudService;
@@ -11,13 +10,15 @@ import cz.muni.fi.pv168.project.business.service.export.GenericExportService;
 import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileExporter;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileImporter;
-import cz.muni.fi.pv168.project.storage.InMemoryRepository;
+import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TemplateSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
+import cz.muni.fi.pv168.project.storage.sql.TodoEventsSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
@@ -25,10 +26,11 @@ import cz.muni.fi.pv168.project.storage.sql.db.TransactionManagerImpl;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.CategoryMapper;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TemplateMapper;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TimeUnitMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TodoEventMapper;
 import cz.muni.fi.pv168.project.ui.MainWindow;
 
-import javax.swing.UIManager;
-import java.awt.EventQueue;
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,13 +62,16 @@ public class Main {
         var templateMapper = new TemplateMapper(timeUnitRepository, categoryRepository);
         var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
 //        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
-        var eventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
+
+        var todoEventDao = new TodoEventDao(transactionConnectionSupplier);
+        var todoEventMapper = new TodoEventMapper(timeUnitRepository, categoryRepository);
+        var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
 
         var categoryCrudService = new CategoryCrudService(categoryRepository);
         var templateCrudService = new TemplateCrudService(templateRepository);
         var timeUnitCrudService = new TimeUnitCrudService(timeUnitRepository);
 
-        var eventCrudService = new TodoEventCrudService(eventRepository);
+        var eventCrudService = new TodoEventCrudService(todoEventRepository);
         var todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(eventCrudService);
 
         var importService = new GenericImportService(categoryCrudService, timeUnitCrudService,
