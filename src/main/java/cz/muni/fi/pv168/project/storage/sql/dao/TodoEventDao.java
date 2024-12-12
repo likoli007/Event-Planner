@@ -100,7 +100,6 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                     while (categoryResultSet.next()) {
                         categoryIds.add(UUID.fromString(categoryResultSet.getString(2)));
                     }
-                    System.out.println(categoryIds);
                     TodoEventEntity TodoEvent = new TodoEventEntity(UUID.fromString(resultSet.getString("id")),
                             resultSet.getString("name"),
                             resultSet.getString("details"),

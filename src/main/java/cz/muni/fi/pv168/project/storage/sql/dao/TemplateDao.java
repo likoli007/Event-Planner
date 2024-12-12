@@ -1,11 +1,7 @@
 package cz.muni.fi.pv168.project.storage.sql.dao;
 
-import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.storage.sql.db.ConnectionHandler;
-import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutor;
-import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
 import cz.muni.fi.pv168.project.storage.sql.entity.TemplateEntity;
-import cz.muni.fi.pv168.project.storage.sql.entity.TimeUnitEntity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -90,7 +86,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                     while (categoryResultSet.next()) {
                         categoryIds.add(UUID.fromString(categoryResultSet.getString(2)));
                     }
-                    System.out.println(categoryIds);
                     TemplateEntity template = new TemplateEntity(UUID.fromString(resultSet.getString("id")),
                             resultSet.getString("name"),
                             resultSet.getString("details"),
