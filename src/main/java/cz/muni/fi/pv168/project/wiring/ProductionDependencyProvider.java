@@ -14,7 +14,6 @@ public class ProductionDependencyProvider extends CommonDependencyProvider {
     private static DatabaseManager createDatabaseManager() {
         DatabaseManager databaseManager = DatabaseManager.createProductionInstance();
         databaseManager.initSchema();
-        databaseManager.initData("prod");
 
         return databaseManager;
     }
