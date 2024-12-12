@@ -1,10 +1,9 @@
 package cz.muni.fi.pv168.project.ui.model;
 
-import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
+import cz.muni.fi.pv168.project.model.TimeUnit;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TimeUnitTableModel extends AbstractTableModel {
@@ -19,7 +18,13 @@ public class TimeUnitTableModel extends AbstractTableModel {
 
     public TimeUnitTableModel(CrudService<TimeUnit> timeUnitCrudService) {
         this.timeUnitCrudService = timeUnitCrudService;
-        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
+        this.timeUnits = getTimeUnits();
+    }
+
+    private List<TimeUnit> getTimeUnits() {
+        // do not show system defined time units
+        return timeUnitCrudService.findAll().stream()
+                .filter(x -> !x.isSystemDefined()).toList();
     }
 
     @Override
@@ -76,7 +81,7 @@ public class TimeUnitTableModel extends AbstractTableModel {
         fireTableRowsDeleted(modelRow, modelRow);
     }
     public void refresh() {
-        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
+        this.timeUnits = getTimeUnits();
         fireTableDataChanged();
     }
     public CrudService<TimeUnit> getTimeUnitCrudService() {

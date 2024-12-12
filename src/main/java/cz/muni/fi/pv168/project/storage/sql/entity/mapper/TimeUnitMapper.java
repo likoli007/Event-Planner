@@ -14,7 +14,8 @@ public final class TimeUnitMapper implements EntityMapper<TimeUnitEntity, TimeUn
                 timeUnitEntity.id(),
                 timeUnitEntity.name(),
                 timeUnitEntity.shortcut(),
-                timeUnitEntity.minutes()
+                timeUnitEntity.minutes(),
+                timeUnitEntity.isSystemDefined()
         );
     }
 
@@ -24,7 +25,8 @@ public final class TimeUnitMapper implements EntityMapper<TimeUnitEntity, TimeUn
                 entity.getId(),
                 entity.getName(),
                 entity.getShortcut(),
-                entity.getMinutes()
+                entity.getMinutes(),
+                entity.isSystemDefined()
         );
     }
 }

@@ -4,15 +4,16 @@ import cz.muni.fi.pv168.project.business.service.validation.CategoryValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TemplateValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TimeUnitValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TodoEventValidator;
-import cz.muni.fi.pv168.project.model.*;
+import cz.muni.fi.pv168.project.model.Category;
+import cz.muni.fi.pv168.project.model.Template;
+import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class TestDataGenerator {
     // Predefined reusable categories
@@ -58,7 +59,7 @@ public final class TestDataGenerator {
     }
 
     public List<Template> createTemplates() {
-        List<Template> sampleTemplates = List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), 30, List.of(healthCategory, hobbyCategory)));
+        List<Template> sampleTemplates = List.of(new Template("Yoga", "Yoga in Hotel Passage", LocalTime.now(), teachingHour, 1, List.of(healthCategory, hobbyCategory)));
 
         for (Template template : sampleTemplates) {
             var validator = new TemplateValidator();
@@ -72,7 +73,7 @@ public final class TestDataGenerator {
     }
 
     public List<TimeUnit> createTimeUnits() {
-        List<TimeUnit> sampleTimeUnits = List.of(teachingHour, iceHockeyPeriod);
+        List<TimeUnit> sampleTimeUnits = List.of(TimeUnit.minute(), teachingHour, iceHockeyPeriod);
 
         for (TimeUnit timeUnit : sampleTimeUnits) {
             var validator = new TimeUnitValidator();

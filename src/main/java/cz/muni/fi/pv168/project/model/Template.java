@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Template extends Entity {
     private String name;
@@ -45,6 +46,16 @@ public class Template extends Entity {
         this.startTime = template.startTime;
         this.interval = template.interval;
         this.categories = template.categories;
+    }
+
+    public Template(UUID id, String name, String details, LocalTime startTime, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
+
+        this.id = id;
+        this.name = name;
+        this.details = details;
+        this.startTime = startTime;
+        this.interval = new Interval(timeUnit, timeUnitAmount);
+        this.categories = categories;
     }
 
     @Override
