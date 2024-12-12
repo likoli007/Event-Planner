@@ -56,7 +56,7 @@ public class Main {
         var timeUnitMapper = new TimeUnitMapper();
         var timeUnitRepository = new TimeUnitSqlRepository(timeUnitDao, timeUnitMapper);
 
-        var templateDao = new TemplateDao(transactionConnectionSupplier);
+        var templateDao = new TemplateDao(transactionConnectionSupplier, transactionExecutor);
         var templateMapper = new TemplateMapper(timeUnitRepository, categoryRepository);
         var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
 //        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
