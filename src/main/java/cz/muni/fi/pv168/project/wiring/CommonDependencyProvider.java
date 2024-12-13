@@ -8,109 +8,91 @@ import cz.muni.fi.pv168.project.business.service.validation.CategoryValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TemplateValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TimeUnitValidator;
 import cz.muni.fi.pv168.project.business.service.validation.TodoEventValidator;
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
-import cz.muni.fi.pv168.project.model.TodoEvent;
-import cz.muni.fi.pv168.project.storage.InMemoryRepository;
-import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
-import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
+import cz.muni.fi.pv168.project.storage.sql.*;
 import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
 import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
 import cz.muni.fi.pv168.project.storage.sql.db.*;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.CategoryMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TemplateMapper;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TimeUnitMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TodoEventMapper;
 
-// TODO: add TodoEvent and Template
+import java.util.List;
+
 /**
  * Common dependency provider for both production and test environment.
  */
 public class CommonDependencyProvider implements DependencyProvider {
 
-//    private final TodoEventSqlRepository todoEvents;
-//    private final TemplateSqlRepository templates;
+    private final TodoEventsSqlRepository todoEvents;
+    private final TemplateSqlRepository templates;
     private final CategorySqlRepository categories;
     private final TimeUnitSqlRepository timeUnits;
     private final DatabaseManager databaseManager;
     private final TransactionExecutor transactionExecutor;
-//    private final CrudService<TodoEvent> todoEventCrudService;
-//    private final CrudService<Template> templateCrudService;
+    private final TodoEventsServiceFacade todoEventsServiceFacade;
+    private final CrudService<Template> templateCrudService;
     private final CrudService<Category> categoryCrudService;
     private final CrudService<TimeUnit> timeUnitCrudService;
-    private final TodoEventsServiceFacade todoEventsServiceFacade;
-    private final ImportService importService = null; // TODO: remove null
-    private final ExportService exportService = null; // TODO: remove null
-//    private final TodoEventValidator todoEventValidator;
-//    private final TemplateValidator templateValidator;
+    private final ImportService importService;
+    private final ExportService exportService;
+    private final TodoEventValidator todoEventValidator;
+    private final TemplateValidator templateValidator;
     private final CategoryValidator categoryValidator;
     private final TimeUnitValidator timeUnitValidator;
 
     public CommonDependencyProvider(DatabaseManager databaseManager) {
-//        todoEventValidator = new TodoEventValidator();
-//        templateValidator = new TemplateValidator();
-        categoryValidator = new CategoryValidator();
-        timeUnitValidator = new TimeUnitValidator();
-
         this.databaseManager = databaseManager;
         var transactionManager = new TransactionManagerImpl(databaseManager);
         this.transactionExecutor = new TransactionExecutorImpl(transactionManager::beginTransaction);
         var transactionConnectionSupplier = new TransactionConnectionSupplier(transactionManager, databaseManager);
 
-//        var todoEventMapper = new TodoEventMapper();
-//        var todoEventDao = new TodoEventDao(transactionConnectionSupplier);
-//
-//        var templateMapper = new TemplateMapper();
-//        var templatetDao = new TemplateDao(transactionConnectionSupplier);
+        todoEventValidator = new TodoEventValidator();
+        templateValidator = new TemplateValidator();
+        categoryValidator = new CategoryValidator();
+        timeUnitValidator = new TimeUnitValidator();
 
-        var categoryMapper = new CategoryMapper();
+        var todoEventDao = new TodoEventDao(transactionConnectionSupplier);
+        var templateDao = new TemplateDao(transactionConnectionSupplier);
         var categoryDao = new CategoryDao(transactionConnectionSupplier);
-
-        var timeUnitMapper = new TimeUnitMapper();
         var timeUnitDao = new TimeUnitDao(transactionConnectionSupplier);
 
-//        this.todoEvents = new TodoEventSqlRepository(
-//                todoEventDao,
-//                todoEventMapper
-//        );
-//        this.templates = new TemplateSqlRepository(
-//                templatetDao,
-//                templateMapper
-//        );
-        this.categories = new CategorySqlRepository(
-                categoryDao,
-                categoryMapper
-        );
-        this.timeUnits = new TimeUnitSqlRepository(
-                timeUnitDao,
-                timeUnitMapper
-        );
+        this.categories = new CategorySqlRepository(categoryDao, new CategoryMapper());
+        this.timeUnits = new TimeUnitSqlRepository(timeUnitDao, new TimeUnitMapper());
 
-        var testDataGenerator = new TestDataGenerator();
-        var todoEventRepository = new InMemoryRepository<>(testDataGenerator.createTodoEvents());
-        var todoEventCrudService = new TodoEventCrudService(todoEventRepository);
+        var todoEventMapper = new TodoEventMapper(timeUnits, categories);
+        var templateMapper = new TemplateMapper(timeUnits, categories);
+
+        this.todoEvents = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
+        this.templates = new TemplateSqlRepository(templateDao, templateMapper);
+
+        var todoEventCrudService = new TodoEventCrudService(todoEvents);
         this.todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(todoEventCrudService);
+        this.templateCrudService = new TemplateCrudService(templates);
+        this.categoryCrudService = new CategoryCrudService(categories);
+        this.timeUnitCrudService = new TimeUnitCrudService(timeUnits);
 
+        this.exportService = new GenericExportService(
+                categoryCrudService,
+                timeUnitCrudService,
+                templateCrudService,
+                todoEventsServiceFacade,
+                List.of(new JSONFileExporter())
+        );
 
-//        todoEventCrudService = new TodoEventCrudService(todoEvents);
-//        templateCrudService = new TemplateCrudService(templates);
-        categoryCrudService = new CategoryCrudService(categories);
-        timeUnitCrudService = new TimeUnitCrudService(timeUnits);
-//        exportService = new GenericExportService(
-//                categoryCrudService,
-//                timeUnitCrudService,
-//                templateCrudService,
-//                todoEventCrudService,
-//                List.of(new JSONFileExporter())
-//        );
-//        var genericImportService = new GenericImportService(
-//                categoryCrudService,
-//                timeUnitCrudService,
-//                templateCrudService,
-//                todoEventCrudService,
-//                List.of(new JSONFileImporter())
-//        );
-//        importService = new TransactionalImportService(genericImportService, transactionExecutor);
+        var genericImportService = new GenericImportService(
+                categoryCrudService,
+                timeUnitCrudService,
+                templateCrudService,
+                todoEventsServiceFacade,
+                List.of(new JSONFileImporter())
+        );
+        this.importService = new TransactionalImportService(genericImportService, transactionExecutor);
     }
 
     @Override
@@ -118,15 +100,15 @@ public class CommonDependencyProvider implements DependencyProvider {
         return databaseManager;
     }
 
-//    @Override
-//    public TodoEventSqlRepository getTodoEventRepository() {
-//        return todoEvents;
-//    }
-//
-//    @Override
-//    public TemplateSqlRepository getTemplateRepository() {
-//        return templates;
-//    }
+    @Override
+    public TodoEventsSqlRepository getTodoEventRepository() {
+        return todoEvents;
+    }
+
+    @Override
+    public TemplateSqlRepository getTemplateRepository() {
+        return templates;
+    }
 
     @Override
     public CategorySqlRepository getCategoryRepository() {
@@ -143,15 +125,15 @@ public class CommonDependencyProvider implements DependencyProvider {
         return transactionExecutor;
     }
 
-//    @Override
-//    public CrudService<TodoEvent> getTodoEventCrudService() {
-//        return todoEventCrudService;
-//    }
-//
-//    @Override
-//    public CrudService<Template> getTemplateCrudService() {
-//        return templateCrudService;
-//    }
+    @Override
+    public TodoEventsServiceFacade getTodoEventsServiceFacade() {
+        return todoEventsServiceFacade;
+    }
+
+    @Override
+    public CrudService<Template> getTemplateCrudService() {
+        return templateCrudService;
+    }
 
     @Override
     public CrudService<Category> getCategoryCrudService() {
@@ -173,15 +155,15 @@ public class CommonDependencyProvider implements DependencyProvider {
         return exportService;
     }
 
-//    @Override
-//    public TodoEventValidator getTodoEventValidator() {
-//        return todoEventValidator;
-//    }
-//
-//    @Override
-//    public TemplateValidator getTemplateValidator() {
-//        return templateValidator;
-//    }
+    @Override
+    public TodoEventValidator getTodoEventValidator() {
+        return todoEventValidator;
+    }
+
+    @Override
+    public TemplateValidator getTemplateValidator() {
+        return templateValidator;
+    }
 
     @Override
     public CategoryValidator getCategoryValidator() {
@@ -191,10 +173,5 @@ public class CommonDependencyProvider implements DependencyProvider {
     @Override
     public TimeUnitValidator getTimeUnitValidator() {
         return timeUnitValidator;
-    }
-
-    @Override
-    public TodoEventsServiceFacade getTodoEventsServiceFacade() {
-        return todoEventsServiceFacade;
     }
 }
