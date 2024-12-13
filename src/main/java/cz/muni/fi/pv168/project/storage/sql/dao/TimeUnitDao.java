@@ -21,7 +21,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
 
     @Override
     public TimeUnitEntity create(TimeUnitEntity newTimeUnit) {
-        var sql = "INSERT INTO TimeUnit (id, name, shortcut, minutes) VALUES (?, ?, ?, ?);";
+        var sql = "INSERT INTO TimeUnit (id, name, shortcut, minutes, isSystemDefined) VALUES (?, ?, ?, ?,?);";
 
         try (
                 var connection = connections.get();
@@ -31,6 +31,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
             statement.setString(2, newTimeUnit.name());
             statement.setString(3, newTimeUnit.shortcut());
             statement.setInt(4, newTimeUnit.minutes());
+            statement.setBoolean(5, newTimeUnit.isSystemDefined());
             statement.executeUpdate();
 
             try (ResultSet keyResultSet = statement.getGeneratedKeys()) {
@@ -58,7 +59,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 SELECT id,
                        name,
                        shortcut,
-                       minutes
+                       minutes,
+                      isSystemDefined
                 FROM TimeUnit;
                 """;
         try (
@@ -85,7 +87,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 SELECT id,
                        name,
                        shortcut,
-                       minutes
+                       minutes,
+                       isSystemDefined
                 FROM TimeUnit
                 WHERE id = ?;
                 """;
@@ -140,7 +143,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
     public void deleteById(UUID id) {
         var sql = """
                 DELETE FROM TimeUnit
-                WHERE id = ?;
+                WHERE id = ? AND isSystemDefined = FALSE;
                 """;
         try (
                 var connection = connections.get();
@@ -149,7 +152,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
             statement.setString(1, String.valueOf(id));
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated == 0) {
-                throw new DataStorageException("Time unit not found, id: " + id);
+                throw new DataStorageException("Time unit not found or is System defined, id: " + id);
             }
             if (rowsUpdated > 1) {
                 throw new DataStorageException("More then 1 time unit (rows=%d) has been deleted: %s"
@@ -162,7 +165,7 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
 
     @Override
     public void deleteAll() {
-        var sql = "DELETE FROM TimeUnit;";
+        var sql = "DELETE FROM TimeUnit WHERE isSystemDefined = FALSE;";
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql)
@@ -178,7 +181,8 @@ public final class TimeUnitDao implements DataAccessObject<TimeUnitEntity> {
                 UUID.fromString(resultSet.getString("id")),
                 resultSet.getString("name"),
                 resultSet.getString("shortcut"),
-                resultSet.getInt("minutes")
+                resultSet.getInt("minutes"),
+                resultSet.getBoolean("isSystemDefined")
         );
     }
 }

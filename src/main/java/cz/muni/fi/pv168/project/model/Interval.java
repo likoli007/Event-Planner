@@ -28,7 +28,7 @@ public class Interval  {
     public String format() {
         StringBuilder sb = new StringBuilder(amount + " " + timeUnit.getShortcut());
 
-        if (timeUnit != TimeUnit.minute()) {
+        if (!timeUnit.equals(TimeUnit.minute())) {
             sb
                     .append(" (")
                     .append(timeUnit.getMinutes() * amount)

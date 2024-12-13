@@ -2,9 +2,9 @@ package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.business.filter.Filter;
-import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
+import cz.muni.fi.pv168.project.model.TodoEvent;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDateTime;
@@ -61,6 +61,7 @@ public class EventTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         var event = getEntity(rowIndex);
         if (columns.get(columnIndex).getName().equals("Done")) {
+            todoEventFacade.setDone(event, (Boolean) aValue);
             event.setDone((Boolean) aValue);
             fireTableCellUpdated(rowIndex, columnIndex);
         }

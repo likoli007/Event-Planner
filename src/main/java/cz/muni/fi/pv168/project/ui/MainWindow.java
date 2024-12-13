@@ -176,7 +176,6 @@ public class MainWindow {
         eventTable.setComponentPopupMenu(createPopupMenu());
         eventsTab.add(createStatisticsPanel(), BorderLayout.SOUTH);
 
-
         return eventsTab;
     }
 

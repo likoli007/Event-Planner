@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS TimeUnit (
     id UUID PRIMARY KEY,
     name VARCHAR(25) NOT NULL,
     shortcut VARCHAR(4) NOT NULL,
-    minutes INT NOT NULL
+    minutes         INT                   NOT NULL,
+    isSystemDefined BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Template (
@@ -34,15 +35,16 @@ CREATE TABLE IF NOT EXISTS TodoEvent (
     name VARCHAR(25) NOT NULL,
     details VARCHAR(36),
     start TIMESTAMP NOT NULL,
-    timeUnit UUID NOT NULL,
+    timeUnit       UUID NOT NULL,
+    timeUnitAmount INT  NOT NULL,
     done BOOLEAN DEFAULT FALSE NOT NULL,
     FOREIGN KEY (timeUnit) REFERENCES TimeUnit(id)
 );
 
 CREATE TABLE IF NOT EXISTS TodoEvent_Category (
-    todo_event_id UUID NOT NULL,
+                                                  todoEvent_id UUID NOT NULL,
     category_id UUID NOT NULL,
-    PRIMARY KEY (todo_event_id, category_id),
-    FOREIGN KEY (todo_event_id) REFERENCES TodoEvent(id),
+                                                  PRIMARY KEY (todoEvent_id, category_id),
+                                                  FOREIGN KEY (todoEvent_id) REFERENCES TodoEvent (id),
     FOREIGN KEY (category_id) REFERENCES Category(id)
 );
