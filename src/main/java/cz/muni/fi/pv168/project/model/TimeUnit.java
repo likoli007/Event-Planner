@@ -2,7 +2,7 @@ package cz.muni.fi.pv168.project.model;
 
 import java.util.Objects;
 
-public class TimeUnit {
+public class TimeUnit extends Entity {
     private String name;
     private String shortcut;
     private int minutes;
@@ -13,6 +13,25 @@ public class TimeUnit {
         this.name = name;
         this.shortcut = shortcut;
         this.minutes = minutes;
+    }
+
+    public TimeUnit(TimeUnit timeUnit) {
+        this.id = timeUnit.id;
+        this.name = timeUnit.name;
+        this.shortcut = timeUnit.shortcut;
+        this.minutes = timeUnit.minutes;
+    }
+
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof TimeUnit timeUnit)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = timeUnit.id;
+        this.name = timeUnit.name;
+        this.shortcut = timeUnit.shortcut;
+        this.minutes = timeUnit.minutes;
     }
 
     public static TimeUnit minute() {
@@ -44,20 +63,23 @@ public class TimeUnit {
     }
 
     @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        TimeUnit timeUnit = (TimeUnit) e;
+        return Objects.equals(name, timeUnit.name) || Objects.equals(shortcut, timeUnit.shortcut);
+    }
+
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        TimeUnit timeUnit = (TimeUnit) e;
+        if (Objects.equals(name, timeUnit.name) && Objects.equals(shortcut, timeUnit.shortcut) &&
+            minutes == timeUnit.getMinutes()) return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TimeUnit timeUnit = (TimeUnit) o;
-        return minutes == timeUnit.minutes && Objects.equals(name, timeUnit.name) && Objects.equals(shortcut, timeUnit.shortcut);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, shortcut, minutes);
     }
 }

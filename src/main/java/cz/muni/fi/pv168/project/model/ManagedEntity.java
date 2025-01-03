@@ -6,7 +6,7 @@ package cz.muni.fi.pv168.project.model;
 public enum ManagedEntity {
     CATEGORIES("Categories"),
     TEMPLATES("Templates"),
-    INTERVALS("Intervals");
+    INTERVALS("Time Units");
 
     private final String displayName;
 

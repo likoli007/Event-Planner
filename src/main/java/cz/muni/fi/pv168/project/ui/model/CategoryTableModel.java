@@ -1,24 +1,23 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.Category;
-import cz.muni.fi.pv168.project.model.Color;
-import cz.muni.fi.pv168.project.model.TodoEvent;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryTableModel extends AbstractTableModel {
-    private final List<Category> categories;
+    private final CrudService<Category> categoryCrudService;
+    private List<Category> categories;
 
     private final List<Column<Category, ?>> columns = List.of(
-            Column.editable("Name", String.class, Category::getName, Category::setName),
-            Column.editable("Color", Color.class, Category::getColor, Category::setColor)
+            Column.readonly("Categories", Category.class, Category::getCategory)
     );
 
-    public CategoryTableModel(List<Category> categories) {
-        this.categories = new ArrayList<>(categories);
+    public CategoryTableModel(CrudService<Category> categoryCrudService) {
+        this.categoryCrudService = categoryCrudService;
+        this.categories = new ArrayList<>(categoryCrudService.findAll());
     }
 
     @Override
@@ -54,5 +53,37 @@ public class CategoryTableModel extends AbstractTableModel {
 
     public Category getEntity(int rowIndex) {
         return categories.get(rowIndex);
+    }
+
+    public void addRow(Category category) {
+        categoryCrudService.create(category);
+        int newRowIndex = categories.size();
+        categories.add(category);
+        fireTableRowsInserted(newRowIndex, newRowIndex);
+
+    }
+
+    public void updateRow(Category category) {
+        categoryCrudService.update(category);
+        int rowIndex = categories.indexOf(category);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int rowIndex) {
+        Category category = categories.get(rowIndex);
+        categoryCrudService.deleteById(category.getId());
+        categories.remove(rowIndex);
+        fireTableRowsDeleted(rowIndex, rowIndex);
+    }
+
+
+
+    public void refresh() {
+        this.categories = new ArrayList<>(categoryCrudService.findAll());
+        fireTableDataChanged();
+    }
+
+    public CrudService<Category> getCategoryCrudService() {
+        return categoryCrudService;
     }
 }

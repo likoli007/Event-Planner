@@ -1,33 +1,64 @@
 package cz.muni.fi.pv168.project.model;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import cz.muni.fi.pv168.project.business.service.export.serialize.CategorySerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.IntervalSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.LocalTimeSerializer;
 
-public class Template {
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+
+public class Template extends Entity {
     private String name;
     private String details;
-    private LocalDateTime date;
-    private TimeUnit timeUnit;
-    private int timeUnitAmount;
+
+    @JsonSerialize(using = LocalTimeSerializer.class)
+    private LocalTime startTime;
+    @JsonSerialize(using = IntervalSerializer.class)
+    private Interval interval;
+    @JsonSerialize(contentUsing = CategorySerializer.class)
     private List<Category> categories;
 
-    public Template(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
+    public Template(String name, String details, LocalTime startTime, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = timeUnit;
-        this.timeUnitAmount = timeUnitAmount;
+        this.startTime = startTime;
+        this.interval = new Interval(timeUnit, timeUnitAmount);
         this.categories = categories;
     }
 
-    public Template(String name, String details, LocalDateTime date, int minutes, List<Category> categories) {
+    public Template(String name, String details, LocalTime startTime, int minutes, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = TimeUnit.minute();
-        this.timeUnitAmount = minutes;
+        this.startTime = startTime;
+        this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
+    }
+
+    public Template(Template template) {
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
+    }
+
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof Template template)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = template.id;
+        this.name = template.name;
+        this.details = template.details;
+        this.startTime = template.startTime;
+        this.interval = template.interval;
+        this.categories = template.categories;
     }
 
     public String getName() {
@@ -46,32 +77,24 @@ public class Template {
         this.details = details;
     }
 
-    public LocalDateTime getDate() {
-        return date;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    public Interval getInterval() {
+        return interval;
     }
 
-    public void setTimeUnit(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public int getTimeUnitAmount() {
-        return timeUnitAmount;
-    }
-
-    public void setTimeUnitAmount(int timeUnitAmount) {
-        this.timeUnitAmount = timeUnitAmount;
+    public void setInterval(Interval interval) {
+        this.interval = interval;
     }
 
     public List<Category> getCategories() {
-        return Collections.unmodifiableList(categories);
+        return categories;
     }
 
     public void setCategories(List<Category> categories) {
@@ -79,21 +102,47 @@ public class Template {
     }
 
     public String formatInterval() {
-        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
+        return interval.format();
+    }
 
-        if (timeUnit != TimeUnit.minute()) {
-            sb
-                    .append(" (")
-                    .append(timeUnit.getMinutes() * timeUnitAmount)
-                    .append(" ")
-                    .append(TimeUnit.minute().getShortcut())
-                    .append(")");
+    public TodoEvent toTodoEvent(){
+            return new TodoEvent(name,details, startTime.atDate(LocalDate.now()), getInterval().getTimeUnit(), getInterval().getAmount(), categories );
+    }
+
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        Template template = (Template) e;
+        return Objects.equals(name, template.name);
+    }
+
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e) {
+        if (e == null || getClass() != e.getClass()) return true;
+        Template template = (Template) e;
+
+        //since inside the system datetime is granular all the way to nanoseconds, need to only take hours and minutes
+        //i.e. a template is meaningfully different when the hour and minute of its start time differs, not nanoseconds
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String timeString = getStartTime().format(timeFormatter);
+
+        if (Objects.equals(name, template.name) && Objects.equals(details, template.details) &&
+            Objects.equals(template.getStartTime().toString(), timeString) &&
+            !(getInterval().getTimeUnit().isMeaningfullyDifferent(template.getInterval().getTimeUnit())) &&
+            getInterval().getAmount() == template.getInterval().getAmount()) {
+                for (Category category : categories){
+                    boolean isPresent = false;
+                    for (Category otherCategory : template.categories) {
+                        if (category.isDuplicate(otherCategory)) {
+                            isPresent = true;
+                        }
+                    }
+                    if (!isPresent) return true;
+                }
+                return false;
         }
 
-        return sb.toString();
-    }
-    public TodoEvent toTodoEvent(){
-            return new TodoEvent(name,details, date,timeUnit, timeUnitAmount, categories );
+        return true;
     }
 
     @Override

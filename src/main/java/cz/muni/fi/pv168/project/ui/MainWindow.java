@@ -1,20 +1,33 @@
 package cz.muni.fi.pv168.project.ui;
 
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
+import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
+import cz.muni.fi.pv168.project.business.service.export.GenericExportService;
+import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.action.*;
-import cz.muni.fi.pv168.project.ui.model.CategoryTableModel;
-import cz.muni.fi.pv168.project.ui.model.EventTableModel;
-import cz.muni.fi.pv168.project.ui.model.TemplateTableModel;
-import cz.muni.fi.pv168.project.ui.model.TimeUnitTableModel;
+import cz.muni.fi.pv168.project.ui.action.add.*;
+import cz.muni.fi.pv168.project.ui.model.*;
+import cz.muni.fi.pv168.project.ui.renderer.*;
+import cz.muni.fi.pv168.project.ui.window.ToastNotification;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.awt.event.*;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.List;
+
+import static cz.muni.fi.pv168.project.ui.format.StatisticsFormatter.*;
 
 public class MainWindow {
     private final JFrame frame;
@@ -22,8 +35,25 @@ public class MainWindow {
     private final JTable managerTabTable;
     private JTable currentTable;
 
+    private final GenericImportService importService;
+    private final GenericExportService exportService;
+
+
+    private final CrudService<Category> categoryCrudService;
+    private final CrudService<Template> templateCrudService;
+    private final CrudService<TimeUnit> timeUnitCrudService;
+    private final TodoEventsServiceFacade todoEventsServiceFacade;
+
+
+
+    private final EventTableModel eventTableModel;
+    private final CategoryTableModel categoryTableModel;
+    private final TemplateTableModel templateTableModel;
+    private final TimeUnitTableModel timeUnitTableModel;
+    private final AllTableModels allTableModels;
+
     private final Action quitAction = new QuitAction();
-    private final Action addAction;
+    private final Action addActionContextual;
     private final Action deleteAction;
     private final Action editAction;
     private final Action importAction;
@@ -32,20 +62,55 @@ public class MainWindow {
     private final Action keybindsAction;
     private final Action contactAction;
 
-    public MainWindow() {
+    //panels used for showing statistics
+    JTextArea statisticsArea;
+    JTextArea catgoryStatisticsArea;
+    private boolean categoryTableShown = true;
+    private final TodoEventFilter filter = new TodoEventFilter();
+
+    public MainWindow( TodoEventsServiceFacade todoEventsServiceFacade,
+                      CrudService<Category> categoryCrudService,
+                      CrudService<Template> templateCrudService,
+                      CrudService<TimeUnit> timeUnitCrudService,
+                      GenericImportService importService,
+                      GenericExportService exportService) {
+
+
         frame = createFrame();
 
-        var testDataGenerator = new TestDataGenerator();
-        eventTable = createTodoEventTable(testDataGenerator.createTodoEvents(10));
-        managerTabTable = createCategoryTable(testDataGenerator.createCategories());
+        this.todoEventsServiceFacade = todoEventsServiceFacade;
+        this.categoryCrudService = categoryCrudService;
+        this.templateCrudService = templateCrudService;
+        this.timeUnitCrudService = timeUnitCrudService;
 
+        this.importService = importService;
+        this.exportService = exportService;
+
+
+        eventTableModel = new EventTableModel(todoEventsServiceFacade, filter);
+        categoryTableModel = new CategoryTableModel(categoryCrudService);
+        templateTableModel = new TemplateTableModel(templateCrudService);
+        timeUnitTableModel = new TimeUnitTableModel(timeUnitCrudService);
+        allTableModels = new AllTableModels(eventTableModel, categoryTableModel, templateTableModel, timeUnitTableModel);
+
+        eventTable = createTodoEventTable(eventTableModel);
+        managerTabTable = createCategoryTable(categoryTableModel);
         currentTable = eventTable;
 
-        addAction = new AddAction(() -> currentTable);
-        deleteAction = new DeleteAction(() -> currentTable);
-        editAction = new EditAction(() -> currentTable);
-        importAction = new ImportAction(frame);
-        exportAction = new ExportAction(frame);
+        managerTabTable.setDefaultRenderer(List.class, new CategoryListRenderer());
+
+        addActionContextual = new AddContextual(() -> currentTable, allTableModels);
+        deleteAction = new DeleteAction(() -> currentTable, allTableModels);
+        editAction = new EditAction(() -> currentTable, allTableModels);
+
+        importAction = new ImportAction(frame, importService, this::refresh);
+
+
+        exportAction = new ExportAction(frame, exportService,todoEventsServiceFacade::getFilteredEvents,
+                this.todoEventsServiceFacade::findAll
+                );
+
+
         aboutAction = new AboutAction(frame);
         keybindsAction = new KeybindsAction(frame);
         contactAction = new ContactAction(frame);
@@ -60,8 +125,12 @@ public class MainWindow {
             int selectedIndex = tabPanel.getSelectedIndex();
             if (selectedIndex == 0) {
                 currentTable = eventTable;
+                computeEventStatistics();
             } else if (selectedIndex == 1) {
                 currentTable = managerTabTable;
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
             int selectedRowsCount = currentTable.getSelectedRowCount();
             changeActionsState(selectedRowsCount);
@@ -78,14 +147,41 @@ public class MainWindow {
             if (!e.getValueIsAdjusting() && currentTable == managerTabTable) {
                 int selectedRowsCount = managerTabTable.getSelectedRowCount();
                 changeActionsState(selectedRowsCount);
+                if(categoryTableShown) {
+                    computeCategoryStatistics();
+                }
             }
         });
+
+        eventTableModel.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                computeEventStatistics();
+            }
+        });
+        computeEventStatistics();
 
         frame.add(tabPanel, BorderLayout.CENTER);
         frame.add(createToolbar(), BorderLayout.BEFORE_FIRST_LINE);
         frame.setJMenuBar(createMenuBar());
         frame.pack();
         changeActionsState(0);
+        setupKeyBindings(frame.getRootPane());
+        setupSelectAllShortcut(eventTable);
+        setupSelectAllShortcut(managerTabTable);
+
+        frame.setMinimumSize(frame.getSize());
+
+        ToastNotification.getInstance().setParent(frame);
+    }
+
+    private void refresh() {
+        eventTableModel.refresh();
+        categoryTableModel.refresh();
+        templateTableModel.refresh();
+        timeUnitTableModel.refresh();
+
+        eventTableModel.refetch(filter);
     }
 
     public JPanel createEventsTab(){
@@ -99,103 +195,193 @@ public class MainWindow {
         return eventsTab;
     }
 
-    //TODO: actual computing of statistics
-    // can use this to display statistics between the different tabs, left alone for now
-    //  i.e. use createStatisticsPanel to just create the panel, then make a 'changeDisplayedStatistics' function
-    //  which sets the currently relevant statistics
+
+    public void computeCategoryStatistics(){
+        List<TodoEvent> filteredEvents = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEvents = todoEventsServiceFacade.findAll();
+
+        HashMap<String, Integer> allStats = computeCategoryStatisticsForList(allEvents);
+
+        HashMap<String, Integer> filteredStats = null;
+        double filteredStatsPercentage = -1.0;
+
+        if (filteredEvents.size() != allEvents.size()) {
+            filteredStats = computeCategoryStatisticsForList(filteredEvents);
+            filteredStatsPercentage = (double) filteredStats.get("total") / allEvents.size() * 100.0;
+        }
+        double allStatsPercentage = (double) allStats.get("total") / allEvents.size() * 100.0;
+
+        List<String> stats = List.of(
+                formatCategoryText(allStats, filteredStats, "total", "Tasks with selected categories"),
+                formatPercentageText(allStatsPercentage, filteredStatsPercentage, "Percentage")
+
+        );
+
+        catgoryStatisticsArea.setText(String.join(" | ", stats));
+    }
+
+
+    private HashMap<String, Integer> computeCategoryStatisticsForList(List<TodoEvent> events) {
+        HashMap<String, Integer> result = new HashMap<>();
+
+        int categoryEventCount = 0;
+        int[] selectedRows = managerTabTable.getSelectedRows();
+
+        for (int i = 0; i < events.size(); i++) {
+            for (int j = 0;  j < selectedRows.length; j++) {
+                boolean categoryFound = false;
+                Category category = (Category) managerTabTable.getValueAt(selectedRows[j], 0);
+                for (Category eventCategory : events.get(i).getCategories()) {
+                    if (eventCategory.equals(category)) {
+                        categoryEventCount++;
+                        categoryFound = true;
+                        break;
+                    }
+                }
+                if (categoryFound) {
+                    break;
+                }
+            }
+        }
+        result.put("total", categoryEventCount);
+        return result;
+    }
+
+    public void computeEventStatistics() {
+        List<TodoEvent> filteredEvents = todoEventsServiceFacade.getFilteredEvents();
+        List<TodoEvent> allEvents = todoEventsServiceFacade.findAll();
+
+        HashMap<String, Integer> allStats = computeEventStatisticsForList(allEvents);
+
+        HashMap<String, Integer> filteredStats = null;
+        if (filteredEvents.size() != allEvents.size()) {
+            filteredStats = computeEventStatisticsForList(filteredEvents);
+        }
+
+        List<String> stats = List.of(
+                formatText(allStats, filteredStats, "totalEvents", "Total events"),
+                formatText(allStats, filteredStats, "doneEvents", "Done events"),
+                formatText(allStats, filteredStats, "totalDoneLength", "Length of done events", "min"),
+                formatText(allStats, filteredStats, "plannedEvents", "Planned events"),
+                formatText(allStats, filteredStats, "totalPlannedLength", "Length of planned events", "min")
+        );
+
+        // Set the formatted statistics text
+        statisticsArea.setText(String.join(" | ", stats));
+    }
+
+    private HashMap<String, Integer> computeEventStatisticsForList(List<TodoEvent> eventList) {
+        int doneEvents = 0;
+        int totalDoneLength = 0;
+        int totalLength = 0;
+        int totalEvents = eventList.size();
+
+        for (TodoEvent event : eventList) {
+            Interval interval = event.getInterval();
+            TimeUnit timeUnit = interval.getTimeUnit();
+            int eventLength = interval.getAmount() * timeUnit.getMinutes();
+
+            totalLength += eventLength;
+
+            if (event.isDone()) {
+                doneEvents++;
+                totalDoneLength += eventLength;
+            }
+        }
+
+        HashMap<String, Integer> stats = new HashMap<>();
+        stats.put("totalEvents", totalEvents);
+        stats.put("doneEvents", doneEvents);
+        stats.put("totalDoneLength", totalDoneLength);
+        stats.put("plannedEvents", totalEvents - doneEvents);
+        stats.put("totalPlannedLength", totalLength - totalDoneLength);
+
+        return stats;
+    }
+
     public JPanel createStatisticsPanel(){
         JPanel statisticsPanel = new JPanel(new BorderLayout());
 
-        JTextArea statisticsArea = new JTextArea(
-                """
-                Total No. of Done Events: 42
-                Total No. of Planned Events: 13
-                """
-        );
+        statisticsArea = new JTextArea();
         statisticsArea.setEditable(false);
         statisticsArea.setBackground(null);
-        statisticsPanel.add(statisticsArea);
+
+        statisticsPanel.add(statisticsArea, BorderLayout.WEST);
         return statisticsPanel;
     }
 
     public JPanel createManagerTab(){
-        var testDataGenerator = new TestDataGenerator();
-        List<Category> categories = testDataGenerator.createCategories();
-
-        CategoryTableModel categoryTableModel = new CategoryTableModel(categories);
         managerTabTable.setModel(categoryTableModel);
 
-        JComboBox<ManagedEntity> managedEntityComboBox = new JComboBox<>(ManagedEntity.values());
+        JButton templateButton = new JButton("Templates");
+        JButton categoryButton = new JButton("Categories");
+        JButton intervalButton = new JButton("Time Units");
 
-        JTextArea statisticsArea = new JTextArea();
-        statisticsArea.setEditable(false);
-        statisticsArea.setBackground(null);
-        // Default text shown
-        // TODO: in the future fetch these statistics
-        statisticsArea.setText("""
-            Total No. of Tasks With Selected Category: 5
-            Percentage of Total Tasks With Selected Category: 14%
-            """);
+
+        catgoryStatisticsArea = new JTextArea();
+        catgoryStatisticsArea.setEditable(false);
+        catgoryStatisticsArea.setBackground(null);
+        computeCategoryStatistics();
 
 
         JPanel managerTab = new JPanel(new BorderLayout());
-        JPanel managerTabToolPanel = new JPanel(new BorderLayout());
-        managerTabToolPanel.add(managedEntityComboBox, BorderLayout.EAST);
+        JPanel managerTabToolPanel = new JPanel();
+        managerTabToolPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+        managerTabToolPanel.add(categoryButton);
+        managerTabToolPanel.add(templateButton);
+        managerTabToolPanel.add(intervalButton);
         managerTab.add(managerTabToolPanel, BorderLayout.NORTH);
 
 
         managerTab.add(new JScrollPane(managerTabTable), BorderLayout.CENTER);
-        managerTab.add(statisticsArea, BorderLayout.SOUTH);
+        managerTab.add(catgoryStatisticsArea, BorderLayout.SOUTH);
 
-        managedEntityComboBox.addActionListener(e -> updateTableModel(e, managerTabTable, statisticsArea));
+        categoryButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.CATEGORIES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = true;
+            computeCategoryStatistics();
+        });
+        templateButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.TEMPLATES, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
+        intervalButton.addActionListener(e -> {
+            updateTableModel(ManagedEntity.INTERVALS, managerTabTable, catgoryStatisticsArea);
+            categoryTableShown = false;
+        });
 
         return managerTab;
     }
 
-    private static void updateTableModel(ActionEvent e, JTable table, JTextArea statisticsArea) {
-        Object source = e.getSource();
+    private void updateTableModel(ManagedEntity selectedEntity, JTable table, JTextArea categoryStatisticsArea) {
+        switch (selectedEntity) {
+            case TEMPLATES -> {
+                table.setModel(templateTableModel);
+                categoryStatisticsArea.setVisible(false);
+                categoryTableShown = false;
+            }
+            case INTERVALS -> {
+                table.setModel(timeUnitTableModel);
+                categoryStatisticsArea.setVisible(false);
+                categoryTableShown = false;
+                configureMinutesColumnRenderer(table);
+            }
+            default -> {
+                table.setModel(categoryTableModel);
+                categoryStatisticsArea.setVisible(true);
+                categoryTableShown = true;
+                computeCategoryStatistics();
+            }
+        }
+    }
 
-        if (source instanceof JComboBox<?> comboBox) {
-            Object selectedItem = comboBox.getSelectedItem();
-            if (selectedItem instanceof ManagedEntity selectedEntity) {
-
-                TestDataGenerator testDataGenerator = new TestDataGenerator();
-                TableModel newModel;
-
-                switch (selectedEntity) {
-                    case CATEGORIES -> {
-                        List<Category> categories = testDataGenerator.createCategories();
-                        newModel = new CategoryTableModel(categories); // Switch to CategoryTableModel
-
-                        statisticsArea.setText("""
-                            Total No. of Tasks With Selected Category: 5
-                            Percentage of Total Tasks With Selected Category: 14%
-                            """);
-                        //TODO: statistics like this should be in its own function where they will be calculated
-                    }
-                    case TEMPLATES -> {
-                        List<Template> templates = testDataGenerator.createTemplates();
-                        newModel = new TemplateTableModel(templates); // Switch to TemplateTableModel
-
-                        //TODO: statistics for used templates? for now leaving blank
-                        statisticsArea.setText("");
-                    }
-                    case INTERVALS -> {
-                        List<TimeUnit> intervals = testDataGenerator.createTimeUnits();
-                        newModel = new TimeUnitTableModel(intervals); // Switch to IntervalTableModel
-
-                        //TODO: statistics for used intervals? for now leaving blank
-                        statisticsArea.setText("");
-                    }
-                    default -> {
-                        // default since otherwise the setModel function may have an uninitialized newModel
-                        // TODO: once normal app logic is being implemented an error/exception should be thrown here
-                        List<TimeUnit> timeUnits = testDataGenerator.createTimeUnits();
-                        newModel = new TimeUnitTableModel(timeUnits); // Default to TimeUnitTableModel
-                    }
-                }
-
-                table.setModel(newModel);
+    private void configureMinutesColumnRenderer(JTable table) {
+        int minutesColumnIndex = timeUnitTableModel.getColumnIndexByName("Minutes");
+        if (minutesColumnIndex != -1) {
+            TableColumnModel columnModel = table.getColumnModel();
+            if (minutesColumnIndex < columnModel.getColumnCount()) {
+                columnModel.getColumn(minutesColumnIndex).setCellRenderer(new LeftAlignedCellRenderer());
             }
         }
     }
@@ -210,23 +396,69 @@ public class MainWindow {
         return frame;
     }
 
-    private JTable createTodoEventTable(List<TodoEvent> todoEvents) {
-        var model = new EventTableModel(todoEvents);
+    private JTable createTodoEventTable(EventTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
+        table.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeRenderer());
+
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(new EventTableCellRenderer());
+        }
+
+        int startColumnIndex = model.getColumnIndexByName("Start");
+        if (startColumnIndex != -1) {
+            TableColumn startColumn = table.getColumnModel().getColumn(startColumnIndex);
+            startColumn.setCellRenderer(new LocalDateTimeRenderer());
+            startColumn.setPreferredWidth(200);
+            startColumn.setMaxWidth(200);
+            startColumn.setMinWidth(200);
+        }
+
+        int intervalColumnIndex = model.getColumnIndexByName("Time Unit");
+        if (intervalColumnIndex != -1) {
+            TableColumn intervalColumn = table.getColumnModel().getColumn(intervalColumnIndex);
+            intervalColumn.setPreferredWidth(150);
+            intervalColumn.setMaxWidth(200);
+            intervalColumn.setMinWidth(100);
+        }
+
+        int doneColumnIndex = model.getColumnIndexByName("Done");
+        if (doneColumnIndex != -1) {
+            TableColumn doneColumn = table.getColumnModel().getColumn(doneColumnIndex);
+            doneColumn.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+            doneColumn.setCellEditor(table.getDefaultEditor(Boolean.class));
+
+            doneColumn.setPreferredWidth(50);
+            doneColumn.setMaxWidth(50);
+            doneColumn.setMinWidth(50);
+
+            model.addTableModelListener(e -> {
+                if (e.getColumn() == doneColumnIndex) {
+                    eventTableModel.refetch(filter);
+                }
+            });
+        }
+
+        int categoryColumnIndex = model.getColumnIndexByName("Categories");
+        if (categoryColumnIndex != -1) {
+            table.getColumnModel().getColumn(categoryColumnIndex).setCellRenderer(new CategoryListRenderer());
+        }
+
         return table;
     }
 
-    private JTable createCategoryTable(List<Category> categories) {
-        var model = new CategoryTableModel(categories);
+    private JTable createCategoryTable(CategoryTableModel model) {
         var table = new JTable(model);
         table.setAutoCreateRowSorter(true);
+        table.setDefaultRenderer(LocalTime.class, new LocalTimeRenderer());
+        table.setDefaultRenderer(Category.class, new CategoryRenderer());
+
         return table;
     }
 
     private JPopupMenu createPopupMenu() {
         var menu = new JPopupMenu();
-        menu.add(addAction);
+        menu.add(addActionContextual);
         menu.add(editAction);
         menu.add(deleteAction);
         return menu;
@@ -237,25 +469,32 @@ public class MainWindow {
 
         var fileMenu = new JMenu("File");
         fileMenu.setMnemonic('f');
+
+        importAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt I"));
+        exportAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt E"));
+        quitAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt Q"));
+
         fileMenu.add(importAction);
         fileMenu.add(exportAction);
         fileMenu.addSeparator();
         fileMenu.add(quitAction);
         menuBar.add(fileMenu);
 
-        var editMenu = new JMenu("Edit");
-        editMenu.setMnemonic('e');
-        editMenu.add(addAction);
-        editMenu.add(editAction);
-        editMenu.add(deleteAction);
-        menuBar.add(editMenu);
-
-        var optionsMenu = new JMenu("Options");
-        optionsMenu.setMnemonic('o');
-        menuBar.add(optionsMenu);
+        var addMenu = new JMenu("Add");
+        addMenu.setMnemonic('a');
+        addMenu.add(new AddEvent(() -> currentTable, allTableModels));
+        addMenu.add(new AddCategory(() -> currentTable, allTableModels));
+        addMenu.add(new AddTemplate(() -> currentTable, allTableModels));
+        addMenu.add(new AddTimeUnit(() -> currentTable, allTableModels));
+        menuBar.add(addMenu);
 
         var helpMenu = new JMenu("Help");
         helpMenu.setMnemonic('h');
+
+        aboutAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt A"));
+        keybindsAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt K"));
+        contactAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt C"));
+
         helpMenu.add(aboutAction);
         helpMenu.add(keybindsAction);
         helpMenu.add(contactAction);
@@ -268,7 +507,7 @@ public class MainWindow {
         var toolbar = new JToolBar();
         toolbar.add(quitAction);
         toolbar.addSeparator();
-        toolbar.add(addAction);
+        toolbar.add(addActionContextual);
         toolbar.add(editAction);
         toolbar.add(deleteAction);
         return toolbar;
@@ -280,68 +519,267 @@ public class MainWindow {
     }
 
     private JPanel createFilterPanel() {
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel filterPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel fromLabel = new JLabel("From:");
-        JSpinner fromTime = new JSpinner(new SpinnerDateModel());
-        fromTime.setEditor(new JSpinner.DateEditor(fromTime, "yyyy-MM-dd HH:mm"));
+        // Date Picker Settings
+        DatePickerSettings dateSettings = new DatePickerSettings(Locale.UK);
+        dateSettings.setAllowKeyboardEditing(false);
+        dateSettings.setFormatForDatesCommonEra("dd.MM.yyyy");
 
-        JLabel toLabel = new JLabel("To:");
-        JSpinner toTime = new JSpinner(new SpinnerDateModel());
-        toTime.setEditor(new JSpinner.DateEditor(toTime, "yyyy-MM-dd HH:mm"));
+        // Row 1: From Date, From Time, To Date, To Time, Today and This Week buttons
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("From Date:"), gbc);
 
-        JLabel unitLabel = new JLabel("Units:");
-        JComboBox<String> unitComboBox = createMultiSelectComboBox(new String[]{"Minutes", "Hours", "Class"});
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        DatePicker fromDatePicker = new DatePicker(dateSettings.copySettings());
+        filterPanel.add(fromDatePicker, gbc);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        JComboBox<String> categoryComboBox = createMultiSelectComboBox(new String[]{"Work", "Study", "Exercise"});
+        gbc.gridx = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Time:"), gbc);
 
-        JLabel statusLabel = new JLabel("Status:");
-        JCheckBox doneCheckBox = new JCheckBox("Done");
-        JCheckBox plannedCheckBox = new JCheckBox("Planned");
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        JSpinner fromTimeSpinner = createTimeSpinner();
+        filterPanel.add(fromTimeSpinner, gbc);
 
+        gbc.gridx = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("To Date:"), gbc);
+
+        gbc.gridx = 5;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        DatePicker toDatePicker = new DatePicker(dateSettings.copySettings());
+        filterPanel.add(toDatePicker, gbc);
+
+        gbc.gridx = 6;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Time:"), gbc);
+
+        gbc.gridx = 7;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        JSpinner toTimeSpinner = createTimeSpinner();
+        filterPanel.add(toTimeSpinner, gbc);
+
+        gbc.gridx = 8;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        JButton todayButton = new JButton("Today");
+        todayButton.addActionListener(e -> {
+            fromDatePicker.setDateToToday();
+            toDatePicker.setDateToToday();
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MAX));
+        });
+        filterPanel.add(todayButton, gbc);
+
+        gbc.gridx = 9;
+        JButton thisWeekButton = new JButton("This Week");
+        thisWeekButton.addActionListener(e -> {
+            LocalDate today = LocalDate.now();
+            LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+            fromDatePicker.setDate(startOfWeek);
+            toDatePicker.setDate(endOfWeek);
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MAX));
+        });
+        filterPanel.add(thisWeekButton, gbc);
+
+        // Row 2: Category, Units, Status, and Clear button
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        filterPanel.add(new JLabel("Category:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        List<String> categories = new ArrayList<>();
+        categories.add(null);
+        categories.addAll(categoryCrudService.findAll().stream().map(Category::getName).toList());
+        JComboBox<String> categoryComboBox = new JComboBox<>(categories.toArray(new String[0]));
+        filterPanel.add(categoryComboBox, gbc);
+
+        gbc.gridx = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(new JLabel("Units:"), gbc);
+
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        List<String> units = new ArrayList<>();
+        units.add(null);
+        units.addAll(timeUnitCrudService.findAll().stream().map(TimeUnit::getName).toList());
+        JComboBox<String> unitComboBox = new JComboBox<>(units.toArray(new String[0]));
+        filterPanel.add(unitComboBox, gbc);
+
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        statusPanel.add(new JLabel("Status:"));
+        JRadioButton doneRadioButton = new JRadioButton("Done");
+        JRadioButton plannedRadioButton = new JRadioButton("Planned");
+        JRadioButton allRadioButton = new JRadioButton("All");
+        allRadioButton.setSelected(true);
+
+        ButtonGroup statusGroup = new ButtonGroup();
+        statusGroup.add(doneRadioButton);
+        statusGroup.add(plannedRadioButton);
+        statusGroup.add(allRadioButton);
+
+        statusPanel.add(doneRadioButton);
+        statusPanel.add(plannedRadioButton);
+        statusPanel.add(allRadioButton);
+
+        gbc.gridx = 4;
+        gbc.gridwidth = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        filterPanel.add(statusPanel, gbc);
+
+        gbc.gridx = 9;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
         JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> {
+            fromDatePicker.clear();
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            toDatePicker.clear();
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            statusGroup.clearSelection();
+            allRadioButton.setSelected(true);
+            categoryComboBox.setSelectedIndex(0);
+            unitComboBox.setSelectedIndex(0);
 
-        filterPanel.add(fromLabel);
-        filterPanel.add(fromTime);
-        filterPanel.add(toLabel);
-        filterPanel.add(toTime);
-        filterPanel.add(unitLabel);
-        filterPanel.add(unitComboBox);
-        filterPanel.add(categoryLabel);
-        filterPanel.add(categoryComboBox);
-        filterPanel.add(statusLabel);
-        filterPanel.add(doneCheckBox);
-        filterPanel.add(plannedCheckBox);
-        filterPanel.add(clearButton);
+            filter.setFromDate(null);
+            filter.setFromTime(null);
+            filter.setToDate(null);
+            filter.setToTime(null);
+            filter.setSelectedCategory(null);
+            filter.setSelectedUnit(null);
+            filter.setDone(null);
+
+            eventTableModel.refetch(filter);
+        });
+        filterPanel.add(clearButton, gbc);
+
+        // Add listener to update 'from' DateTime filter
+        fromDatePicker.addDateChangeListener(event -> {
+            filter.setFromDate(fromDatePicker.getDate());
+            eventTableModel.refetch(filter);
+        });
+
+        fromTimeSpinner.addChangeListener(e -> {
+            Date fromTime = (Date) fromTimeSpinner.getValue();
+            filter.setFromTime(fromTime.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
+            eventTableModel.refetch(filter);
+        });
+
+        toDatePicker.addDateChangeListener(event -> {
+            filter.setToDate(toDatePicker.getDate());
+            eventTableModel.refetch(filter);
+        });
+
+        toTimeSpinner.addChangeListener(e -> {
+            Date toTime = (Date) toTimeSpinner.getValue();
+            filter.setToTime(toTime.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
+            eventTableModel.refetch(filter);
+        });
+
+        unitComboBox.addActionListener(e -> {
+            filter.setSelectedUnit((String) unitComboBox.getSelectedItem());
+            eventTableModel.refetch(filter);
+        });
+
+        categoryComboBox.addActionListener(e -> {
+            filter.setSelectedCategory((String) categoryComboBox.getSelectedItem());
+            eventTableModel.refetch(filter);
+        });
+
+        doneRadioButton.addActionListener(e -> {
+            filter.setDone(Boolean.TRUE);
+            eventTableModel.refetch(filter);
+        });
+
+        plannedRadioButton.addActionListener(e -> {
+            filter.setDone(Boolean.FALSE);
+            eventTableModel.refetch(filter);
+        });
+
+        allRadioButton.addActionListener(e -> {
+            filter.setDone(null);
+            eventTableModel.refetch(filter);
+        });
 
         return filterPanel;
     }
 
-    private static JComboBox<String> createMultiSelectComboBox(String[] options) {
-        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Select"});
-        comboBox.setPrototypeDisplayValue("Select");
+    private JSpinner createTimeSpinner() {
+        LocalTime midnight = LocalTime.MIDNIGHT;
+        java.util.Date initialTime = java.sql.Time.valueOf(midnight);
 
-        JPopupMenu popupMenu = new JPopupMenu();
-        List<JCheckBox> checkBoxes = new ArrayList<>();
+        SpinnerDateModel timeModel = new SpinnerDateModel(
+                initialTime,
+                null,
+                null,
+                java.util.Calendar.MINUTE
+        );
 
-        for (String option : options) {
-            JCheckBox checkBox = new JCheckBox(option);
-            checkBoxes.add(checkBox);
-            popupMenu.add(checkBox);
-        }
+        JSpinner timeSpinner = new JSpinner(timeModel);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(timeSpinner, "HH:mm");
 
-        comboBox.addActionListener(new ActionListener() {
+        DateFormatter timeFormatter = (DateFormatter) editor.getTextField().getFormatter();
+        timeFormatter.setAllowsInvalid(false);
+        timeFormatter.setOverwriteMode(true);
+
+        timeSpinner.setEditor(editor);
+        return timeSpinner;
+    }
+
+    private void setupSelectAllShortcut(JTable table) {
+        KeyStroke ctrlA = KeyStroke.getKeyStroke("control A");
+
+        InputMap inputMap = table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        inputMap.put(ctrlA, "selectAll");
+
+        ActionMap actionMap = table.getActionMap();
+        actionMap.put("selectAll", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (popupMenu.isShowing()) {
-                    popupMenu.setVisible(false);
-                } else {
-                    popupMenu.show(comboBox, 0, comboBox.getHeight());
-                }
+                table.selectAll();
             }
         });
+    }
 
-        return comboBox;
+    private void setupKeyBindings(JComponent component) {
+        InputMap inputMap = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = component.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl N"), "addActionContextual");
+        actionMap.put("addActionContextual", addActionContextual);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl D"), "deleteAction");
+        actionMap.put("deleteAction", deleteAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl E"), "editAction");
+        actionMap.put("editAction", editAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("ctrl Q"), "quitAction");
+        actionMap.put("quitAction", quitAction);
     }
 }

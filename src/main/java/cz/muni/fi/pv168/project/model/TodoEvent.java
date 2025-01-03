@@ -1,34 +1,76 @@
 package cz.muni.fi.pv168.project.model;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import cz.muni.fi.pv168.project.business.service.export.serialize.CategorySerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.DateTimeSerializer;
+import cz.muni.fi.pv168.project.business.service.export.serialize.IntervalSerializer;
 
-public class TodoEvent {
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+public class TodoEvent extends Entity {
     private String name;
     private String details;
-    private LocalDateTime date;
-    private TimeUnit timeUnit;
-    private int timeUnitAmount;
+
+    @JsonSerialize(using = DateTimeSerializer.class)
+    private LocalDateTime start;
+
+    @JsonSerialize(using = IntervalSerializer.class)
+    private Interval interval;
+
+    @JsonSerialize(contentUsing = CategorySerializer.class)
     private List<Category> categories;
     private boolean done = false;
 
-    public TodoEvent(String name, String details, LocalDateTime date, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
+    public TodoEvent(String name, String details, LocalDateTime start, TimeUnit timeUnit, int timeUnitAmount, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = timeUnit;
-        this.timeUnitAmount = timeUnitAmount;
+        this.start = start;
+        this.interval = new Interval(timeUnit, timeUnitAmount);
         this.categories = categories;
     }
 
-    public TodoEvent(String name, String details, LocalDateTime date, int minutes, List<Category> categories) {
+    public TodoEvent(String name, String details, LocalDateTime start, int minutes, List<Category> categories) {
         this.name = name;
         this.details = details;
-        this.date = date;
-        this.timeUnit = TimeUnit.minute();
-        this.timeUnitAmount = minutes;
+        this.start = start;
+        this.interval = new Interval(TimeUnit.minute(), minutes);
         this.categories = categories;
+    }
+
+    public TodoEvent(TodoEvent todoEvent) {
+        this.id = todoEvent.id;
+        this.name = todoEvent.name;
+        this.details = todoEvent.details;
+        this.start = todoEvent.start;
+        this.interval = todoEvent.interval;
+        this.categories = todoEvent.categories;
+        this.done = todoEvent.done;
+    }
+
+    //Done so that there is no 'ID' field in exported JSON file
+    @Override
+    @JsonIgnore
+    public UUID getId() {
+        return id;
+    }
+
+    @Override
+    public void update(Entity e) {
+        if (!(e instanceof TodoEvent todoEvent)) {
+            throw new IllegalArgumentException("Cannot update object of different class");
+        }
+
+        this.id = todoEvent.id;
+        this.name = todoEvent.name;
+        this.details = todoEvent.details;
+        this.start = todoEvent.start;
+        this.interval = todoEvent.interval;
+        this.categories = todoEvent.categories;
+        this.done = todoEvent.done;
     }
 
     public String getName() {
@@ -47,32 +89,24 @@ public class TodoEvent {
         this.details = details;
     }
 
-    public LocalDateTime getDate() {
-        return date;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
+    public Interval getInterval() {
+        return interval;
     }
 
-    public void setTimeUnit(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public int getTimeUnitAmount() {
-        return timeUnitAmount;
-    }
-
-    public void setTimeUnitAmount(int timeUnitAmount) {
-        this.timeUnitAmount = timeUnitAmount;
+    public void setInterval(Interval interval) {
+        this.interval = interval;
     }
 
     public List<Category> getCategories() {
-        return Collections.unmodifiableList(categories);
+        return categories;
     }
 
     public void setCategories(List<Category> categories) {
@@ -87,18 +121,38 @@ public class TodoEvent {
         this.done = done;
     }
 
-    public String formatInterval() {
-        StringBuilder sb = new StringBuilder(timeUnitAmount + " " + timeUnit.getShortcut());
+    @Override
+    public boolean isDuplicate(Entity e) {
+        if (e == null || getClass() != e.getClass()) return false;
+        TodoEvent todoEvent = (TodoEvent) e;
+        return Objects.equals(name, todoEvent.name) && Objects.equals(start, todoEvent.start);
+    }
 
-        if (timeUnit != TimeUnit.minute()) {
-            sb
-                    .append(" (")
-                    .append(timeUnit.getMinutes() * timeUnitAmount)
-                    .append(" ")
-                    .append(TimeUnit.minute().getShortcut())
-                    .append(")");
+    @Override
+    public boolean isMeaningfullyDifferent(Entity e){
+        if (e == null || getClass() != e.getClass()) return true;
+        TodoEvent todoEvent = (TodoEvent) e;
+        if (Objects.equals(name, todoEvent.name) &&
+            Objects.equals(todoEvent.getStart().toString(), getStart().toString()) &&
+            Objects.equals(details, todoEvent.details) &&
+            !(getInterval().getTimeUnit().isMeaningfullyDifferent(todoEvent.getInterval().getTimeUnit())) &&
+            getInterval().getAmount() == todoEvent.getInterval().getAmount() && done == todoEvent.isDone()){
+                for (Category category : categories) {
+                    boolean isPresent = false;
+                    for (Category otherCategory : todoEvent.categories) {
+                        if (category.isDuplicate(otherCategory)) {
+                            isPresent = true;
+                        }
+                    }
+                    if (!isPresent) return true;
+                }
+                return false;
         }
 
-        return sb.toString();
+        return true;
+    }
+
+    public String formatInterval() {
+        return interval.format();
     }
 }

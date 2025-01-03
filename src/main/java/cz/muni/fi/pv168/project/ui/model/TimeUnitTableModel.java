@@ -1,13 +1,15 @@
 package cz.muni.fi.pv168.project.ui.model;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimeUnitTableModel extends AbstractTableModel {
-    private final List<TimeUnit> timeUnits;
+    private final CrudService<TimeUnit> timeUnitCrudService;
+    private List<TimeUnit> timeUnits;
 
     private final List<Column<TimeUnit, ?>> columns = List.of(
             Column.editable("Name", String.class, TimeUnit::getName, TimeUnit::setName),
@@ -15,8 +17,9 @@ public class TimeUnitTableModel extends AbstractTableModel {
             Column.editable("Minutes", Integer.class, TimeUnit::getMinutes, TimeUnit::setMinutes)
     );
 
-    public TimeUnitTableModel(List<TimeUnit> timeUnits) {
-        this.timeUnits = new ArrayList<>(timeUnits);
+    public TimeUnitTableModel(CrudService<TimeUnit> timeUnitCrudService) {
+        this.timeUnitCrudService = timeUnitCrudService;
+        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
     }
 
     @Override
@@ -52,5 +55,40 @@ public class TimeUnitTableModel extends AbstractTableModel {
 
     public TimeUnit getEntity(int rowIndex) {
         return timeUnits.get(rowIndex);
+    }
+
+    public void addRow(TimeUnit timeUnit) {
+        timeUnitCrudService.create(timeUnit);
+        timeUnits.add(timeUnit);
+        fireTableRowsInserted(timeUnits.size() - 1, timeUnits.size() - 1);
+    }
+
+    public void updateRow(TimeUnit timeUnit) {
+        timeUnitCrudService.update(timeUnit);
+        int rowIndex = timeUnits.indexOf(timeUnit);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+    }
+
+    public void deleteRow(int modelRow) {
+        var timeUnit = getEntity(modelRow);
+        timeUnitCrudService.deleteById(timeUnit.getId());
+        timeUnits.remove(modelRow);
+        fireTableRowsDeleted(modelRow, modelRow);
+    }
+    public void refresh() {
+        this.timeUnits = new ArrayList<>(timeUnitCrudService.findAll());
+        fireTableDataChanged();
+    }
+    public CrudService<TimeUnit> getTimeUnitCrudService() {
+        return timeUnitCrudService;
+    }
+
+    public int getColumnIndexByName(String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).getName().equals(columnName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
