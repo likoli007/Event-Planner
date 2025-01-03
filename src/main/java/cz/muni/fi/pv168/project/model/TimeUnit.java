@@ -7,7 +7,7 @@ public class TimeUnit extends Entity {
     private String name;
     private String shortcut;
     private int minutes;
-    private boolean isSystemDefined;
+    private boolean isFixed = false;
 
     private static final TimeUnit MINUTE = new TimeUnit(UUID.fromString("fce37f43-01d1-43b2-9099-094b0eaf56bd"),
             "Minute", "min", 1, true);
@@ -18,14 +18,13 @@ public class TimeUnit extends Entity {
         this.minutes = minutes;
     }
 
-    public TimeUnit(String name, String shortcut, int minutes, boolean isSystemDefined) {
+    public TimeUnit(String name, String shortcut, int minutes, boolean isFixed) {
         this(name, shortcut, minutes);
-        this.isSystemDefined = isSystemDefined;
-
+        this.isFixed = isFixed;
     }
 
-    public TimeUnit(UUID uuid, String name, String shortcut, int minutes, boolean isSystemDefined) {
-        this(name, shortcut, minutes, isSystemDefined);
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes, boolean isFixed) {
+        this(name, shortcut, minutes, isFixed);
         this.id = uuid;
     }
 
@@ -38,7 +37,7 @@ public class TimeUnit extends Entity {
         this.name = timeUnit.name;
         this.shortcut = timeUnit.shortcut;
         this.minutes = timeUnit.minutes;
-        this.isSystemDefined = timeUnit.isSystemDefined;
+        this.isFixed = timeUnit.isFixed;
     }
 
 
@@ -103,8 +102,8 @@ public class TimeUnit extends Entity {
         return name;
     }
 
-    public boolean isSystemDefined() {
-        return isSystemDefined;
+    public boolean isFixed() {
+        return isFixed;
     }
 
     @Override

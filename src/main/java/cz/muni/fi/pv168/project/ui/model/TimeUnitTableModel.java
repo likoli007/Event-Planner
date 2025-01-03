@@ -25,7 +25,7 @@ public class TimeUnitTableModel extends AbstractTableModel {
     private List<TimeUnit> getTimeUnits() {
         // do not show system defined time units
         return new ArrayList<>(timeUnitCrudService.findAll().stream()
-                .filter(x -> !x.isSystemDefined()).toList());
+                .filter(x -> !x.isFixed()).toList());
     }
 
     @Override
