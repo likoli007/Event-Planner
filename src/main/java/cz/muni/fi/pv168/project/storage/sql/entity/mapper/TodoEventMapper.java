@@ -52,11 +52,11 @@ public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent>
 
     @Override
     public TodoEventEntity mapEntityToDatabase(TodoEvent entity) {
-        String isDone;
+        String done;
         if (entity.isDone()) {
-            isDone = TodoEventEntity.IS_DONE;
+            done = TodoEventEntity.IS_DONE;
         } else {
-            isDone = TodoEventEntity.IS_NOT_DONE;
+            done = TodoEventEntity.IS_NOT_DONE;
         }
 
         return new TodoEventEntity(
@@ -67,7 +67,7 @@ public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent>
                 entity.getInterval().getTimeUnit().getId(),
                 entity.getInterval().getAmount(),
                 entity.getCategories().stream().map(Category::getId).toList(),
-                isDone
+                done
         );
     }
 }

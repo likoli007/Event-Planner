@@ -23,11 +23,11 @@ public final class TimeUnitMapper implements EntityMapper<TimeUnitEntity, TimeUn
 
     @Override
     public TimeUnitEntity mapEntityToDatabase(TimeUnit entity) {
-        String isFixed;
+        String fixed;
         if (entity.isFixed()) {
-            isFixed = TimeUnitEntity.IS_FIXED;
+            fixed = TimeUnitEntity.IS_FIXED;
         } else {
-            isFixed = TimeUnitEntity.IS_NOT_FIXED;
+            fixed = TimeUnitEntity.IS_NOT_FIXED;
         }
 
         return new TimeUnitEntity(
@@ -35,7 +35,7 @@ public final class TimeUnitMapper implements EntityMapper<TimeUnitEntity, TimeUn
                 entity.getName(),
                 entity.getShortcut(),
                 entity.getMinutes(),
-                isFixed
+                fixed
         );
     }
 }
