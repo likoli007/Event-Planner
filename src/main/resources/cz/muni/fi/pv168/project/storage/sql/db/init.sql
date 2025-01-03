@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS TodoEvent (
     start TIMESTAMP NOT NULL,
     timeUnit UUID NOT NULL,
     timeUnitAmount INT  NOT NULL CHECK (timeUnitAmount >= 0),
-    done BOOLEAN DEFAULT FALSE NOT NULL,
+    done ENUM('IS_DONE', 'IS_NOT_DONE') DEFAULT 'IS_NOT_DONE' NOT NULL,
     FOREIGN KEY (timeUnit) REFERENCES TimeUnit(id),
     UNIQUE (name, start)
 );
