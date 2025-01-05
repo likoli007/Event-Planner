@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.business.service.crud.CrudService;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimeUnitTableModel extends AbstractTableModel {
@@ -23,8 +24,8 @@ public class TimeUnitTableModel extends AbstractTableModel {
 
     private List<TimeUnit> getTimeUnits() {
         // do not show system defined time units
-        return timeUnitCrudService.findAll().stream()
-                .filter(x -> !x.isSystemDefined()).toList();
+        return new ArrayList<>(timeUnitCrudService.findAll().stream()
+                .filter(x -> !x.isFixed()).toList());
     }
 
     @Override

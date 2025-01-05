@@ -37,7 +37,7 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
             statement.setTimestamp(4, Timestamp.valueOf(entity.startTime()));
             statement.setString(5, String.valueOf(entity.timeUnitId()));
             statement.setInt(6, entity.timeUnitAmount());
-            statement.setBoolean(7, entity.done());
+            statement.setString(7, entity.done());
             statement.executeUpdate();
 
             for (int i = 0; i < entity.categoryIds().size(); i++) {
@@ -107,7 +107,7 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                             UUID.fromString(resultSet.getString("timeUnit")),
                             resultSet.getInt("timeUnitAmount"),
                             categoryIds,
-                            resultSet.getBoolean("done"));
+                            resultSet.getString("done"));
 
                     TodoEvents.add(TodoEvent);
                 }
@@ -150,7 +150,7 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                             UUID.fromString(resultSet.getString("timeUnit")),
                             resultSet.getInt("timeUnitAmount"),
                             categoryList,
-                            resultSet.getBoolean("done")
+                            resultSet.getString("done")
                     ));
                 }
             }
@@ -189,7 +189,7 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
             statement.setTimestamp(3, Timestamp.valueOf(entity.startTime()));
             statement.setString(4, entity.timeUnitId().toString());
             statement.setInt(5, entity.timeUnitAmount());
-            statement.setBoolean(6, entity.done());
+            statement.setString(6, entity.done());
             statement.setString(7, entity.id().toString());
 
             int rowsUpdated = statement.executeUpdate();
