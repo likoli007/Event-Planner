@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.ui.dialog;
 
 import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.TimePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
 import cz.muni.fi.pv168.project.model.*;
 import cz.muni.fi.pv168.project.ui.documentFilters.NumericDocumentFilter;
 import cz.muni.fi.pv168.project.ui.model.AllTableModels;
@@ -9,20 +9,23 @@ import cz.muni.fi.pv168.project.ui.utils.NumericInputValue;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.DateFormatter;
 import javax.swing.text.Position;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
     private final JTextField nameField = new JTextField();
     private final JTextField detailsField = new JTextField();
-    private final DatePicker dateField = new DatePicker();
-    private final TimePicker timeField = new TimePicker();
+    private final DatePicker dateField;
+    private final JSpinner timeSpinner;
 
     private final JTextField intervalField = new JTextField(5);
     private final JList<Category> categoryList;
@@ -52,6 +55,13 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
 
         ((AbstractDocument) intervalField.getDocument()).setDocumentFilter(new NumericDocumentFilter());
 
+        DatePickerSettings dateSettings = new DatePickerSettings(Locale.UK);
+        dateSettings.setAllowKeyboardEditing(false);
+        dateSettings.setFormatForDatesCommonEra("dd.MM.yyyy");
+        this.dateField = new DatePicker(dateSettings);
+
+        this.timeSpinner = createTimeSpinner();
+
         setValues();
         addFields();
     }
@@ -63,10 +73,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         LocalDateTime start = todoEvent.getStart();
         if (start != null) {
             dateField.setDate(start.toLocalDate());
-            timeField.setTime(start.toLocalTime());
+            timeSpinner.setValue(java.sql.Time.valueOf(start.toLocalTime()));
         } else {
             dateField.setDate(LocalDate.now());
-            timeField.setTime(LocalTime.now());
+            timeSpinner.setValue(java.sql.Time.valueOf(LocalTime.now()));
         }
         dateField.getComponentDateTextField().setEditable(false);
 
@@ -116,7 +126,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         add("Name:", nameField);
         add("Details:", detailsField);
         add("Date:", dateField);
-        add("Time:", timeField);
+        add("Time:", timeSpinner);
         add("Length:", intervalPanel);
         add("Categories:", categoryList);
         add("Done:", doneCheckBox);
@@ -126,7 +136,7 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
     private void onCreateTemplate() {
         String name = nameField.getText();
         String details = detailsField.getText();
-        LocalTime time = timeField.getTime();
+        LocalTime time = ((java.sql.Time) timeSpinner.getValue()).toLocalTime();
         int intervalAmount = NumericInputValue.get(intervalField.getText(), "length");
         TimeUnit selectedTimeUnit = (TimeUnit) timeUnitModel.getSelectedItem();
         List<Category> selectedCategories = categoryList.getSelectedValuesList();
@@ -155,7 +165,10 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         todoEvent.setDetails(detailsField.getText());
 
         LocalDate date = dateField.getDate();
-        LocalTime time = timeField.getTime();
+        LocalTime time = ((java.util.Date) timeSpinner.getValue()).toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalTime();
+
         if (date != null && time != null) {
             todoEvent.setStart(LocalDateTime.of(date, time));
         }
@@ -169,5 +182,18 @@ public final class TodoEventDialog extends EntityDialog<TodoEvent> {
         todoEvent.setDone(doneCheckBox.isSelected());
 
         return todoEvent;
+    }
+
+    private JSpinner createTimeSpinner() {
+        SpinnerDateModel timeModel = new SpinnerDateModel();
+        JSpinner spinner = new JSpinner(timeModel);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
+
+        DateFormatter timeFormatter = (DateFormatter) editor.getTextField().getFormatter();
+        timeFormatter.setAllowsInvalid(false);
+        timeFormatter.setOverwriteMode(true);
+
+        spinner.setEditor(editor);
+        return spinner;
     }
 }

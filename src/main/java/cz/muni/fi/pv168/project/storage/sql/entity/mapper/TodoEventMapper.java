@@ -5,9 +5,11 @@ import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
+import cz.muni.fi.pv168.project.storage.sql.entity.TimeUnitEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent> {
@@ -23,33 +25,40 @@ public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent>
 
 
     @Override
-    public TodoEvent mapToBusiness(TodoEventEntity TodoEventEntity) {
-        Optional<TimeUnit> timeUnitResult = timeUnitSqlRepository.findById(TodoEventEntity.timeUnitId());
+    public TodoEvent mapToBusiness(TodoEventEntity todoEventEntity) {
+        Optional<TimeUnit> timeUnitResult = timeUnitSqlRepository.findById(todoEventEntity.timeUnitId());
         TimeUnit timeUnit = timeUnitResult.orElse(null);
         //TODO: null check?
 
         ArrayList<Category> categories = new ArrayList<>();
 
-        for (int i = 0; i < TodoEventEntity.categoryIds().size(); i++) {
-            Optional<Category> categoryResult = categorySqlRepository.findById(TodoEventEntity.categoryIds().get(i));
+        for (int i = 0; i < todoEventEntity.categoryIds().size(); i++) {
+            Optional<Category> categoryResult = categorySqlRepository.findById(todoEventEntity.categoryIds().get(i));
             Category category = categoryResult.orElse(null);
             categories.add(category);
         }
 
         return new TodoEvent(
-                TodoEventEntity.id(),
-                TodoEventEntity.name(),
-                TodoEventEntity.details(),
-                TodoEventEntity.startTime(),
+                todoEventEntity.id(),
+                todoEventEntity.name(),
+                todoEventEntity.details(),
+                todoEventEntity.startTime(),
                 timeUnit,
-                TodoEventEntity.timeUnitAmount(),
+                todoEventEntity.timeUnitAmount(),
                 categories,
-                TodoEventEntity.done()
+                Objects.equals(todoEventEntity.done(), TodoEventEntity.IS_DONE)
         );
     }
 
     @Override
     public TodoEventEntity mapEntityToDatabase(TodoEvent entity) {
+        String done;
+        if (entity.isDone()) {
+            done = TodoEventEntity.IS_DONE;
+        } else {
+            done = TodoEventEntity.IS_NOT_DONE;
+        }
+
         return new TodoEventEntity(
                 entity.getId(),
                 entity.getName(),
@@ -58,7 +67,7 @@ public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent>
                 entity.getInterval().getTimeUnit().getId(),
                 entity.getInterval().getAmount(),
                 entity.getCategories().stream().map(Category::getId).toList(),
-                entity.isDone()
+                done
         );
     }
 }

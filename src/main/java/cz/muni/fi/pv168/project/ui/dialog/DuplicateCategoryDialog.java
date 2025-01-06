@@ -14,7 +14,9 @@ public class DuplicateCategoryDialog {
     JPanel buttonPanel = new JPanel();
     JButton overwriteButton = new JButton("Overwrite");
     JButton cancelButton = new JButton("Don't import");
-    JButton duplicateButton = new JButton("Duplicate");
+    JButton duplicateButton = new JButton("Keep both");
+
+    JCheckBox defaultHandlingCheckBox = new JCheckBox("Set as default handling for all Categories");
 
     DuplicateType result = DuplicateType.UNDEFINED;
 
@@ -55,6 +57,9 @@ public class DuplicateCategoryDialog {
         duplicatePanel.add(duplicateNamePanel);
         duplicatePanel.add(duplicateColorPanel);
 
+        JPanel defaultHandlingPanel = new JPanel();
+        defaultHandlingPanel.add(defaultHandlingCheckBox);
+
         JLabel originalNameLabel = new JLabel("Name: " + originalCategory.getName());
         originalNamePanel.add(originalNameLabel);
         JLabel originalColorLabel = new JLabel("Color: ");
@@ -70,7 +75,9 @@ public class DuplicateCategoryDialog {
         mainPanel.add(aboutPanel);
         mainPanel.add(originalPanel);
         mainPanel.add(duplicatePanel);
+        mainPanel.add(defaultHandlingPanel);
         mainPanel.add(buttonPanel);
+
 
         overwriteButton.addActionListener(e -> {
             result = DuplicateType.OVERWRITE;
@@ -90,6 +97,7 @@ public class DuplicateCategoryDialog {
         dialog.setVisible(true);
     }
 
+    public boolean getDefaultHandling() {return defaultHandlingCheckBox.isSelected();}
     public DuplicateType getResult() {
         return result;
     }

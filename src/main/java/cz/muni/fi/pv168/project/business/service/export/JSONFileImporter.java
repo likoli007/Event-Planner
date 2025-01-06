@@ -92,6 +92,20 @@ public class JSONFileImporter implements BatchImporter {
         return result.setData(data);
     }
 
+    private SingleResult<Boolean> validateBooleanField(String fieldName, JsonNode node) {
+        SingleResult<Boolean> result = new SingleResult<>();
+        JsonNode nameNode = node.get(fieldName);
+        if (nameNode == null) {
+            return result.setMessage("Missing field: '" + fieldName + "'.");
+        }
+        if (!nameNode.isBoolean()){
+            return result.setMessage("Field \"" + fieldName + "\" is not a boolean value.");
+        }
+
+        Boolean data = nameNode.asBoolean();
+        return result.setData(data);
+    }
+
     private SingleResult<Integer> validateIntField(String fieldName, JsonNode node){
         SingleResult<Integer> result = new SingleResult<>();
         JsonNode nameNode = node.get(fieldName);
@@ -468,16 +482,23 @@ public class JSONFileImporter implements BatchImporter {
 
             ArrayList<Category> categoriesList = new ArrayList<>(categoriesResult.getData());
 
-            TodoEvent event;
+            SingleResult<Boolean> isDoneResult = validateBooleanField("done", e);
+            if (!isDoneResult.isSuccess()){
+                return result.setMessage(errorPrepend + isDoneResult.getMessage());
+            }
 
+
+            TodoEvent event;
             if (desiredTimeUnit == null) {
                 event = new TodoEvent(
                         name, details, startDate, amount, categoriesList
                 );
+                event.setDone(isDoneResult.getData());
             } else {
                 event = new TodoEvent(
                         name, details, startDate, desiredTimeUnit, amount, categoriesList
                 );
+                event.setDone(isDoneResult.getData());
 
             }
             events.add(event);

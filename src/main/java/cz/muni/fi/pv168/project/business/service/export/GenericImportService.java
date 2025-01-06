@@ -106,6 +106,10 @@ public class GenericImportService implements ImportService {
                 if (defaultHandling == DuplicateType.UNDEFINED){
                     DuplicateCategoryDialog dialog = new DuplicateCategoryDialog(parentFrame, crudCategory, category);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -148,6 +152,10 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Time Unit", originalString, duplicateString);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -201,6 +209,10 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Template", originalString, duplicateString);
                     result = dialog.getResult();
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -241,13 +253,16 @@ public class GenericImportService implements ImportService {
                     String originalString =
                             "Name: " + crudEvent.getName() + "\n" +
                                     "Details: " + crudEvent.getDetails() + "\n" +
+                                    "Done Status: " + crudEvent.isDone() + "\n" +
                                     "Start Time: " + crudEvent.getStart().format(formatter) + "\n" +
                                     "Time Unit: " + crudEvent.getInterval().getAmount() + " " +
                                     originalLength + "\n" +
                                     "Categories: " + crudEvent.getCategories().toString();
 
+
                     String duplicateString = "Name: " + event.getName() + "\n" +
                             "Details: " + event.getDetails() + "\n" +
+                            "Done Status: " + event.isDone() + "\n" +
                             "Start Time: " + event.getStart().format(formatter) + "\n" +
                             "Time Unit: " + event.getInterval().getAmount() + " " +
                             duplicateLength + "\n" +
@@ -255,6 +270,11 @@ public class GenericImportService implements ImportService {
 
                     DuplicateDialog dialog = new DuplicateDialog(parentFrame, "Event", originalString, duplicateString);
                     result = dialog.getResult();
+
+                    boolean setNewDefault = dialog.getDefaultHandling();
+                    if (setNewDefault) {
+                        defaultHandling = result;
+                    }
                 }
                 else{
                     result = defaultHandling;
@@ -267,6 +287,7 @@ public class GenericImportService implements ImportService {
                     crudEvent.setStart(event.getStart());
                     crudEvent.setInterval(event.getInterval());
                     crudEvent.setCategories(event.getCategories());
+                    crudEvent.setDone(event.isDone());
                 }
                 if (result == DuplicateType.DUPLICATE) {
                     addDuplicateTodoEvent(event);

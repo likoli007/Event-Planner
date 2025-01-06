@@ -1,7 +1,7 @@
 package cz.muni.fi.pv168.project.ui;
 
 import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.TimePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacade;
 import cz.muni.fi.pv168.project.business.filter.TodoEventFilter;
 import cz.muni.fi.pv168.project.business.service.crud.CrudService;
@@ -18,16 +18,12 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.awt.event.*;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 
 import static cz.muni.fi.pv168.project.ui.format.StatisticsFormatter.*;
@@ -507,6 +503,11 @@ public class MainWindow {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        // Date Picker Settings
+        DatePickerSettings dateSettings = new DatePickerSettings(Locale.UK);
+        dateSettings.setAllowKeyboardEditing(false);
+        dateSettings.setFormatForDatesCommonEra("dd.MM.yyyy");
+
         // Row 1: From Date, From Time, To Date, To Time, Today and This Week buttons
         gbc.gridy = 0;
         gbc.gridx = 0;
@@ -518,7 +519,7 @@ public class MainWindow {
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        DatePicker fromDatePicker = new DatePicker();
+        DatePicker fromDatePicker = new DatePicker(dateSettings.copySettings());
         filterPanel.add(fromDatePicker, gbc);
 
         gbc.gridx = 2;
@@ -529,8 +530,8 @@ public class MainWindow {
         gbc.gridx = 3;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        TimePicker fromTimePicker = new TimePicker();
-        filterPanel.add(fromTimePicker, gbc);
+        JSpinner fromTimeSpinner = createTimeSpinner();
+        filterPanel.add(fromTimeSpinner, gbc);
 
         gbc.gridx = 4;
         gbc.fill = GridBagConstraints.NONE;
@@ -540,7 +541,7 @@ public class MainWindow {
         gbc.gridx = 5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        DatePicker toDatePicker = new DatePicker();
+        DatePicker toDatePicker = new DatePicker(dateSettings.copySettings());
         filterPanel.add(toDatePicker, gbc);
 
         gbc.gridx = 6;
@@ -551,8 +552,8 @@ public class MainWindow {
         gbc.gridx = 7;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        TimePicker toTimePicker = new TimePicker();
-        filterPanel.add(toTimePicker, gbc);
+        JSpinner toTimeSpinner = createTimeSpinner();
+        filterPanel.add(toTimeSpinner, gbc);
 
         gbc.gridx = 8;
         gbc.fill = GridBagConstraints.NONE;
@@ -561,8 +562,8 @@ public class MainWindow {
         todayButton.addActionListener(e -> {
             fromDatePicker.setDateToToday();
             toDatePicker.setDateToToday();
-            fromTimePicker.setTime(LocalTime.MIN);
-            toTimePicker.setTime(LocalTime.MAX);
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MAX));
         });
         filterPanel.add(todayButton, gbc);
 
@@ -571,12 +572,12 @@ public class MainWindow {
         thisWeekButton.addActionListener(e -> {
             LocalDate today = LocalDate.now();
             LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            LocalDate endOfWeek = today.with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
+            LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
             fromDatePicker.setDate(startOfWeek);
             toDatePicker.setDate(endOfWeek);
-            fromTimePicker.setTime(LocalTime.MIN);
-            toTimePicker.setTime(LocalTime.MAX);
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MAX));
         });
         filterPanel.add(thisWeekButton, gbc);
 
@@ -637,9 +638,9 @@ public class MainWindow {
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(e -> {
             fromDatePicker.clear();
-            fromTimePicker.clear();
+            fromTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
             toDatePicker.clear();
-            toTimePicker.clear();
+            toTimeSpinner.setValue(java.sql.Time.valueOf(LocalTime.MIN));
             statusGroup.clearSelection();
             allRadioButton.setSelected(true);
             categoryComboBox.setSelectedIndex(0);
@@ -663,9 +664,10 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
-        fromTimePicker.addTimeChangeListener(event -> {
-           filter.setFromTime(fromTimePicker.getTime());
-           eventTableModel.refetch(filter);
+        fromTimeSpinner.addChangeListener(e -> {
+            Date fromTime = (Date) fromTimeSpinner.getValue();
+            filter.setFromTime(fromTime.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
+            eventTableModel.refetch(filter);
         });
 
         toDatePicker.addDateChangeListener(event -> {
@@ -673,8 +675,9 @@ public class MainWindow {
             eventTableModel.refetch(filter);
         });
 
-        toTimePicker.addTimeChangeListener(event -> {
-            filter.setToTime(toTimePicker.getTime());
+        toTimeSpinner.addChangeListener(e -> {
+            Date toTime = (Date) toTimeSpinner.getValue();
+            filter.setToTime(toTime.toInstant().atZone(ZoneId.systemDefault()).toLocalTime());
             eventTableModel.refetch(filter);
         });
 
@@ -706,31 +709,26 @@ public class MainWindow {
         return filterPanel;
     }
 
-    private static JComboBox<String> createMultiSelectComboBox(String[] options) {
-        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Select"});
-        comboBox.setPrototypeDisplayValue("Select");
+    private JSpinner createTimeSpinner() {
+        LocalTime midnight = LocalTime.MIDNIGHT;
+        java.util.Date initialTime = java.sql.Time.valueOf(midnight);
 
-        JPopupMenu popupMenu = new JPopupMenu();
-        List<JCheckBox> checkBoxes = new ArrayList<>();
+        SpinnerDateModel timeModel = new SpinnerDateModel(
+                initialTime,
+                null,
+                null,
+                java.util.Calendar.MINUTE
+        );
 
-        for (String option : options) {
-            JCheckBox checkBox = new JCheckBox(option);
-            checkBoxes.add(checkBox);
-            popupMenu.add(checkBox);
-        }
+        JSpinner timeSpinner = new JSpinner(timeModel);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(timeSpinner, "HH:mm");
 
-        comboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (popupMenu.isShowing()) {
-                    popupMenu.setVisible(false);
-                } else {
-                    popupMenu.show(comboBox, 0, comboBox.getHeight());
-                }
-            }
-        });
+        DateFormatter timeFormatter = (DateFormatter) editor.getTextField().getFormatter();
+        timeFormatter.setAllowsInvalid(false);
+        timeFormatter.setOverwriteMode(true);
 
-        return comboBox;
+        timeSpinner.setEditor(editor);
+        return timeSpinner;
     }
 
     private void setupSelectAllShortcut(JTable table) {
