@@ -107,6 +107,8 @@ public final class EditAction extends AbstractAction {
             if (result.isValid()) {
                 originalCategory.update(category);
                 categoryTableModel.updateRow(originalCategory);
+                allTableModels.getEventTableModel().refresh();
+                allTableModels.getTemplateTableModel().refresh();
                 ToastNotification.getInstance().show("Category edited successfully!");
                 break;
             } else {
