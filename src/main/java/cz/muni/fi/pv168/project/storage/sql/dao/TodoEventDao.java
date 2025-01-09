@@ -85,34 +85,26 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
     @Override
     public Collection<TodoEventEntity> findAll() {
         var sql = "SELECT * FROM TodoEvent;";
-        var categorySQL = "SELECT * FROM TodoEvent_Category WHERE todoEvent_id=?;";
+
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
-                var categoryStatement = connection.use().prepareStatement(categorySQL)
         ) {
             List<TodoEventEntity> TodoEvents = new ArrayList<>();
-            try (var resultSet = statement.executeQuery()) {
+            var resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    ArrayList<UUID> categoryIds = new ArrayList<>();
-                    categoryStatement.setString(1, resultSet.getString("id"));
-                    ResultSet categoryResultSet = categoryStatement.executeQuery();
-                    while (categoryResultSet.next()) {
-                        categoryIds.add(UUID.fromString(categoryResultSet.getString(2)));
-                    }
+
                     TodoEventEntity TodoEvent = new TodoEventEntity(UUID.fromString(resultSet.getString("id")),
                             resultSet.getString("name"),
                             resultSet.getString("details"),
                             resultSet.getTimestamp("start").toLocalDateTime(),
                             UUID.fromString(resultSet.getString("timeUnit")),
                             resultSet.getInt("timeUnitAmount"),
-                            categoryIds,
+                            new ArrayList<>(),
                             resultSet.getString("done"));
 
                     TodoEvents.add(TodoEvent);
                 }
-            }
-
             return TodoEvents;
         } catch (SQLException ex) {
             throw new DataStorageException("Failed to load all TodoEvents", ex);
@@ -122,44 +114,30 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
     @Override
     public Optional<TodoEventEntity> findById(UUID id) {
         var sql = "SELECT id, name, details, start, timeUnit, timeUnitAmount, done FROM TodoEvent WHERE id = ?;";
-        var categorySQL = "SELECT * FROM TodoEvent_Category WHERE todoEvent_id = ?;";
 
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
-                var categoryStatement = connection.use().prepareStatement(categorySQL);
         ) {
             statement.setString(1, String.valueOf(id));
-            categoryStatement.setString(1, String.valueOf(id));
-            try (
-                    ResultSet resultSet = statement.executeQuery();
-                    ResultSet categoryResultSet = categoryStatement.executeQuery();
-            ) {
-                if (resultSet.next()) {
-                    ArrayList<UUID> categoryList = new ArrayList<>();
-
-                    while (categoryResultSet.next()) {
-                        categoryList.add(UUID.fromString(categoryResultSet.getString(2)));
-                    }
-
-                    return Optional.of(new TodoEventEntity(
-                            UUID.fromString(resultSet.getString("id")),
-                            resultSet.getString("name"),
-                            resultSet.getString("details"),
-                            resultSet.getTimestamp("start").toLocalDateTime(),
-                            UUID.fromString(resultSet.getString("timeUnit")),
-                            resultSet.getInt("timeUnitAmount"),
-                            categoryList,
-                            resultSet.getString("done")
-                    ));
-                }
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(new TodoEventEntity(
+                        UUID.fromString(resultSet.getString("id")),
+                        resultSet.getString("name"),
+                        resultSet.getString("details"),
+                        resultSet.getTimestamp("start").toLocalDateTime(),
+                        UUID.fromString(resultSet.getString("timeUnit")),
+                        resultSet.getInt("timeUnitAmount"),
+                        new ArrayList<>(),
+                        resultSet.getString("done")
+                ));
             }
         } catch (SQLException ex) {
             throw new DataStorageException("Failed to retrieve TodoEvent with id: " + id, ex);
         }
         return Optional.empty();
     }
-
     @Override
     public TodoEventEntity update(TodoEventEntity entity) {
         var sql = """
@@ -172,16 +150,11 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                     done = ?
                 WHERE id = ?;
                 """;
-        var categoryResetSQL = """
-                DELETE FROM TodoEvent_Category
-                WHERE todoEvent_id = ?;
-                """;
-        var categorySQL = "INSERT INTO TodoEvent_Category (todoEvent_id, category_id) VALUES (?, ?)";
+
         var connection = connections.get();
         try (
                 var statement = connection.use().prepareStatement(sql);
-                var categoryStatement = connection.use().prepareStatement(categorySQL);
-                var categoryDeleteStatement = connection.use().prepareStatement(categoryResetSQL);
+
         ) {
             connection.use().setAutoCommit(false);
             statement.setString(1, entity.name());
@@ -193,23 +166,13 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
             statement.setString(7, entity.id().toString());
 
             int rowsUpdated = statement.executeUpdate();
-            if (rowsUpdated == 0) {
-                throw new DataStorageException("TodoEvent not found, id: " + entity.id());
-            }
             if (rowsUpdated > 1) {
                 throw new DataStorageException("More than 1 time unit (rows=%d) has been updated: %s"
                         .formatted(rowsUpdated, entity));
             }
-            if (rowsUpdated == 1) {
-                categoryDeleteStatement.setString(1, entity.id().toString());
-                categoryDeleteStatement.executeUpdate();
-                for (int i = 0; i < entity.categoryIds().size(); i++) {
-                    categoryStatement.setString(1, entity.id().toString());
-                    categoryStatement.setString(2, entity.categoryIds().get(i).toString());
-                    categoryStatement.executeUpdate();
-                }
-                connection.use().commit();
-            }
+
+            connection.use().commit();
+
             return entity;
         } catch (SQLException ex) {
             try {
@@ -237,20 +200,12 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                 WHERE id = ?;
                 """;
 
-        var categoryResetSQL = """
-                DELETE FROM TodoEvent_Category
-                WHERE todoEvent_id = ?;
-                """;
         var connection = connections.get();
         try (
                 var statement = connection.use().prepareStatement(sql);
-                var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
             connection.use().setAutoCommit(false);
             statement.setString(1, String.valueOf(id));
-            categoryResetStatement.setString(1, String.valueOf(id));
-
-            categoryResetStatement.executeUpdate();
             int rowsUpdated = statement.executeUpdate();
 
             if (rowsUpdated == 0) {
@@ -282,14 +237,12 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
     @Override
     public void deleteAll() {
         var sql = "DELETE FROM TodoEvent;";
-        var categoryResetSQL = "DELETE FROM TodoEvent_Category;";
+
         var connection = connections.get();
         try (
                 var statement = connection.use().prepareStatement(sql);
-                var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
         ) {
             connection.use().setAutoCommit(false);
-            categoryResetStatement.executeUpdate();
             statement.executeUpdate();
             connection.use().commit();
         } catch (SQLException ex) {

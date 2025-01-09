@@ -5,10 +5,7 @@ import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TemplateSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TodoEventsSqlRepository;
-import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.*;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
@@ -42,9 +39,10 @@ public class InsertTestData {
         var templateMapper = new TemplateMapper(timeUnitRepository, categoryRepository);
         var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
 
+        var todoEventCategoryDao = new TodoEventCategoryDao(transactionConnectionSupplier);
         var todoEventDao = new TodoEventDao(transactionConnectionSupplier);
         var todoEventMapper = new TodoEventMapper(timeUnitRepository, categoryRepository);
-        var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
+        var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventCategoryDao, todoEventMapper);
 
         testDataGenerator.createCategories().forEach(categoryRepository::create);
         testDataGenerator.createTimeUnits().forEach(timeUnitRepository::create);

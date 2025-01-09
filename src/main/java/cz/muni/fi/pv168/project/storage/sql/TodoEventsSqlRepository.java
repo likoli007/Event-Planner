@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.repository.Repository;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataAccessObject;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
+import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventCategoryDao;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.EntityMapper;
 
@@ -13,20 +14,27 @@ import java.util.UUID;
 
 public class TodoEventsSqlRepository implements Repository<TodoEvent> {
     private final DataAccessObject<TodoEventEntity> todoEventDao;
+    private final TodoEventCategoryDao todoEventCategoryDao;
     private final EntityMapper<TodoEventEntity, TodoEvent> todoEventMapper;
 
     public TodoEventsSqlRepository(
-            DataAccessObject<TodoEventEntity> TodoEventDao,
+            DataAccessObject<TodoEventEntity> TodoEventDao, TodoEventCategoryDao TodoEventCategoryDao,
             EntityMapper<TodoEventEntity, TodoEvent> TodoEventMapper) {
         this.todoEventDao = TodoEventDao;
+        this.todoEventCategoryDao = TodoEventCategoryDao;
         this.todoEventMapper = TodoEventMapper;
     }
 
     @Override
     public List<TodoEvent> findAll() {
-        return todoEventDao
-                .findAll()
-                .stream()
+        var todoEvents = todoEventDao.findAll();
+
+        for (var todoEvent : todoEvents) {
+            var categories = todoEventCategoryDao.findByTodoEventId(todoEvent.id());
+            todoEvent.categoryIds().addAll(categories);
+        }
+
+        return todoEvents.stream()
                 .map(todoEventMapper::mapToBusiness)
                 .toList();
     }
@@ -40,25 +48,33 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
     public void update(TodoEvent entity) {
         todoEventDao.findById(entity.getId())
                 .orElseThrow(() -> new DataStorageException("TodoEvent not found, id: " + entity.getId()));
-        var updatedTodoEvent = todoEventMapper.mapEntityToDatabase(entity);
+        var dbTodoEvent = todoEventMapper.mapEntityToDatabase(entity);
 
-        todoEventDao.update(updatedTodoEvent);
+        var updated = todoEventDao.update(dbTodoEvent);
+        todoEventCategoryDao.updateCategories(entity.getId(), updated.categoryIds());
     }
 
     @Override
     public void deleteById(UUID id) {
+        todoEventCategoryDao.deleteByTodoEventId(id);
         todoEventDao.deleteById(id);
     }
 
     @Override
     public void deleteAll() {
+        todoEventCategoryDao.deleteAll();
         todoEventDao.deleteAll();
     }
 
     @Override
     public Optional<TodoEvent> findById(UUID id) {
-        return todoEventDao
-                .findById(id)
+        var todoEvent = todoEventDao.findById(id);
+        if (todoEvent.isEmpty()) {
+            return Optional.empty();
+        }
+        var categories = todoEventCategoryDao.findByTodoEventId(id);
+        todoEvent.get().categoryIds().addAll(categories);
+        return todoEvent
                 .map(todoEventMapper::mapToBusiness);
     }
 

@@ -2,11 +2,10 @@ package cz.muni.fi.pv168.project;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import cz.muni.fi.pv168.project.business.facades.TodoEventsServiceFacadeImpl;
-import cz.muni.fi.pv168.project.data.TestDataGenerator;
 import cz.muni.fi.pv168.project.business.service.crud.CategoryCrudService;
-import cz.muni.fi.pv168.project.business.service.crud.TemplateCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TimeUnitCrudService;
 import cz.muni.fi.pv168.project.business.service.crud.TodoEventCrudService;
+import cz.muni.fi.pv168.project.business.service.crud.TransactionalTemplateCrudService;
 import cz.muni.fi.pv168.project.business.service.export.GenericExportService;
 import cz.muni.fi.pv168.project.business.service.export.GenericImportService;
 import cz.muni.fi.pv168.project.business.service.export.JSONFileExporter;
@@ -16,11 +15,7 @@ import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TemplateSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TodoEventsSqlRepository;
-import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
-import cz.muni.fi.pv168.project.business.service.crud.TransactionalTemplateCrudService;
-import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.*;
 import cz.muni.fi.pv168.project.storage.sql.db.DatabaseManager;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionConnectionSupplier;
 import cz.muni.fi.pv168.project.storage.sql.db.TransactionExecutorImpl;
@@ -65,9 +60,10 @@ public class Main {
         var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
 //        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
 
+        var todoEventCategoryDao = new TodoEventCategoryDao(transactionConnectionSupplier);
         var todoEventDao = new TodoEventDao(transactionConnectionSupplier);
         var todoEventMapper = new TodoEventMapper(timeUnitRepository, categoryRepository);
-        var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
+        var todoEventRepository = new TodoEventsSqlRepository(todoEventDao, todoEventCategoryDao, todoEventMapper);
 
         var categoryCrudService = new CategoryCrudService(categoryRepository);
         var templateCrudService = new TransactionalTemplateCrudService(transactionExecutor, templateRepository);//TemplateCrudService(templateRepository);
