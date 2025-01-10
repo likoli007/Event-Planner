@@ -59,7 +59,7 @@ public class TemplateSqlRepository implements Repository<Template> {
         var dbTemplate = TemplateMapper.mapEntityToDatabase(entity);
 
         var updated = TemplateDao.update(dbTemplate);
-        templateCategoryDao.updateAssociations(entity.getId(), updated.categoryIds());
+        templateCategoryDao.updateAssociations(entity.getId(), dbTemplate.categoryIds());
     }
 
     @Override
