@@ -4,7 +4,7 @@ import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.repository.Repository;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataAccessObject;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
-import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventCategoryDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.JoinTableDao;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.EntityMapper;
 
@@ -14,11 +14,11 @@ import java.util.UUID;
 
 public class TodoEventsSqlRepository implements Repository<TodoEvent> {
     private final DataAccessObject<TodoEventEntity> todoEventDao;
-    private final TodoEventCategoryDao todoEventCategoryDao;
+    private final JoinTableDao<UUID, UUID> todoEventCategoryDao;
     private final EntityMapper<TodoEventEntity, TodoEvent> todoEventMapper;
 
     public TodoEventsSqlRepository(
-            DataAccessObject<TodoEventEntity> TodoEventDao, TodoEventCategoryDao TodoEventCategoryDao,
+            DataAccessObject<TodoEventEntity> TodoEventDao, JoinTableDao<UUID, UUID> TodoEventCategoryDao,
             EntityMapper<TodoEventEntity, TodoEvent> TodoEventMapper) {
         this.todoEventDao = TodoEventDao;
         this.todoEventCategoryDao = TodoEventCategoryDao;
@@ -30,7 +30,7 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
         var todoEvents = todoEventDao.findAll();
 
         for (var todoEvent : todoEvents) {
-            var categories = todoEventCategoryDao.findByTodoEventId(todoEvent.id());
+            var categories = todoEventCategoryDao.findByParentId(todoEvent.id());
             todoEvent.categoryIds().addAll(categories);
         }
 
@@ -51,12 +51,12 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
         var dbTodoEvent = todoEventMapper.mapEntityToDatabase(entity);
 
         var updated = todoEventDao.update(dbTodoEvent);
-        todoEventCategoryDao.updateCategories(entity.getId(), updated.categoryIds());
+        todoEventCategoryDao.updateAssociations(entity.getId(), updated.categoryIds());
     }
 
     @Override
     public void deleteById(UUID id) {
-        todoEventCategoryDao.deleteByTodoEventId(id);
+        todoEventCategoryDao.deleteByParentId(id);
         todoEventDao.deleteById(id);
     }
 
@@ -72,7 +72,7 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
         if (todoEvent.isEmpty()) {
             return Optional.empty();
         }
-        var categories = todoEventCategoryDao.findByTodoEventId(id);
+        var categories = todoEventCategoryDao.findByParentId(id);
         todoEvent.get().categoryIds().addAll(categories);
         return todoEvent
                 .map(todoEventMapper::mapToBusiness);

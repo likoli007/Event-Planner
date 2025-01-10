@@ -8,14 +8,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class TodoEventCategoryDao {
+public class TodoEventCategoryDao implements JoinTableDao<UUID, UUID> {
     private final Supplier<ConnectionHandler> connections;
 
     public TodoEventCategoryDao(Supplier<ConnectionHandler> connections) {
         this.connections = connections;
     }
 
-    public TodoEventCategoryDao create(UUID todoEventId, UUID categoryId) {
+    @Override
+    public void create(UUID todoEventId, UUID categoryId) {
         String sql = "INSERT INTO TodoEvent_Category (todoEvent_id, category_id) VALUES (?, ?);";
 
         try (var connection = connections.get();
@@ -24,13 +25,13 @@ public class TodoEventCategoryDao {
             statement.setString(1, todoEventId.toString());
             statement.setString(2, categoryId.toString());
             statement.executeUpdate();
-            return this;
         } catch (SQLException ex) {
             throw new DataStorageException("Failed to store category for TodoEvent: " + todoEventId, ex);
         }
     }
 
-    public List<UUID> findByTodoEventId(UUID todoEventId) {
+    @Override
+    public List<UUID> findByParentId(UUID todoEventId) {
         String sql = "SELECT category_id FROM TodoEvent_Category WHERE todoEvent_id = ?;";
 
         try (var connection = connections.get();
@@ -49,7 +50,8 @@ public class TodoEventCategoryDao {
         }
     }
 
-    public void updateCategories(UUID todoEventId, List<UUID> newCategoryIds) {
+    @Override
+    public void updateAssociations(UUID todoEventId, List<UUID> newCategoryIds) {
         String deleteSql = """
                     DELETE FROM TodoEvent_Category
                     WHERE todoEvent_id = ? AND category_id NOT IN (%s);
@@ -90,7 +92,8 @@ public class TodoEventCategoryDao {
         }
     }
 
-    public void deleteByTodoEventId(UUID id) {
+    @Override
+    public void deleteByParentId(UUID id) {
         String sql = "DELETE FROM TodoEvent_Category WHERE todoEvent_id = ?;";
 
         try (var connection = connections.get();
@@ -103,7 +106,7 @@ public class TodoEventCategoryDao {
         }
     }
 
-
+    @Override
     public void deleteAll() {
         String sql = "DELETE FROM TodoEvent_Category;";
 
