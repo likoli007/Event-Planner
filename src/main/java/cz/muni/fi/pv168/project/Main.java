@@ -55,10 +55,10 @@ public class Main {
         var timeUnitMapper = new TimeUnitMapper();
         var timeUnitRepository = new TimeUnitSqlRepository(timeUnitDao, timeUnitMapper);
 
+        var templateCategoryDao = new TemplateCategoryDao(transactionConnectionSupplier);
         var templateDao = new TemplateDao(transactionConnectionSupplier);
         var templateMapper = new TemplateMapper(timeUnitRepository, categoryRepository);
-        var templateRepository = new TemplateSqlRepository(templateDao, templateMapper);
-//        var templateRepository = new InMemoryRepository<>(testDataGenerator.createTemplates());
+        var templateRepository = new TemplateSqlRepository(templateDao, templateCategoryDao, templateMapper);
 
         var todoEventCategoryDao = new TodoEventCategoryDao(transactionConnectionSupplier);
         var todoEventDao = new TodoEventDao(transactionConnectionSupplier);

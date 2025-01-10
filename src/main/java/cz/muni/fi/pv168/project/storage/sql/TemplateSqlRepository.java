@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.repository.Repository;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataAccessObject;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
+import cz.muni.fi.pv168.project.storage.sql.dao.JoinTableDao;
 import cz.muni.fi.pv168.project.storage.sql.entity.TemplateEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.EntityMapper;
 
@@ -16,40 +17,54 @@ import java.util.UUID;
  */
 public class TemplateSqlRepository implements Repository<Template> {
     private final DataAccessObject<TemplateEntity> TemplateDao;
+    private final JoinTableDao<UUID, UUID> templateCategoryDao;
+
     private final EntityMapper<TemplateEntity, Template> TemplateMapper;
 
     public TemplateSqlRepository(
-            DataAccessObject<TemplateEntity> TemplateDao,
+            DataAccessObject<TemplateEntity> TemplateDao, JoinTableDao<UUID, UUID> templateCategoryDao,
             EntityMapper<TemplateEntity, Template> TemplateMapper) {
         this.TemplateDao = TemplateDao;
+        this.templateCategoryDao = templateCategoryDao;
         this.TemplateMapper = TemplateMapper;
     }
 
     @Override
     public List<Template> findAll() {
-        return TemplateDao
-                .findAll()
-                .stream()
+        var templates = TemplateDao.findAll();
+
+        for (var template : templates) {
+            var categories = templateCategoryDao.findByParentId(template.id());
+            template.categoryIds().addAll(categories);
+        }
+
+        return templates.stream()
                 .map(TemplateMapper::mapToBusiness)
                 .toList();
     }
 
     @Override
     public Template create(Template newTemplate) {
-        return TemplateMapper.mapToBusiness(TemplateDao.create(TemplateMapper.mapEntityToDatabase(newTemplate)));
+        var dbTemplate = TemplateMapper.mapEntityToDatabase(newTemplate);
+        var created = TemplateDao.create(dbTemplate);
+        templateCategoryDao.updateAssociations(newTemplate.getId(), created.categoryIds());
+        return TemplateMapper.mapToBusiness(created);
     }
 
     @Override
     public void update(Template entity) {
         TemplateDao.findById(entity.getId())
                 .orElseThrow(() -> new DataStorageException("Template not found, id: " + entity.getId()));
-        var updatedTemplate = TemplateMapper.mapEntityToDatabase(entity);
 
-        TemplateDao.update(updatedTemplate);
+        var dbTemplate = TemplateMapper.mapEntityToDatabase(entity);
+
+        var updated = TemplateDao.update(dbTemplate);
+        templateCategoryDao.updateAssociations(entity.getId(), updated.categoryIds());
     }
 
     @Override
     public void deleteById(UUID id) {
+        templateCategoryDao.deleteByParentId(id);
         TemplateDao.deleteById(id);
     }
 
@@ -60,8 +75,13 @@ public class TemplateSqlRepository implements Repository<Template> {
 
     @Override
     public Optional<Template> findById(UUID id) {
-        return TemplateDao
-                .findById(id)
+        var template = TemplateDao.findById(id);
+        if (template.isEmpty()) {
+            return Optional.empty();
+        }
+        var categories = templateCategoryDao.findByParentId(id);
+        template.get().categoryIds().addAll(categories);
+        return template
                 .map(TemplateMapper::mapToBusiness);
     }
 
