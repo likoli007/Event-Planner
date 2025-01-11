@@ -80,14 +80,14 @@ public class GenericImportService implements ImportService {
             TimeUnit originalTimeUnit = originalInterval.getTimeUnit();
 
             if (timeUnit.isDuplicate(originalTimeUnit)){
-                e.getInterval().setTimeUnit(originalTimeUnit);
+                e.getInterval().setTimeUnit(timeUnit);
             }
         }
         for (Template t : importedBatch.templates()){
             Interval originalInterval = t.getInterval();
             TimeUnit originalTimeUnit = originalInterval.getTimeUnit();
             if (timeUnit.isDuplicate(originalTimeUnit)){
-                t.getInterval().setTimeUnit(originalTimeUnit);
+                t.getInterval().setTimeUnit(timeUnit);
             }
         }
     }
@@ -126,6 +126,10 @@ public class GenericImportService implements ImportService {
                 else{
                     changeImportedCategoryReferences(crudCategory);
                 }
+            }
+            else{
+                //Non-meaningfully different, swap it with the already existing one
+                changeImportedCategoryReferences(original.get());
             }
         }
     }
@@ -173,6 +177,10 @@ public class GenericImportService implements ImportService {
                 else{
                     changeImportedTimeUnitReferences(crudTimeUnit);
                 }
+            }
+            else{
+                //Non-meaningfully different, swap it with the already existing one
+                changeImportedTimeUnitReferences(original.get());
             }
         }
     }
@@ -290,6 +298,7 @@ public class GenericImportService implements ImportService {
                     crudEvent.setDone(event.isDone());
                 }
                 if (result == DuplicateType.DUPLICATE) {
+                    System.out.println("calldin duplicate function with: " + event.getInterval().getTimeUnit().getId());
                     addDuplicateTodoEvent(event);
                 }
             }
@@ -410,11 +419,14 @@ public class GenericImportService implements ImportService {
             lastLeftIndex = event.getName().length();
         }
 
+
+        System.out.println("Attempting to add: " + event.getName() + " with ref:" + event.getInterval().getTimeUnit().getId());
         while (true){
             event.setName(event.getName().substring(0, lastLeftIndex) + "(" + number + ")");
             Optional<TodoEvent> original = todoEventFacade.findDuplicate(event);
             if (original.isEmpty()) {
                 createEvent(event);
+                System.out.println("Added: " + event.getName() + " with ref:" + event.getInterval().getTimeUnit().getId());
                 return;
             }
             number++;
