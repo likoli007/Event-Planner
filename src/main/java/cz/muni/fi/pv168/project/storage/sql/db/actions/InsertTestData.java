@@ -15,10 +15,10 @@ public class InsertTestData {
         var categoryRepository = provider.getCategoryRepository();
         var timeUnitRepository = provider.getTimeUnitRepository();
 
-        testDataGenerator.createTodoEvents().forEach(todoEventRepository::create);
-        testDataGenerator.createTemplates().forEach(templateRepository::create);
-        testDataGenerator.createCategories().forEach(categoryRepository::create);
         testDataGenerator.createTimeUnits().forEach(timeUnitRepository::create);
+        testDataGenerator.createCategories().forEach(categoryRepository::create);
+        testDataGenerator.createTemplates().forEach(templateRepository::create);
+        testDataGenerator.createTodoEvents().forEach(todoEventRepository::create);
 
         System.out.println("Test data inserted...");
     }
