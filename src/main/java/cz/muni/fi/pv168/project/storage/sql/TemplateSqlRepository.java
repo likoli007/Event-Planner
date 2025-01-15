@@ -47,7 +47,7 @@ public class TemplateSqlRepository implements Repository<Template> {
     public Template create(Template newTemplate) {
         var dbTemplate = TemplateMapper.mapEntityToDatabase(newTemplate);
         var created = TemplateDao.create(dbTemplate);
-        templateCategoryDao.updateAssociations(newTemplate.getId(), created.categoryIds());
+        templateCategoryDao.updateAssociations(newTemplate.getId(), dbTemplate.categoryIds());
         return TemplateMapper.mapToBusiness(created);
     }
 
