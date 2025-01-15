@@ -5,8 +5,10 @@ import cz.muni.fi.pv168.project.repository.Repository;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataAccessObject;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
 import cz.muni.fi.pv168.project.storage.sql.dao.JoinTableDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.EntityMapper;
+import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TodoEventMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +43,10 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
 
     @Override
     public TodoEvent create(TodoEvent newTodoEvent) {
-        return todoEventMapper.mapToBusiness(todoEventDao.create(todoEventMapper.mapEntityToDatabase(newTodoEvent)));
+        var dbTodoEvent = todoEventMapper.mapEntityToDatabase(newTodoEvent);
+        var created = todoEventDao.create(dbTodoEvent);
+        todoEventCategoryDao.updateAssociations(newTodoEvent.getId(), created.categoryIds());
+        return todoEventMapper.mapToBusiness(created);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class TemplateSqlRepository implements Repository<Template> {
         var dbTemplate = TemplateMapper.mapEntityToDatabase(entity);
 
         var updated = TemplateDao.update(dbTemplate);
-        templateCategoryDao.updateAssociations(entity.getId(), dbTemplate.categoryIds());
+        templateCategoryDao.updateAssociations(entity.getId(), updated.categoryIds());
     }
 
     @Override
@@ -70,6 +70,7 @@ public class TemplateSqlRepository implements Repository<Template> {
 
     @Override
     public void deleteAll() {
+        templateCategoryDao.deleteAll();
         TemplateDao.deleteAll();
     }
 

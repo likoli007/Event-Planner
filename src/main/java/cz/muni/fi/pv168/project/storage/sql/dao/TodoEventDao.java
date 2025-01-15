@@ -1,13 +1,12 @@
 package cz.muni.fi.pv168.project.storage.sql.dao;
 
 import cz.muni.fi.pv168.project.storage.sql.db.ConnectionHandler;
+import cz.muni.fi.pv168.project.storage.sql.entity.TemplateEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
@@ -19,38 +18,26 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
 
     @Override
     public TodoEventEntity create(TodoEventEntity entity) {
-
-
         var sql = "INSERT INTO TodoEvent (id, name, details, start, timeUnit, timeUnitAmount, done) VALUES (?, ?, ?, ?, ?, ?,?);";
-        var categorySQL = "INSERT INTO TodoEvent_Category (todoEvent_id, category_id) VALUES (?, ?);";
-        var connection = connections.get();
+        AtomicReference<TodoEventEntity> todoEventEntity = new AtomicReference<>();
         try (
-
+                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                var categoryStatement = connection.use().prepareStatement(categorySQL);
         ) {
-            connection.use().setAutoCommit(false);
-            System.out.println(entity.timeUnitAmount());
             statement.setString(1, String.valueOf(entity.id()));
             statement.setString(2, entity.name());
             statement.setString(3, entity.details());
-            statement.setTimestamp(4, Timestamp.valueOf(entity.startTime()));
+            statement.setTime(4, Time.valueOf(entity.startTime().toLocalTime()));
             statement.setString(5, String.valueOf(entity.timeUnitId()));
             statement.setInt(6, entity.timeUnitAmount());
-            statement.setString(7, entity.done());
+            statement.setString(7, String.valueOf(entity.done()));
             statement.executeUpdate();
 
-            for (int i = 0; i < entity.categoryIds().size(); i++) {
-                categoryStatement.setString(1, entity.id().toString());
-                categoryStatement.setString(2, entity.categoryIds().get(i).toString());
-                categoryStatement.executeUpdate();
-            }
-
             try (ResultSet keyResultSet = statement.getGeneratedKeys()) {
-                UUID TodoEventId;
+                UUID todoEventId;
 
                 if (keyResultSet.next()) {
-                    TodoEventId = UUID.fromString(keyResultSet.getString(1));
+                    todoEventId = UUID.fromString(keyResultSet.getString(1));
                 } else {
                     throw new DataStorageException("Failed to fetch generated key for: " + entity);
                 }
@@ -58,28 +45,14 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                 if (keyResultSet.next()) {
                     throw new DataStorageException("Multiple keys returned for: " + entity);
                 }
-                connection.use().commit();
-                return findById(TodoEventId).orElseThrow();
+                todoEventEntity.set(findById(todoEventId).orElseThrow());
             }
         } catch (SQLException ex) {
-            // Rollback if an error occurs
-            try {
-                connection.use().rollback();
-                System.out.println("Transaction rolled back.");
-                throw new DataStorageException("Failed to store: " + entity, ex);
-            } catch (SQLException rollbackEx) {
-                throw new DataStorageException("Failed to rollback: " + entity, rollbackEx);
-            }
-        } finally {
-            try {
-                if (connection != null) {
-                    connection.use().setAutoCommit(true);
-                    connection.close();
-                }
-            } catch (SQLException closeEx) {
-                closeEx.printStackTrace();
-            }
+            System.out.println("Transaction rolled back.");
+            throw new DataStorageException("Failed to store: " + entity, ex);
         }
+
+        return todoEventEntity.get();
     }
 
     @Override
@@ -151,45 +124,33 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                 WHERE id = ?;
                 """;
 
-        var connection = connections.get();
-        try (
-                var statement = connection.use().prepareStatement(sql);
+        AtomicReference<TodoEventEntity> todoEventEntity = new AtomicReference<>();
 
+
+        try (
+                var connection = connections.get();
+                var statement = connection.use().prepareStatement(sql);
         ) {
-            connection.use().setAutoCommit(false);
             statement.setString(1, entity.name());
             statement.setString(2, entity.details());
-            statement.setTimestamp(3, Timestamp.valueOf(entity.startTime()));
+            statement.setTime(3, Time.valueOf(entity.startTime().toLocalTime()));
             statement.setString(4, entity.timeUnitId().toString());
             statement.setInt(5, entity.timeUnitAmount());
-            statement.setString(6, entity.done());
-            statement.setString(7, entity.id().toString());
+            statement.setString(6, entity.id().toString());
 
             int rowsUpdated = statement.executeUpdate();
+
             if (rowsUpdated > 1) {
                 throw new DataStorageException("More than 1 time unit (rows=%d) has been updated: %s"
                         .formatted(rowsUpdated, entity));
             }
 
-            connection.use().commit();
-
-            return entity;
+            todoEventEntity.set(findById(entity.id()).orElseThrow());
         } catch (SQLException ex) {
-            try {
-                connection.use().rollback();
-                throw new DataStorageException("Failed to update TodoEvent: \n" + entity, ex);
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-                throw new DataStorageException("Failed to rollback: " + entity, rollbackEx);
-            }
-        } finally {
-            try {
-                connection.use().setAutoCommit(true);
-                connection.close();
-            } catch (SQLException closeEx) {
-                throw new DataStorageException("Failed to revert autocommit.", closeEx);
-            }
+            throw new DataStorageException("Failed to update template: " + entity, ex);
         }
+
+        return todoEventEntity.get();
     }
 
 
