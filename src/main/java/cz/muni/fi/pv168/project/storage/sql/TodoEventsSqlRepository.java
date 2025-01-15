@@ -45,7 +45,7 @@ public class TodoEventsSqlRepository implements Repository<TodoEvent> {
     public TodoEvent create(TodoEvent newTodoEvent) {
         var dbTodoEvent = todoEventMapper.mapEntityToDatabase(newTodoEvent);
         var created = todoEventDao.create(dbTodoEvent);
-        todoEventCategoryDao.updateAssociations(newTodoEvent.getId(), created.categoryIds());
+        todoEventCategoryDao.updateAssociations(newTodoEvent.getId(), dbTodoEvent.categoryIds());
         return todoEventMapper.mapToBusiness(created);
     }
 
