@@ -10,6 +10,8 @@ public abstract class Entity {
         return id;
     }
 
+    public void refreshId(){ id = Generators.timeBasedEpochGenerator().generate(); }
+
     public abstract boolean isDuplicate(Entity e);
 
     public abstract boolean isMeaningfullyDifferent(Entity e);
