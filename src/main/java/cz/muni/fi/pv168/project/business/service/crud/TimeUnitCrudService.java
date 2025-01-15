@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.repository.Repository;
+import cz.muni.fi.pv168.project.storage.sql.entity.CategoryEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,11 @@ public class TimeUnitCrudService implements CrudService<TimeUnit> {
 
     @Override
     public void create(TimeUnit newEntity) {
+        Optional<TimeUnit> duplicate = timeUnitRepository.findById(newEntity.getId());
+        while (duplicate.isPresent()) {
+            newEntity.refreshId();
+            duplicate = timeUnitRepository.findById(newEntity.getId());
+        }
         timeUnitRepository.create(newEntity);
     }
 
