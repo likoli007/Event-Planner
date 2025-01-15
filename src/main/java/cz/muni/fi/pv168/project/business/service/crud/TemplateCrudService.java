@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.repository.Repository;
+import cz.muni.fi.pv168.project.storage.sql.entity.CategoryEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,11 @@ public class TemplateCrudService implements CrudService<Template> {
 
     @Override
     public void create(Template newEntity) {
+        Optional<Template> duplicate = templateRepository.findById(newEntity.getId());
+        while (duplicate.isPresent()) {
+            newEntity.refreshId();
+            duplicate = templateRepository.findById(newEntity.getId());
+        }
         templateRepository.create(newEntity);
     }
 
