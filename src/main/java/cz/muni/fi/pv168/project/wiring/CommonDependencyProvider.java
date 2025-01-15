@@ -12,10 +12,7 @@ import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.storage.sql.*;
-import cz.muni.fi.pv168.project.storage.sql.dao.CategoryDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TemplateDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TimeUnitDao;
-import cz.muni.fi.pv168.project.storage.sql.dao.TodoEventDao;
+import cz.muni.fi.pv168.project.storage.sql.dao.*;
 import cz.muni.fi.pv168.project.storage.sql.db.*;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.CategoryMapper;
 import cz.muni.fi.pv168.project.storage.sql.entity.mapper.TemplateMapper;
@@ -62,14 +59,20 @@ public class CommonDependencyProvider implements DependencyProvider {
         var categoryDao = new CategoryDao(transactionConnectionSupplier);
         var timeUnitDao = new TimeUnitDao(transactionConnectionSupplier);
 
-        this.categories = new CategorySqlRepository(categoryDao, new CategoryMapper());
-        this.timeUnits = new TimeUnitSqlRepository(timeUnitDao, new TimeUnitMapper());
+        var templateCategoryDao = new TemplateCategoryDao(transactionConnectionSupplier);
+        var todoEventCategoryDao = new TodoEventCategoryDao(transactionConnectionSupplier);
+
+        var categoryMapper = new CategoryMapper();
+        this.categories = new CategorySqlRepository(categoryDao, categoryMapper);
+
+        var timeUnitMapper = new TimeUnitMapper();
+        this.timeUnits = new TimeUnitSqlRepository(timeUnitDao, timeUnitMapper);
 
         var todoEventMapper = new TodoEventMapper(timeUnits, categories);
         var templateMapper = new TemplateMapper(timeUnits, categories);
 
-        this.todoEvents = new TodoEventsSqlRepository(todoEventDao, todoEventMapper);
-        this.templates = new TemplateSqlRepository(templateDao, templateMapper);
+        this.todoEvents = new TodoEventsSqlRepository(todoEventDao, todoEventCategoryDao, todoEventMapper);
+        this.templates = new TemplateSqlRepository(templateDao, templateCategoryDao, templateMapper);
 
         var todoEventCrudService = new TodoEventCrudService(todoEvents);
         this.todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(todoEventCrudService);
