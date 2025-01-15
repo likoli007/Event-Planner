@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.repository.Repository;
+import cz.muni.fi.pv168.project.storage.sql.entity.CategoryEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,11 @@ public class TodoEventCrudService implements CrudService<TodoEvent> {
 
     @Override
     public void create(TodoEvent newEntity) {
+        Optional<TodoEvent> duplicate = todoEventRepository.findById(newEntity.getId());
+        while (duplicate.isPresent()) {
+            newEntity.refreshId();
+            duplicate = todoEventRepository.findById(newEntity.getId());
+        }
         todoEventRepository.create(newEntity);
     }
 

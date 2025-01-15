@@ -23,14 +23,11 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public TemplateEntity create(TemplateEntity entity) {
         var sql = "INSERT INTO Template (id, name, details, startTime, timeUnit, timeUnitAmount) VALUES (?, ?, ?, ?, ?, ?);";
-        var categorySQL = "INSERT INTO Template_Category (template_id, category_id) VALUES (?, ?);";
-
 
         AtomicReference<TemplateEntity> templateEntity = new AtomicReference<>();
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                    var categoryStatement = connection.use().prepareStatement(categorySQL);
             ) {
                 statement.setString(1, String.valueOf(entity.id()));
                 statement.setString(2, entity.name());
@@ -39,12 +36,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 statement.setString(5, String.valueOf(entity.timeUnitId()));
                 statement.setInt(6, entity.timeUnitAmount());
                 statement.executeUpdate();
-
-                for (int i = 0; i < entity.categoryIds().size(); i++) {
-                    categoryStatement.setString(1, entity.id().toString());
-                    categoryStatement.setString(2, entity.categoryIds().get(i).toString());
-                    categoryStatement.executeUpdate();
-                }
 
                 try (ResultSet keyResultSet = statement.getGeneratedKeys()) {
                     UUID templateId;
@@ -71,28 +62,20 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public Collection<TemplateEntity> findAll() {
         var sql = "SELECT * FROM Template;";
-        var categorySQL = "SELECT * FROM Template_Category WHERE template_id=?;";
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
-                var categoryStatement = connection.use().prepareStatement(categorySQL)
         ) {
             List<TemplateEntity> templates = new ArrayList<>();
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    ArrayList<UUID> categoryIds = new ArrayList<>();
-                    categoryStatement.setString(1, resultSet.getString("id"));
-                    ResultSet categoryResultSet = categoryStatement.executeQuery();
-                    while (categoryResultSet.next()) {
-                        categoryIds.add(UUID.fromString(categoryResultSet.getString(2)));
-                    }
                     TemplateEntity template = new TemplateEntity(UUID.fromString(resultSet.getString("id")),
                             resultSet.getString("name"),
                             resultSet.getString("details"),
                             resultSet.getTime("startTime").toLocalTime(),
                             UUID.fromString(resultSet.getString("timeUnit")),
                             resultSet.getInt("timeUnitAmount"),
-                            categoryIds);
+                            new ArrayList<>());
 
                     templates.add(template);
                 }
@@ -107,26 +90,16 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public Optional<TemplateEntity> findById(UUID id) {
         var sql = "SELECT id, name, details, startTime, timeUnit, timeUnitAmount FROM Template WHERE id = ?;";
-        var categorySQL = "SELECT * FROM Template_Category WHERE template_id = ?;";
 
         try (
                 var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
-                var categoryStatement = connection.use().prepareStatement(categorySQL);
         ) {
             statement.setString(1, String.valueOf(id));
-            categoryStatement.setString(1, String.valueOf(id));
             try (
                     ResultSet resultSet = statement.executeQuery();
-                    ResultSet categoryResultSet = categoryStatement.executeQuery();
             ) {
                 if (resultSet.next()) {
-                    ArrayList<UUID> categoryList = new ArrayList<>();
-
-                    while (categoryResultSet.next()) {
-                        categoryList.add(UUID.fromString(categoryResultSet.getString(2)));
-                    }
-
                     return Optional.of(new TemplateEntity(
                             UUID.fromString(resultSet.getString("id")),
                             resultSet.getString("name"),
@@ -134,7 +107,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                             resultSet.getTime("startTime").toLocalTime(),
                             UUID.fromString(resultSet.getString("timeUnit")),
                             resultSet.getInt("timeUnitAmount"),
-                            categoryList
+                            new ArrayList<>()
                     ));
                 }
             }
@@ -155,11 +128,7 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                     timeUnitAmount = ?
                 WHERE id = ?;
                 """;
-        var categoryResetSQL = """
-                DELETE FROM Template_Category
-                WHERE template_id = ?;
-                """;
-        var categorySQL = "INSERT INTO Template_Category (template_id, category_id) VALUES (?, ?)";
+
 
         AtomicReference<TemplateEntity> templateEntity = new AtomicReference<>();
 
@@ -167,8 +136,6 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
-                    var categoryStatement = connection.use().prepareStatement(categorySQL);
-                    var categoryDeleteStatement = connection.use().prepareStatement(categoryResetSQL);
             ) {
                 statement.setString(1, entity.name());
                 statement.setString(2, entity.details());
@@ -178,22 +145,12 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 statement.setString(6, entity.id().toString());
 
                 int rowsUpdated = statement.executeUpdate();
-                if (rowsUpdated == 0) {
-                    throw new DataStorageException("Template not found, id: " + entity.id());
-                }
+
                 if (rowsUpdated > 1) {
                     throw new DataStorageException("More than 1 time unit (rows=%d) has been updated: %s"
                             .formatted(rowsUpdated, entity));
                 }
-                if (rowsUpdated == 1){
-                    categoryDeleteStatement.setString(1, entity.id().toString());
-                    categoryDeleteStatement.executeUpdate();
-                    for (int i = 0; i < entity.categoryIds().size(); i++) {
-                        categoryStatement.setString(1, entity.id().toString());
-                        categoryStatement.setString(2, entity.categoryIds().get(i).toString());
-                        categoryStatement.executeUpdate();
-                    }
-                }
+
                 templateEntity.set(findById(entity.id()).orElseThrow());
             } catch (SQLException ex) {
                 throw new DataStorageException("Failed to update template: " + entity, ex);
@@ -210,25 +167,15 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
                 WHERE id = ?;
                 """;
 
-        var categoryResetSQL = """
-                DELETE FROM Template_Category
-                WHERE template_id = ?;
-                """;
-
 
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
-                    var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
             ) {
                 statement.setString(1, String.valueOf(id));
-                categoryResetStatement.setString(1, String.valueOf(id));
-                categoryResetStatement.executeUpdate();
                 int rowsUpdated = statement.executeUpdate();
 
-                if (rowsUpdated == 0) {
-                    throw new DataStorageException("Template not found, id: " + id);
-                }
+
                 if (rowsUpdated > 1) {
                     throw new DataStorageException("More then 1 template (rows=%d) has been deleted: %s"
                             .formatted(rowsUpdated, id));
@@ -242,15 +189,12 @@ public class TemplateDao implements DataAccessObject<TemplateEntity> {
     @Override
     public void deleteAll() {
         var sql = "DELETE FROM Template;";
-        var categoryResetSQL = "DELETE FROM Template_Category;";
 
 
             try (
                     var connection = connections.get();
                     var statement = connection.use().prepareStatement(sql);
-                    var categoryResetStatement = connection.use().prepareStatement(categoryResetSQL);
             ) {
-                categoryResetStatement.executeUpdate();
                 statement.executeUpdate();
             } catch (SQLException ex) {
                 throw new DataStorageException("Failed to delete all templates", ex);

@@ -1,13 +1,16 @@
 package cz.muni.fi.pv168.project.model;
 
 import java.util.UUID;
+import com.fasterxml.uuid.Generators;
 
 public abstract class Entity {
-    protected UUID id = UUID.randomUUID();
+    protected UUID id = Generators.timeBasedEpochGenerator().generate();
 
     public UUID getId() {
         return id;
     }
+
+    public void refreshId(){ id = Generators.timeBasedEpochGenerator().generate(); }
 
     public abstract boolean isDuplicate(Entity e);
 

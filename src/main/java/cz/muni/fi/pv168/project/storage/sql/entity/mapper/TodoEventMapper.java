@@ -5,12 +5,12 @@ import cz.muni.fi.pv168.project.model.TimeUnit;
 import cz.muni.fi.pv168.project.model.TodoEvent;
 import cz.muni.fi.pv168.project.storage.sql.CategorySqlRepository;
 import cz.muni.fi.pv168.project.storage.sql.TimeUnitSqlRepository;
-import cz.muni.fi.pv168.project.storage.sql.entity.TimeUnitEntity;
 import cz.muni.fi.pv168.project.storage.sql.entity.TodoEventEntity;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent> {
 
@@ -32,8 +32,8 @@ public class TodoEventMapper implements EntityMapper<TodoEventEntity, TodoEvent>
 
         ArrayList<Category> categories = new ArrayList<>();
 
-        for (int i = 0; i < todoEventEntity.categoryIds().size(); i++) {
-            Optional<Category> categoryResult = categorySqlRepository.findById(todoEventEntity.categoryIds().get(i));
+        for (UUID categoryId : todoEventEntity.categoryIds()) {
+            Optional<Category> categoryResult = categorySqlRepository.findById(categoryId);
             Category category = categoryResult.orElse(null);
             categories.add(category);
         }
