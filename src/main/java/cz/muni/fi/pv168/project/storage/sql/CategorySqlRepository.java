@@ -36,11 +36,6 @@ public class CategorySqlRepository implements Repository<Category> {
 
     @Override
     public Category create(Category newEntity) {
-        Optional<CategoryEntity> duplicate = categoryDao.findById(newEntity.getId());
-        while (duplicate.isPresent()) {
-            newEntity.refreshId();
-            duplicate = categoryDao.findById(newEntity.getId());
-        }
         return categoryMapper.mapToBusiness(categoryDao.create(categoryMapper.mapEntityToDatabase(newEntity)));
     }
 

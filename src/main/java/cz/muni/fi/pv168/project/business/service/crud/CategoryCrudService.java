@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.project.business.service.crud;
 
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.repository.Repository;
+import cz.muni.fi.pv168.project.storage.sql.entity.CategoryEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,11 @@ public class CategoryCrudService implements CrudService<Category> {
 
     @Override
     public void create(Category newEntity) {
+        Optional<Category> duplicate = categoryRepository.findById(newEntity.getId());
+        while (duplicate.isPresent()) {
+            newEntity.refreshId();
+            duplicate = categoryRepository.findById(newEntity.getId());
+        }
         categoryRepository.create(newEntity);
     }
 
