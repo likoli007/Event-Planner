@@ -136,7 +136,8 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
             statement.setTime(3, Time.valueOf(entity.startTime().toLocalTime()));
             statement.setString(4, entity.timeUnitId().toString());
             statement.setInt(5, entity.timeUnitAmount());
-            statement.setString(6, entity.id().toString());
+            statement.setString(6, entity.done());
+            statement.setString(7, entity.id().toString());
 
             int rowsUpdated = statement.executeUpdate();
 
@@ -147,7 +148,7 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
 
             todoEventEntity.set(findById(entity.id()).orElseThrow());
         } catch (SQLException ex) {
-            throw new DataStorageException("Failed to update template: " + entity, ex);
+            throw new DataStorageException("Failed to update TodoEvent: " + entity, ex);
         }
 
         return todoEventEntity.get();

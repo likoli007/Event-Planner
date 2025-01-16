@@ -34,15 +34,6 @@ public final class DatabaseManager {
         return new DatabaseManager(connectionString);
     }
 
-    public static DatabaseManager createTestInstance() {
-        String connectionString = "jdbc:h2:mem:%s;%s".formatted(PROJECT_NAME, DB_PROPERTIES_STRING);
-        var databaseManager = new DatabaseManager(connectionString);
-        databaseManager.initSchema();
-        databaseManager.initData("test");
-
-        return databaseManager;
-    }
-
     public ConnectionHandler getConnectionHandler() {
         try {
             return new ConnectionHandlerImpl(dataSource.getConnection());
@@ -63,16 +54,8 @@ public final class DatabaseManager {
         return databaseConnectionString;
     }
 
-    public void destroySchema() {
-        sqlFileExecutor.execute("drop.sql");
-    }
-
     public void initSchema() {
         sqlFileExecutor.execute("init.sql");
-    }
-
-    public void initData(String environment) {
-        sqlFileExecutor.execute("data_%s.sql".formatted(environment));
     }
 
     private static Path createDbFileSystemPath() {
