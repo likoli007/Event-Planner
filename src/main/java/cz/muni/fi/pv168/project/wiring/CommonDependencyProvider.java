@@ -75,16 +75,21 @@ public class CommonDependencyProvider implements DependencyProvider {
         this.templates = new TemplateSqlRepository(templateDao, templateCategoryDao, templateMapper);
 
         var todoEventCrudService = new TodoEventCrudService(todoEvents);
-        this.todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(todoEventCrudService);
-        this.templateCrudService = new TemplateCrudService(templates);
-        this.categoryCrudService = new CategoryCrudService(categories);
-        this.timeUnitCrudService = new TimeUnitCrudService(timeUnits);
+        var todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(todoEventCrudService);
+        var templateCrudService = new TemplateCrudService(templates);
+        var categoryCrudService = new CategoryCrudService(categories);
+        var timeUnitCrudService = new TimeUnitCrudService(timeUnits);
+
+        this.todoEventsServiceFacade = new TodoEventsServiceFacadeImpl(new TransactionalCrudService<>(transactionExecutor, todoEventCrudService));
+        this.templateCrudService = new TransactionalCrudService<>(transactionExecutor, templateCrudService);
+        this.categoryCrudService = new TransactionalCrudService<>(transactionExecutor, categoryCrudService);
+        this.timeUnitCrudService = new TransactionalCrudService<>(transactionExecutor, timeUnitCrudService);
 
         this.exportService = new GenericExportService(
-                categoryCrudService,
-                timeUnitCrudService,
-                templateCrudService,
-                todoEventsServiceFacade,
+                this.categoryCrudService,
+                this.timeUnitCrudService,
+                this.templateCrudService,
+                this.todoEventsServiceFacade,
                 List.of(new JSONFileExporter())
         );
 
