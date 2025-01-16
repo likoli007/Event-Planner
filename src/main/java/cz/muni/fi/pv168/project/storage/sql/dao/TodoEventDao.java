@@ -162,11 +162,10 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                 WHERE id = ?;
                 """;
 
-        var connection = connections.get();
         try (
+                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
         ) {
-            connection.use().setAutoCommit(false);
             statement.setString(1, String.valueOf(id));
             int rowsUpdated = statement.executeUpdate();
 
@@ -177,22 +176,8 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
                 throw new DataStorageException("More then 1 TodoEvent (rows=%d) has been deleted: %s"
                         .formatted(rowsUpdated, id));
             }
-
-            connection.use().commit();
         } catch (SQLException ex) {
-            try {
-                connection.use().rollback();
-                throw new DataStorageException("Failed to delete TodoEvent, id: " + id, ex);
-            } catch (SQLException rollbackEx) {
-                throw new DataStorageException("Failed to rollback: " + id, rollbackEx);
-            }
-        } finally {
-            try {
-                connection.use().setAutoCommit(true);
-                connection.close();
-            } catch (SQLException closeEx) {
-                throw new DataStorageException("Failed to revert to autocommit.", closeEx);
-            }
+            throw new DataStorageException("Failed to delete TodoEvent, id: " + id, ex);
         }
     }
 
@@ -200,27 +185,13 @@ public class TodoEventDao implements DataAccessObject<TodoEventEntity> {
     public void deleteAll() {
         var sql = "DELETE FROM TodoEvent;";
 
-        var connection = connections.get();
         try (
+                var connection = connections.get();
                 var statement = connection.use().prepareStatement(sql);
         ) {
-            connection.use().setAutoCommit(false);
             statement.executeUpdate();
-            connection.use().commit();
         } catch (SQLException ex) {
-            try {
-                connection.use().rollback();
-                throw new DataStorageException("Failed to delete all TodoEvents", ex);
-            } catch (SQLException rollbackEx) {
-                throw new DataStorageException("Failed to rollback deletion of all TodoEvents", rollbackEx);
-            }
-        } finally {
-            try {
-                connection.use().setAutoCommit(true);
-                connection.close();
-            } catch (SQLException closeEx) {
-                throw new DataStorageException("Failed to revert to autocommit.", closeEx);
-            }
+            throw new DataStorageException("Failed to delete all TodoEvents", ex);
         }
     }
 
