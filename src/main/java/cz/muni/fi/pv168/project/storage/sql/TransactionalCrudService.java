@@ -24,33 +24,17 @@ public class TransactionalCrudService<T extends Entity> implements CrudService<T
 
     @Override
     public List<T> findAll() {
-        AtomicReference<List<T>> ref = new AtomicReference<>();
-        transactionExecutor.executeInTransaction( () -> {
-            List<T> found = entityCrudService.findAll();
-            ref.set(found);
-        });
-
-        return ref.get();
+        return entityCrudService.findAll();
     }
 
     @Override
     public Optional<T> findById(UUID id) {
-        AtomicReference<Optional<T>> ref = new AtomicReference<>();
-        transactionExecutor.executeInTransaction( () -> {
-            Optional<T> found = entityCrudService.findById(id);
-            ref.set(found);
-        });
-        return ref.get();
+        return entityCrudService.findById(id);
     }
 
     @Override
     public Optional<T> findDuplicate(T entity) {
-        AtomicReference<Optional<T>> ref = new AtomicReference<>();
-        transactionExecutor.executeInTransaction( () -> {
-            Optional<T> found = entityCrudService.findDuplicate(entity);
-            ref.set(found);
-        });
-        return ref.get();
+        return entityCrudService.findDuplicate(entity);
     }
 
     @Override
