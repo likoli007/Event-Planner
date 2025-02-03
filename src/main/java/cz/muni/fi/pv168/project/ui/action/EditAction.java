@@ -4,6 +4,7 @@ import cz.muni.fi.pv168.project.business.service.validation.*;
 import cz.muni.fi.pv168.project.model.Category;
 import cz.muni.fi.pv168.project.model.Template;
 import cz.muni.fi.pv168.project.model.TimeUnit;
+import cz.muni.fi.pv168.project.storage.sql.db.TransactionException;
 import cz.muni.fi.pv168.project.ui.dialog.*;
 import cz.muni.fi.pv168.project.ui.model.*;
 import cz.muni.fi.pv168.project.ui.resources.Icons;
@@ -187,7 +188,7 @@ public final class EditAction extends AbstractAction {
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
-        } catch (ValidationException ex) {
+        } catch (ValidationException | TransactionException ex) {
             JOptionPane.showMessageDialog(null,
                     ex.getMessage(),
                     "Error",
