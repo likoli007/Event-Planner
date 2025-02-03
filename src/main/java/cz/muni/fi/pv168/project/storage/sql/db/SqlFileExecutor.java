@@ -3,6 +3,7 @@ package cz.muni.fi.pv168.project.storage.sql.db;
 import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -67,19 +68,14 @@ final class SqlFileExecutor {
 
 
     private String loadSQLFromResources(final String fileName) {
-        URL resource = resourceRoot.getResource(fileName);
-        if (resource == null) {
-            throw new DataStorageException("Expected SQL file does not exit: " + fileName);
-        }
+        try (InputStream resource = resourceRoot.getResourceAsStream(fileName)) {
+            if (resource == null) {
+                throw new DataStorageException("Expected SQL file does not exit: " + fileName);
+            }
 
-        try {
-            Path path = Paths.get(resource.toURI());
-
-            return Files.readString(path, StandardCharsets.UTF_8);
-        } catch (URISyntaxException e) {
-            throw new DataStorageException("Unable to convert resource URL to URI: " + resource);
+            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new DataStorageException("Unable to read the SQL resource content: " + resource, e);
+            throw new DataStorageException("Unable to read the SQL resource content: " + fileName, e);
         }
     }
 }
