@@ -1,13 +1,16 @@
 package cz.muni.fi.pv168.project.model;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class TimeUnit extends Entity {
     private String name;
     private String shortcut;
     private int minutes;
+    private boolean isFixed = false;
 
-    private static final TimeUnit MINUTE = new TimeUnit("Minute", "min", 1);
+    private static final TimeUnit MINUTE = new TimeUnit(UUID.fromString("fce37f43-01d1-43b2-9099-094b0eaf56bd"),
+            "Minute", "min", 1, true);
 
     public TimeUnit(String name, String shortcut, int minutes) {
         this.name = name;
@@ -15,12 +18,28 @@ public class TimeUnit extends Entity {
         this.minutes = minutes;
     }
 
+    public TimeUnit(String name, String shortcut, int minutes, boolean isFixed) {
+        this(name, shortcut, minutes);
+        this.isFixed = isFixed;
+    }
+
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes, boolean isFixed) {
+        this(name, shortcut, minutes, isFixed);
+        this.id = uuid;
+    }
+
+    public TimeUnit(UUID uuid, String name, String shortcut, int minutes) {
+        this(uuid, name, shortcut, minutes, false);
+    }
+
     public TimeUnit(TimeUnit timeUnit) {
         this.id = timeUnit.id;
         this.name = timeUnit.name;
         this.shortcut = timeUnit.shortcut;
         this.minutes = timeUnit.minutes;
+        this.isFixed = timeUnit.isFixed;
     }
+
 
     @Override
     public void update(Entity e) {
@@ -81,5 +100,22 @@ public class TimeUnit extends Entity {
     @Override
     public String toString() {
         return name;
+    }
+
+    public boolean isFixed() {
+        return isFixed;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        TimeUnit timeUnit = (TimeUnit) obj;
+        return Objects.equals(id, timeUnit.id);
     }
 }

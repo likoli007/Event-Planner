@@ -1,0 +1,76 @@
+package cz.muni.fi.pv168.project.storage.sql.db;
+
+import cz.muni.fi.pv168.project.storage.sql.dao.DataStorageException;
+import org.h2.jdbcx.JdbcConnectionPool;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.SQLException;
+
+/**
+ * The class is responsible for managing H2 database connection and schemas
+ */
+public final class DatabaseManager {
+
+    private static final String PROJECT_NAME = "todoListApp";
+    private static final String DB_PROPERTIES_STRING = "DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false";
+
+    private final DataSource dataSource;
+    private final SqlFileExecutor sqlFileExecutor;
+    private final String databaseConnectionString;
+
+    private DatabaseManager(String jdbcUri) {
+        // connection pool with empty credentials
+        this.databaseConnectionString = jdbcUri;
+        this.dataSource = JdbcConnectionPool.create(jdbcUri, "", "");
+
+        this.sqlFileExecutor = new SqlFileExecutor(this::getTransactionHandler, DatabaseManager.class);
+    }
+
+    public static DatabaseManager createProductionInstance() {
+        String connectionString = "jdbc:h2:%s;%s".formatted(createDbFileSystemPath(), DB_PROPERTIES_STRING);
+        return new DatabaseManager(connectionString);
+    }
+
+    public ConnectionHandler getConnectionHandler() {
+        try {
+            return new ConnectionHandlerImpl(dataSource.getConnection());
+        } catch (SQLException e) {
+            throw new DataStorageException("Unable to get a new connection", e);
+        }
+    }
+
+    public Transaction getTransactionHandler() {
+        try {
+            return new TransactionImpl(dataSource.getConnection());
+        } catch (SQLException e) {
+            throw new DataStorageException("Unable to get a new connection", e);
+        }
+    }
+
+    public String getDatabaseConnectionString() {
+        return databaseConnectionString;
+    }
+
+    public void initSchema() {
+        sqlFileExecutor.execute("init.sql");
+    }
+
+    private static Path createDbFileSystemPath() {
+        String projectDir = System.getProperty("user.dir");
+        Path projectDbPath = Paths.get(projectDir, "db", PROJECT_NAME);
+
+        File parentDir = projectDbPath.getParent().toFile();
+
+        parentDir.mkdirs();
+
+        if (!parentDir.exists()) {
+            throw new DataStorageException("Unable to create database root directory");
+        }
+
+        return projectDbPath;
+    }
+}
+

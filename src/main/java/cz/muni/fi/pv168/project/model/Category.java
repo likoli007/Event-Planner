@@ -5,6 +5,7 @@ import cz.muni.fi.pv168.project.business.service.export.serialize.ColorSerialize
 
 import java.awt.Color;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Category extends Entity {
     private String name;
@@ -13,6 +14,12 @@ public class Category extends Entity {
     private Color color;
 
     public Category(String name, Color color) {
+        this.name = name;
+        this.color = color;
+    }
+
+    public Category(UUID id, String name, Color color) {
+        this.id = id;
         this.name = name;
         this.color = color;
     }

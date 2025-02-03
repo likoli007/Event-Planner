@@ -35,8 +35,7 @@ public final class CategoryDialog extends EntityDialog<Category> {
 
     private void setValues() {
         nameField.setText(category.getName());
-        selectedColor = category.getColor();
-
+        colorChooser.setColor(category.getColor());
     }
 
     private void addFields() {
@@ -49,8 +48,11 @@ public final class CategoryDialog extends EntityDialog<Category> {
         String name = nameField.getText();
         category.setName(name);
 
-        selectedColor = (Color) colorChooser.getColor();
-        category.setColor(selectedColor);
+        Color chosenColor = colorChooser.getColor();
+        if (!chosenColor.equals(category.getColor())) {
+            category.setColor(chosenColor);
+        }
+
         return category;
     }
 }
