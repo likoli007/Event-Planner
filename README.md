@@ -9,24 +9,18 @@ The application will allow users to create tasks with key details such as:
 
 Additionally, users will be able to categorize tasks for better organization. The application will include a filtering feature, enabling users to sort tasks based on their progress status, allowing for efficient task management and prioritization.
 
-## Team Information
-
-| Seminar Group | Team |
-|---------------|------|
-| PV168/03      | 11   |
-
 ### Members
 
 | Role           | Person                                                 |
 |----------------|--------------------------------------------------------|
-|Team Lead       | [Tereza Hrbková](https://is.muni.cz/auth/osoba/492946) |
-|Member          | [Šimon Brauner](https://is.muni.cz/auth/osoba/525160)      |
-|Member          | [Alojz Holúbek](https://is.muni.cz/auth/osoba/514416)      |
-|Member          | [Josef Žižka](https://is.muni.cz/auth/osoba/514412)      |
+|Team Lead       | [Tereza Hrbková]|
+|Member          | [Šimon Brauner]     |
+|Member          | [Alojz Holúbek]   |
+|Member          | [Josef Žižka]     |
 
 ### Evaluators
 
 | Role           | Person               |
 |----------------|----------------------|
-|PM              | [Andrej Vaculčiak](https://is.muni.cz/auth/osoba/248487) |
-|Technical Coach | [Leoš Otáhal](https://is.muni.cz/auth/osoba/445324) |
+|PM              | [Andrej Vaculčiak] |
+|Technical Coach | [Leoš Otáhal]|
