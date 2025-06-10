@@ -1,4 +1,6 @@
+
 # PV168 Project: TODO List
+This is a group project made for the Java Programming Seminar course of Masaryk University, copied from university GitLab
 
 This project aims to develop a desktop application designed to help users organize and manage their tasks effectively. 
 The application will allow users to create tasks with key details such as:
